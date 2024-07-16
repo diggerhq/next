@@ -30,9 +30,11 @@ export const getOrganizationIdBySlug = async (slug: string) => {
   }
 
   return data.id;
-}
+};
 
-export const getOrganizationSlugByOrganizationId = async (organizationId: string) => {
+export const getOrganizationSlugByOrganizationId = async (
+  organizationId: string,
+) => {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const { data, error } = await supabaseClient
     .from('organizations')
@@ -45,7 +47,7 @@ export const getOrganizationSlugByOrganizationId = async (organizationId: string
   }
 
   return data.slug;
-}
+};
 
 export const createOrganization = async (
   name: string,
@@ -66,16 +68,19 @@ export const createOrganization = async (
   }
 
   if (!SLUG_PATTERN.test(slug)) {
-    return { status: 'error', message: 'Slug does not match the required pattern' };
+    return {
+      status: 'error',
+      message: 'Slug does not match the required pattern',
+    };
   }
 
-  const { error, } = await supabaseClient.from('organizations').insert({
+  const { error } = await supabaseClient.from('organizations').insert({
     title: name,
     id: organizationId,
-    slug: slug
+    slug: slug,
   });
 
-  revalidatePath("/[organizationSlug]", 'layout');
+  revalidatePath('/org/[organizationId]', 'layout');
 
   if (error) {
     return { status: 'error', message: error.message };
@@ -96,23 +101,24 @@ export const createOrganization = async (
   }
 
   if (isOnboardingFlow) {
-
     // insert 3 dummy projects
 
-    const { error: projectError } = await supabaseClient.from('projects').insert([
-      {
-        organization_id: organizationId,
-        name: 'Project 1',
-      },
-      {
-        organization_id: organizationId,
-        name: 'Project 2',
-      },
-      {
-        organization_id: organizationId,
-        name: 'Project 3',
-      },
-    ]);
+    const { error: projectError } = await supabaseClient
+      .from('projects')
+      .insert([
+        {
+          organization_id: organizationId,
+          name: 'Project 1',
+        },
+        {
+          organization_id: organizationId,
+          name: 'Project 2',
+        },
+        {
+          organization_id: organizationId,
+          name: 'Project 3',
+        },
+      ]);
 
     if (projectError) {
       return { status: 'error', message: projectError.message };
@@ -126,7 +132,6 @@ export const createOrganization = async (
     if (updateError) {
       return { status: 'error', message: updateError.message };
     }
-
 
     const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
       onboardingHasCreatedOrganization: true,
@@ -311,7 +316,7 @@ export const updateOrganizationInfo = async (
     return { status: 'error', message: error.message };
   }
 
-  revalidatePath("/[organizationSlug]", 'layout');
+  revalidatePath('/org/[organizationId]', 'layout');
 
   return { status: 'success', data };
 };
@@ -515,7 +520,7 @@ export async function setDefaultOrganization(
     return { status: 'error', message: updateError.message };
   }
 
-  revalidatePath("/[organizationSlug]", 'layout');
+  revalidatePath('/org/[organizationId]', 'layout');
   return { status: 'success' };
 }
 
@@ -532,14 +537,12 @@ export async function deleteOrganization(
     return { status: 'error', message: error.message };
   }
 
-  revalidatePath("/[organizationSlug]", 'layout');
+  revalidatePath('/org/[organizationId]', 'layout');
   return {
     status: 'success',
     data: `Organization ${organizationId} deleted successfully`,
   };
 }
-
-
 
 export const updateOrganizationSlug = async (
   organizationId: string,
@@ -550,7 +553,10 @@ export const updateOrganizationSlug = async (
   }
 
   if (!SLUG_PATTERN.test(newSlug)) {
-    return { status: 'error', message: 'Slug does not match the required pattern' };
+    return {
+      status: 'error',
+      message: 'Slug does not match the required pattern',
+    };
   }
 
   const supabaseClient = createSupabaseUserServerActionClient();
@@ -563,17 +569,17 @@ export const updateOrganizationSlug = async (
     return { status: 'error', message: error.message };
   }
 
-  revalidatePath("/[organizationSlug]", 'layout');
+  revalidatePath('/org/[organizationId]', 'layout');
   return { status: 'success', data: `Slug updated to ${newSlug}` };
 };
-
-
 
 /**
  * This is the organization that the user will be redirected to once they login
  * or when they go to the /dashboard page
  */
-export async function getInitialOrganizationToRedirectTo(): Promise<SAPayload<string>> {
+export async function getInitialOrganizationToRedirectTo(): Promise<
+  SAPayload<string>
+> {
   const [slimOrganizations, defaultOrganizationId] = await Promise.all([
     fetchSlimOrganizations(),
     getDefaultOrganization(),
@@ -582,9 +588,8 @@ export async function getInitialOrganizationToRedirectTo(): Promise<SAPayload<st
   const firstOrganization = slimOrganizations[0];
 
   if (defaultOrganizationId) {
-    const slug = await getOrganizationSlugByOrganizationId(defaultOrganizationId);
     return {
-      data: slug,
+      data: defaultOrganizationId,
       status: 'success',
     };
   }
@@ -599,7 +604,7 @@ export async function getInitialOrganizationToRedirectTo(): Promise<SAPayload<st
   }
 
   return {
-    data: firstOrganization.slug,
+    data: firstOrganization.id,
     status: 'success',
   };
 }

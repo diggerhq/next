@@ -3,13 +3,10 @@ import { PageHeading } from "@/components/PageHeading";
 import { Pagination } from "@/components/Pagination";
 import { Search } from "@/components/Search";
 import { T } from "@/components/ui/Typography";
-import {
-  getOrganizationIdBySlug
-} from "@/data/user/organizations";
 import { getProjects, getProjectsTotalCount } from "@/data/user/projects";
 import {
-  organizationSlugParamSchema,
-  projectsfilterSchema,
+  organizationParamSchema,
+  projectsfilterSchema
 } from "@/utils/zod-schemas/params";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -43,8 +40,7 @@ export default async function Page({
   params,
   searchParams,
 }: DashboardProps) {
-  const { organizationSlug } = organizationSlugParamSchema.parse(params);
-  const organizationId = await getOrganizationIdBySlug(organizationSlug);
+  const { organizationId } = organizationParamSchema.parse(params);
   const filters = projectsfilterSchema.parse(searchParams);
 
   return (

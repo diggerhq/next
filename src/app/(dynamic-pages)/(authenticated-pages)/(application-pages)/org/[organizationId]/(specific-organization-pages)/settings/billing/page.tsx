@@ -1,12 +1,11 @@
 import { T } from "@/components/ui/Typography";
 import {
   getLoggedInUserOrganizationRole,
-  getNormalizedOrganizationSubscription,
-  getOrganizationIdBySlug,
+  getNormalizedOrganizationSubscription
 } from "@/data/user/organizations";
-import { organizationSlugParamSchema } from "@/utils/zod-schemas/params";
 import { Suspense } from "react";
 
+import { organizationParamSchema } from "@/utils/zod-schemas/params";
 import type { Metadata } from "next";
 import { OrganizationSubscripionDetails } from "./OrganizationSubscripionDetails";
 
@@ -34,8 +33,8 @@ export default async function OrganizationSettingsPage({
 }: {
   params: unknown;
 }) {
-  const { organizationSlug } = organizationSlugParamSchema.parse(params);
-  const organizationId = await getOrganizationIdBySlug(organizationSlug);
+  const { organizationId } = organizationParamSchema.parse(params);
+
   return (
     <Suspense fallback={<T.Subtle>Loading billing details...</T.Subtle>}>
       <Subscription organizationId={organizationId} />

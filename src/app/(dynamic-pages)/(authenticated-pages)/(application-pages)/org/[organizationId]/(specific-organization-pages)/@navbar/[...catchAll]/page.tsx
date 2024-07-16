@@ -2,17 +2,18 @@
 import { T } from '@/components/ui/Typography';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getOrganizationIdBySlug, getOrganizationTitle } from '@/data/user/organizations';
-import { organizationSlugParamSchema } from '@/utils/zod-schemas/params';
+import { getOrganizationTitle } from '@/data/user/organizations';
+import { organizationParamSchema } from '@/utils/zod-schemas/params';
 import { UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
 export async function generateMetadata({ params }: { params: unknown }) {
   try {
-    const { organizationSlug } = organizationSlugParamSchema.parse(params);
-    const organizationId = await getOrganizationIdBySlug(organizationSlug)
-
+    const { organizationId } = organizationParamSchema.parse(params);
+    console.log('----------------------------------------')
+    console.log('in [...catchAll]/page organizationId', organizationId)
+    console.log('----------------------------------------')
     const organizationTitle = await getOrganizationTitle(organizationId);
 
     return {
@@ -46,12 +47,11 @@ export default async function OrganizationProjectsNavbar({
 }: {
   params: unknown;
 }) {
-  const { organizationSlug } = organizationSlugParamSchema.parse(params);
-  const organizationId = await getOrganizationIdBySlug(organizationSlug)
+  const { organizationId } = organizationParamSchema.parse(params);
 
   return (
     <div className="flex items-center">
-      <Link href={`/${organizationSlug}`}>
+      <Link href={`/org/${organizationId}`}>
         <span className="flex items-center space-x-2">
           <Suspense fallback={<Skeleton className="w-16 h-6" />}>
             <Title organizationId={organizationId} />

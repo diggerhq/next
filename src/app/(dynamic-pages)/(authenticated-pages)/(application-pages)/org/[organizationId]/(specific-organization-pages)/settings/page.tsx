@@ -1,10 +1,9 @@
 import {
   getLoggedInUserOrganizationRole,
-  getOrganizationIdBySlug,
   getOrganizationSlugByOrganizationId,
-  getOrganizationTitle,
+  getOrganizationTitle
 } from "@/data/user/organizations";
-import { organizationSlugParamSchema } from "@/utils/zod-schemas/params";
+import { organizationParamSchema } from "@/utils/zod-schemas/params";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DeleteOrganization } from "./DeleteOrganization";
@@ -60,11 +59,10 @@ export default async function EditOrganizationPage({
   params,
 }: {
   params: {
-    organizationSlug: string;
+    organizationId: string;
   };
 }) {
-  const { organizationSlug } = organizationSlugParamSchema.parse(params);
-  const organizationId = await getOrganizationIdBySlug(organizationSlug);
+  const { organizationId } = organizationParamSchema.parse(params);
 
   return (
     <div className="space-y-4">

@@ -49,7 +49,7 @@ export function Login({
     errorMessage: 'Failed to load dashboard',
     successMessage: 'Redirecting to your dashboard...',
     onSuccess: (successPayload) => {
-      router.push(`/${successPayload.data}`);
+      router.push(`/org/${successPayload.data}`);
     },
     onError: (errorPayload) => {
       console.error(errorPayload);

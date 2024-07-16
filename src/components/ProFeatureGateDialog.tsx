@@ -10,11 +10,11 @@ import { AspectRatio } from "./ui/aspect-ratio";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 
 export function ProFeatureGateDialog({
-  organizationSlug,
+  organizationId,
   label,
   icon,
 }: {
-  organizationSlug: string;
+  organizationId: string;
   label: string;
   icon: ReactNode;
 }) {
@@ -80,7 +80,7 @@ export function ProFeatureGateDialog({
           workspace and more.
         </Typography.P>
         <Link
-          href={`/${organizationSlug}/settings/billing`}
+          href={`/org/${organizationId}/settings/billing`}
           className="w-full"
           onClick={() => setIsDialogOpen(false)}
         >
