@@ -1,8 +1,8 @@
 import { ProFeatureGateDialog } from '@/components/ProFeatureGateDialog';
 import { SidebarLink } from '@/components/SidebarLink';
-import { fetchSlimOrganizations, getOrganizationIdBySlug } from '@/data/user/organizations';
+import { fetchSlimOrganizations, getOrganizationSlugByOrganizationId } from '@/data/user/organizations';
 import { cn } from '@/utils/cn';
-import { organizationSlugParamSchema } from '@/utils/zod-schemas/params';
+import { organizationParamSchema } from '@/utils/zod-schemas/params';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
@@ -36,32 +36,32 @@ async function OrganizationSidebarInternal({
           <div>
             <SidebarLink
               label="Home"
-              href={`/${organizationSlug}`}
+              href={`/org/${organizationId}`}
               icon={<Home className="h-5 w-5" />}
             />
             <SidebarLink
               label="Settings"
-              href={`/${organizationSlug}/settings`}
+              href={`/org/${organizationId}/settings`}
               icon={<Settings className="h-5 w-5" />}
             />
             <SidebarLink
               label="Projects"
-              href={`/${organizationSlug}/projects`}
+              href={` /org/${organizationId}/projects`}
               icon={<Layers className="h-5 w-5" />}
             />
             <SidebarLink
               label="Members"
-              href={`/${organizationSlug}/settings/members`}
+              href={`/org/${organizationId}/settings/members`}
               icon={<UserRound className="h-5 w-5" />}
             />
             <SidebarLink
               label="Billing"
-              href={`/${organizationSlug}/settings/billing`}
+              href={`/org/${organizationId}/settings/billing`}
               icon={<DollarSign className="h-5 w-5" />}
             />
             <Suspense>
               <ProFeatureGateDialog
-                organizationSlug={organizationSlug}
+                organizationId={organizationId}
                 label="Feature Pro"
                 icon={<FileBox className="h-5 w-5" />}
               />
@@ -84,8 +84,8 @@ async function OrganizationSidebarInternal({
 
 export async function OrganizationSidebar({ params }: { params: unknown }) {
   try {
-    const { organizationSlug } = organizationSlugParamSchema.parse(params);
-    const organizationId = await getOrganizationIdBySlug(organizationSlug)
+    const { organizationId } = organizationParamSchema.parse(params);
+    const organizationSlug = await getOrganizationSlugByOrganizationId(organizationId)
     return (
       <Suspense fallback={<DesktopSidebarFallback />}>
         <OrganizationSidebarInternal organizationId={organizationId} organizationSlug={organizationSlug} />

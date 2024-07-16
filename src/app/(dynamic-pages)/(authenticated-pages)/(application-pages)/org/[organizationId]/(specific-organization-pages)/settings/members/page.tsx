@@ -10,12 +10,11 @@ import {
 } from "@/components/ui/table";
 import {
   getLoggedInUserOrganizationRole,
-  getOrganizationIdBySlug,
   getPendingInvitationsInOrganization,
-  getTeamMembersInOrganization,
+  getTeamMembersInOrganization
 } from "@/data/user/organizations";
 import type { TeamMembersTableProps } from "@/types";
-import { organizationSlugParamSchema } from "@/utils/zod-schemas/params";
+import { organizationParamSchema } from "@/utils/zod-schemas/params";
 import moment from "moment";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -168,8 +167,7 @@ export default async function OrganizationPage({
 }: {
   params: unknown;
 }) {
-  const { organizationSlug } = organizationSlugParamSchema.parse(params);
-  const organizationId = await getOrganizationIdBySlug(organizationSlug);
+  const { organizationId } = organizationParamSchema.parse(params);
   return (
     <div className="space-y-12">
       <Suspense fallback={<ProjectsTableLoadingFallback />}>

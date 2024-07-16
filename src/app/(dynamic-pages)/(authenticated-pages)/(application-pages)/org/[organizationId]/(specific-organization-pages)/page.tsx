@@ -3,11 +3,11 @@ import { ProjectsCardList } from "@/components/Projects/ProjectsCardList";
 import { Search } from "@/components/Search";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getOrganizationIdBySlug, getOrganizationTitle } from "@/data/user/organizations";
+import { getOrganizationTitle } from "@/data/user/organizations";
 import { getProjects } from "@/data/user/projects";
 import {
-  organizationSlugParamSchema,
-  projectsfilterSchema,
+  organizationParamSchema,
+  projectsfilterSchema
 } from "@/utils/zod-schemas/params";
 import { FileText, Layers } from "lucide-react";
 import type { Metadata } from 'next';
@@ -34,13 +34,12 @@ async function Projects({
 }
 
 export type DashboardProps = {
-  params: { organizationSlug: string };
+  params: { organizationId: string };
   searchParams: unknown;
 };
 
 async function Dashboard({ params, searchParams }: DashboardProps) {
-  const { organizationSlug } = organizationSlugParamSchema.parse(params);
-  const organizationId = await getOrganizationIdBySlug(organizationSlug);
+  const { organizationId } = organizationParamSchema.parse(params);
   const validatedSearchParams = projectsfilterSchema.parse(searchParams);
 
   return (
@@ -62,7 +61,7 @@ async function Dashboard({ params, searchParams }: DashboardProps) {
             <div className="flex items-center space-x-4">
               <Search className="w-[200px]" placeholder="Search projects" />
               <Button variant="secondary" size="sm" asChild>
-                <Link href={`/${organizationSlug}/projects`}>
+                <Link href={`/org/${organizationId}/projects`}>
                   <Layers className="mr-2 h-4 w-4" />
                   View all projects
                 </Link>
@@ -89,9 +88,13 @@ async function Dashboard({ params, searchParams }: DashboardProps) {
 }
 
 export async function generateMetadata({ params }: DashboardProps): Promise<Metadata> {
-  const { organizationSlug } = organizationSlugParamSchema.parse(params);
-  const organizationId = await getOrganizationIdBySlug(organizationSlug);
+  const { organizationId } = organizationParamSchema.parse(params);
+  console.log('------------------------------------')
+  console.log('Params', params);
+  console.log('Organization id', organizationId);
+  console.log('------------------------------------')
   const title = await getOrganizationTitle(organizationId);
+  console.log('Organization title', title);
 
   return {
     title: `Dashboard | ${title}`,
