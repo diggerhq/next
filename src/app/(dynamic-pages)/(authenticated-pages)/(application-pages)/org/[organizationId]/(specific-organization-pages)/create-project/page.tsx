@@ -16,7 +16,7 @@ export default async function CreateProjectPage({
     const { organizationId } = organizationParamSchema.parse(params);
 
     return (
-        <div className="w-full">
+        <div className="w-full mt-1">
             <CreateProjectForm organizationId={organizationId} />
         </div>
     );
