@@ -1,4 +1,3 @@
-import { CreateProjectDialog } from "@/components/CreateProjectDialog";
 import { ProjectsCardList } from "@/components/Projects/ProjectsCardList";
 import { Search } from "@/components/Search";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import {
   organizationParamSchema,
   projectsfilterSchema
 } from "@/utils/zod-schemas/params";
-import { FileText, Layers } from "lucide-react";
+import { FileText, Layers, Plus } from "lucide-react";
 import type { Metadata } from 'next';
 import Link from "next/link";
 import { Suspense } from "react";
@@ -52,7 +51,12 @@ async function Dashboard({ params, searchParams }: DashboardProps) {
               <FileText className="mr-2 h-4 w-4" />
               Export PDF
             </Button>
-            <CreateProjectDialog organizationId={organizationId} />
+            <Link href={`/org/${organizationId}/create-project`}>
+              <Button variant="default" size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Project
+              </Button>
+            </Link>
           </div>
         </CardHeader>
         <CardContent>
