@@ -44,7 +44,7 @@ export default async function Page({
   const filters = projectsfilterSchema.parse(searchParams);
 
   return (
-    <div className="flex flex-col gap-4 w-full mt-8">
+    <div className="flex flex-col space-y-4 w-full mt-8">
       <PageHeading
         title="Projects"
         subTitle="You can create projects within teams, or within your organization."
