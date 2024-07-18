@@ -30,7 +30,7 @@ const feedbackReceivedCommentPayload = z.object({
   feedbackTitle: z.string(),
   feedbackId: z.string(),
   commenterName: z.string(),
-  comment: z.string()
+  comment: z.string(),
 });
 
 const feedbackStatusChangedPayload = z.object({
@@ -47,7 +47,6 @@ const feedbackPriorityChangedPayload = z.object({
   newPriority: z.string(),
 });
 
-
 const feedbackTypeUpdatedPayload = z.object({
   type: z.literal('feedbackTypeUpdated'),
   feedbackId: z.string(),
@@ -58,19 +57,71 @@ const feedbackTypeUpdatedPayload = z.object({
 const feedbackIsInRoadmapUpdatedPayload = z.object({
   type: z.literal('feedbackIsInRoadmapUpdated'),
   feedbackId: z.string(),
-  isInRoadmap: z.boolean()
+  isInRoadmap: z.boolean(),
 });
 
 const feedbackVisibilityUpdatedPayload = z.object({
   type: z.literal('feedbackVisibilityUpdated'),
   feedbackId: z.string(),
-  isPubliclyVisible: z.boolean()
+  isPubliclyVisible: z.boolean(),
 });
 
 const feedbackFeedbackOpenForCommentUpdatedPayload = z.object({
   type: z.literal('feedbackFeedbackOpenForCommentUpdated'),
   feedbackId: z.string(),
-  isOpenForComments: z.boolean()
+  isOpenForComments: z.boolean(),
+});
+
+const applyFailurePayload = z.object({
+  type: z.literal('applyFailure'),
+  projectName: z.string(),
+  projectId: z.string(),
+  commitId: z.string(),
+  userId: z.string(),
+  reason: z.string(),
+  dashboardUrl: z.string(),
+});
+
+const planNeedsApprovalPayload = z.object({
+  type: z.literal('planNeedsApproval'),
+  projectName: z.string(),
+  projectId: z.string(),
+  commitId: z.string(),
+  dashboardUrl: z.string(),
+});
+
+const planApprovedPayload = z.object({
+  type: z.literal('planApproved'),
+  planName: z.string(),
+  planId: z.string(),
+  projectId: z.string(),
+  projectName: z.string(),
+  approverName: z.string(),
+  approverId: z.string(),
+});
+
+const planRejectedPayload = z.object({
+  type: z.literal('planRejected'),
+  planName: z.string(),
+  planId: z.string(),
+  projectName: z.string(),
+  projectId: z.string(),
+  rejectorName: z.string(),
+  rejectorId: z.string(),
+});
+
+const projectDriftedPayload = z.object({
+  type: z.literal('projectDrifted'),
+  projectName: z.string(),
+  projectId: z.string(),
+  dashboardUrl: z.string(),
+});
+
+const policyViolationPayload = z.object({
+  type: z.literal('policyViolation'),
+  projectName: z.string(),
+  projectId: z.string(),
+  dashboardUrl: z.string(),
 });
 
 export const userNotificationPayloadSchema = z.union([
@@ -84,7 +135,13 @@ export const userNotificationPayloadSchema = z.union([
   feedbackTypeUpdatedPayload,
   feedbackIsInRoadmapUpdatedPayload,
   feedbackVisibilityUpdatedPayload,
-  feedbackFeedbackOpenForCommentUpdatedPayload
+  feedbackFeedbackOpenForCommentUpdatedPayload,
+  applyFailurePayload,
+  planNeedsApprovalPayload,
+  planApprovedPayload,
+  planRejectedPayload,
+  projectDriftedPayload,
+  policyViolationPayload,
 ]);
 
 export type UserNotification = z.infer<typeof userNotificationPayloadSchema>;
