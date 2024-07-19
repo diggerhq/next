@@ -16,3 +16,17 @@ export async function getRepoDetails(repoId: number) {
 
   return data;
 }
+
+export async function getOrganizationRepos(organizationId: string) {
+  const supabaseClient = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabaseClient
+    .from('repos')
+    .select('id, name')
+    .eq('organization_id', organizationId);
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

@@ -32,23 +32,25 @@ const createProjectFormSchema = z.object({
 
 type CreateProjectFormData = z.infer<typeof createProjectFormSchema>;
 
-const repositories = [
-    { id: 12, name: 'Repository 1' },
-    { id: 123, name: 'Repository 2' },
-    { id: 41, name: 'Repository 3' },
-    { id: 24, name: 'Repository 4' },
-    { id: 124, name: 'Repository 5' },
-];
+type Repository = {
+    id: number;
+    name: string;
+};
 
-export default function CreateProjectForm({ organizationId }: { organizationId: string }) {
-    const [selectedRepo, setSelectedRepo] = useState(repositories[0].id);
+type CreateProjectFormProps = {
+    organizationId: string;
+    repositories: Repository[];
+};
+
+export default function CreateProjectForm({ organizationId, repositories }: CreateProjectFormProps) {
+    const [selectedRepo, setSelectedRepo] = useState(repositories[0]?.id || null);
     const router = useRouter();
 
     const { control, handleSubmit, setValue, watch } = useForm<CreateProjectFormData>({
         resolver: zodResolver(createProjectFormSchema),
         defaultValues: {
             name: "",
-            repository: repositories[0].id,
+            repository: repositories[0]?.id || 0,
             terraformDir: "",
             managedState: true,
             labels: [],
@@ -83,8 +85,6 @@ export default function CreateProjectForm({ organizationId }: { organizationId: 
     const onSubmit = (data: CreateProjectFormData) => {
         createProjectMutation.mutate(data);
     };
-
-
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
@@ -159,31 +159,43 @@ export default function CreateProjectForm({ organizationId }: { organizationId: 
                         </Badge>
                     </CardHeader>
                     <CardContent>
-                        <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-                            <div className="flex w-max space-x-4 p-4">
-                                {repositories.map((repo, index) => (
-                                    <MotionCard
-                                        key={repo.id}
-                                        className={`w-[200px] cursor-pointer ${selectedRepo === repo.id ? 'ring-2 ring-primary' : ''}`}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() => {
-                                            setSelectedRepo(repo.id);
-                                            setValue("repository", repo.id);
-                                        }}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                    >
-                                        <CardContent className="flex items-center justify-center p-6">
-                                            <Github className="mr-2 h-6 w-6" />
-                                            <span>{repo.name}</span>
-                                        </CardContent>
-                                    </MotionCard>
-                                ))}
+                        {repositories.length > 0 ? (
+                            <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+                                <div className="flex w-max space-x-4 p-4">
+                                    {repositories.map((repo, index) => (
+                                        <MotionCard
+                                            key={repo.id}
+                                            className={`w-[200px] cursor-pointer ${selectedRepo === repo.id ? 'ring-2 ring-primary' : ''}`}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => {
+                                                setSelectedRepo(repo.id);
+                                                setValue("repository", repo.id);
+                                            }}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: index * 0.1 }}
+                                        >
+                                            <CardContent className="flex items-center justify-center p-6">
+                                                <Github className="mr-2 h-6 w-6" />
+                                                <span>{repo.name}</span>
+                                            </CardContent>
+                                        </MotionCard>
+                                    ))}
+                                </div>
+                                <ScrollBar orientation="horizontal" />
+                            </ScrollArea>
+                        ) : (
+                            <div className="text-center py-8">
+                                <div className="bg-muted/50 rounded-full p-4 inline-block">
+                                    <Github className="mx-auto size-8 text-muted-foreground" />
+                                </div>
+                                <T.H4 className="mb-1 mt-4">No Repositories Found</T.H4>
+                                <T.P className="text-muted-foreground mb-4">
+                                    It looks like there are no repositories.
+                                </T.P>
                             </div>
-                            <ScrollBar orientation="horizontal" />
-                        </ScrollArea>
+                        )}
                     </CardContent>
                 </MotionCard>
 
