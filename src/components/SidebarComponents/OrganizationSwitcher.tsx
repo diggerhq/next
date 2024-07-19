@@ -75,7 +75,7 @@ export function OrganizationSwitcher({
                   key={organization.id}
                   onSelect={() => {
                     setIsPopoverOpen(false);
-                    router.push(`/${organization.slug}`);
+                    router.push(`/org/${organization.id}`);
                   }}
                   className="text-sm flex items-start"
                 >

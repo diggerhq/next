@@ -36,6 +36,7 @@ export default async function ProjectLayout({
   const project = await getSlimProjectBySlug(projectSlug);
 
   return (
+
     <ApplicationLayoutShell sidebar={sidebar}>
       <div className="">
         <InternalNavbar>

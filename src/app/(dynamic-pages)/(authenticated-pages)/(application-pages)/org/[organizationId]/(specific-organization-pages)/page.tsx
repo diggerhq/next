@@ -51,7 +51,7 @@ async function Dashboard({ params, searchParams }: DashboardProps) {
               <FileText className="mr-2 h-4 w-4" />
               Export PDF
             </Button>
-            <Link href={`/org/${organizationId}/create-project`}>
+            <Link href={`/org/${organizationId}/projects/create`}>
               <Button variant="default" size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 Create Project

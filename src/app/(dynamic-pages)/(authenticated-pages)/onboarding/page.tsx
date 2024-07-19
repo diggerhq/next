@@ -47,7 +47,10 @@ async function OnboardingFlowWrapper({ userId, userEmail }: { userId: string; us
     serverGetLoggedInUser(),
   ]);
   const { userProfile } = onboardingConditions;
+  console.log(userProfile);
   const onboardingStatus = authUserMetadataSchema.parse(user.user_metadata);
+  console.log(onboardingStatus);
+  console.log(userEmail);
 
   return (
     <UserOnboardingFlow

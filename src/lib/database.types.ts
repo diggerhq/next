@@ -2,7 +2,7 @@ export type Json =
   | string
   | number
   | boolean
-  | null
+  | null 
   | { [key: string]: Json | undefined }
   | Json[]
 
@@ -681,36 +681,119 @@ export type Database = {
       }
       projects: {
         Row: {
+          configuration_yaml: string | null
           created_at: string
+          deleted_at: string | null
           id: string
+          is_generated: boolean | null
+          is_in_main_branch: boolean | null
+          is_managing_state: boolean | null
+          labels: string[] | null
+          latest_action_on: string | null
           name: string
           organization_id: string
           project_status: Database["public"]["Enums"]["project_status"]
+          repo_id: number
           slug: string
+          status: string | null
           team_id: number | null
+          terraform_working_dir: string | null
           updated_at: string
         }
         Insert: {
+          configuration_yaml?: string | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
+          is_generated?: boolean | null
+          is_in_main_branch?: boolean | null
+          is_managing_state?: boolean | null
+          labels?: string[] | null
+          latest_action_on?: string | null
           name: string
           organization_id: string
           project_status?: Database["public"]["Enums"]["project_status"]
+          repo_id?: number
           slug?: string
+          status?: string | null
           team_id?: number | null
+          terraform_working_dir?: string | null
           updated_at?: string
         }
         Update: {
+          configuration_yaml?: string | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
+          is_generated?: boolean | null
+          is_in_main_branch?: boolean | null
+          is_managing_state?: boolean | null
+          labels?: string[] | null
+          latest_action_on?: string | null
           name?: string
           organization_id?: string
           project_status?: Database["public"]["Enums"]["project_status"]
+          repo_id?: number
           slug?: string
+          status?: string | null
           team_id?: number | null
+          terraform_working_dir?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_projects_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_projects_repo"
+            columns: ["repo_id"]
+            isOneToOne: false
+            referencedRelation: "repos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      repos: {
+        Row: {
+          created_at: string | null
+          deleted_at: string | null
+          digger_config: string | null
+          id: number
+          name: string
+          organization_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_at?: string | null
+          digger_config?: string | null
+          id?: number
+          name: string
+          organization_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          deleted_at?: string | null
+          digger_config?: string | null
+          id?: number
+          name?: string
+          organization_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_repos_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {

@@ -66,10 +66,18 @@ export const createProjectAction = async ({
   organizationId,
   name,
   slug,
+  repoId,
+  terraformWorkingDir,
+  isManagingState,
+  labels,
 }: {
   organizationId: string;
   name: string;
   slug: string;
+  repoId: number;
+  terraformWorkingDir: string;
+  isManagingState: boolean;
+  labels: string[];
 }): Promise<SAPayload<Tables<"projects">>> => {
   "use server";
   const supabaseClient = createSupabaseUserServerActionClient();
@@ -79,12 +87,24 @@ export const createProjectAction = async ({
       organization_id: organizationId,
       name,
       slug,
+      repo_id: repoId,
+      terraform_working_dir: terraformWorkingDir,
+      is_managing_state: isManagingState,
+      is_in_main_branch: true,
+      is_generated: true,
+      project_status: "draft",
+      latest_action_on: new Date().toISOString(),
+      labels,
+
     })
     .select("*")
     .single();
 
+  console.log('createProjectAction', project);
+
 
   if (error) {
+    console.log('createProjectAction', error);
     return {
       status: 'error',
       message: error.message,
@@ -92,8 +112,8 @@ export const createProjectAction = async ({
   }
 
 
-  revalidatePath("/[organizationSlug]", "layout");
-  revalidatePath("/[organizationSlug]/projects", "layout");
+  revalidatePath(`/org/[organizationId]`, "layout");
+  revalidatePath(`/org/[organizationId]/projects/`, "layout");
 
   return {
     status: 'success',

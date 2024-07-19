@@ -1,12 +1,9 @@
-import { ChatContainer } from "@/components/chat-container";
-import { T } from "@/components/ui/Typography";
-import { getSlimProjectBySlug } from "@/data/user/projects";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProjectById, getSlimProjectBySlug } from "@/data/user/projects";
 import { projectSlugParamSchema } from "@/utils/zod-schemas/params";
-import { nanoid } from "ai";
+import { CalendarIcon, GitBranchIcon, LayersIcon } from "lucide-react";
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { CommentInput } from "./CommentInput";
-import { ProjectComments } from "./ProjectComments";
 
 type ProjectPageProps = {
   params: {
@@ -20,7 +17,6 @@ export async function generateMetadata({
   const { projectSlug } = projectSlugParamSchema.parse(params);
   const project = await getSlimProjectBySlug(projectSlug);
 
-
   return {
     title: `Project | ${project.name}`,
     description: `View and manage your project ${project.name}`,
@@ -29,32 +25,51 @@ export async function generateMetadata({
 
 export default async function ProjectPage({ params }: { params: unknown }) {
   const { projectSlug } = projectSlugParamSchema.parse(params);
-  const project = await getSlimProjectBySlug(projectSlug);
+  const slimProject = await getSlimProjectBySlug(projectSlug);
+  const project = await getProjectById(slimProject.id);
 
-  const newChatId = nanoid();
   return (
     <div className="space-y-6">
-      <div className="mb-10">
-        <div
-          className="border dotted-bg dark:dotted-bg-dark border-gray-400/50 dark:border-gray-600/50 rounded-xl bg-gray-200/20 dark:bg-slate-950/40 flex justify-center items-center h-full"
-        >
-          <div className="h-[800px] w-full relative">
-            <ChatContainer id={newChatId} project={project} />
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>{project.name}</CardTitle>
+            <Badge variant="outline">{project.project_status}</Badge>
           </div>
-
-        </div>
-        <div className="space-y-4 max-w-md">
-          <T.H4>Comments</T.H4>
-          <div className="space-y-2 mb-10">
-            <div className="space-y-4 mt-4 mb-10">
-              <CommentInput projectId={project.id} />
-              <Suspense>
-                <ProjectComments projectId={project.id} />
-              </Suspense>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center">
+              <CalendarIcon className="mr-2" />
+              <span>Created: {new Date(project.created_at).toLocaleDateString()}</span>
+            </div>
+            <div className="flex items-center">
+              <LayersIcon className="mr-2" />
+              <span>Organization: {project.organization_id}</span>
+            </div>
+            <div className="flex items-center">
+              <GitBranchIcon className="mr-2" />
+              <span>Repository: {project.repo_id}</span>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Project Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p><strong>Terraform Working Directory:</strong> {project.terraform_working_dir}</p>
+            <p><strong>Managing State:</strong> {project.is_managing_state ? 'Yes' : 'No'}</p>
+            <p><strong>In Main Branch:</strong> {project.is_in_main_branch ? 'Yes' : 'No'}</p>
+            <p><strong>Generated:</strong> {project.is_generated ? 'Yes' : 'No'}</p>
+            <p><strong>Latest Action:</strong> {project.latest_action_on ? new Date(project.latest_action_on).toLocaleString() : 'No actions'}</p>
+          </div>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }
