@@ -24,9 +24,13 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
   });
 
   const createOrgMutation = useMutation({
-    mutationFn: ({ organizationTitle, organizationSlug }: CreateOrganizationSchema) =>
-      createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true }),
-    onSuccess: () => {
+    mutationFn: async ({ organizationTitle, organizationSlug }: CreateOrganizationSchema) => {
+      console.log('creating organization mutation');
+      return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true })
+    }
+    ,
+    onSuccess: (data) => {
+      console.log('success', data);
       toast({ title: "Organization created!", description: "Your new organization is ready." });
       onSuccess();
     },
@@ -36,6 +40,7 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
   });
 
   const onSubmit = (data: CreateOrganizationSchema) => {
+    console.log('submitting');
     createOrgMutation.mutate(data);
   };
 

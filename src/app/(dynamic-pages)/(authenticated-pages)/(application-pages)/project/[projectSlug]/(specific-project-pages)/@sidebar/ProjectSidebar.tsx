@@ -1,12 +1,11 @@
-import { OrganizationSwitcher } from '@/components/SidebarComponents/OrganizationSwitcher';
 import { DesktopSidebarFallback } from '@/components/SidebarComponents/SidebarFallback';
 import { SwitcherAndToggle } from '@/components/SidebarComponents/SidebarLogo';
 import { SidebarLink } from '@/components/SidebarLink';
-import { fetchSlimOrganizations, getOrganizationSlugByOrganizationId } from '@/data/user/organizations';
+import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { getSlimProjectById, getSlimProjectBySlug } from '@/data/user/projects';
 import { cn } from '@/utils/cn';
 import { projectSlugParamSchema } from '@/utils/zod-schemas/params';
-import { ArrowLeft, Bird, History, Image, Layers, Settings } from 'lucide-react';
+import { Activity, ArrowLeft, FileText, GitCompare, Layers, MessageCircle, Settings, Shield } from 'lucide-react';
 import { Suspense } from 'react';
 
 async function ProjectSidebarInternal({ projectId, projectSlug }: { projectId: string; projectSlug: string }) {
@@ -15,61 +14,60 @@ async function ProjectSidebarInternal({ projectId, projectSlug }: { projectId: s
     getSlimProjectById(projectId),
   ]);
   const organizationId = project.organization_id;
-  const organizationSlug = await getOrganizationSlugByOrganizationId(organizationId);
 
   return (
     <div
       className={cn(
-        'flex flex-col justify-between h-full',
-        'lg:px-3 lg:py-4 lg:pt-2.5 ',
+        'flex flex-col h-full',
+        'lg:px-3 lg:py-4',
       )}
     >
-      <div>
+      <div className="flex justify-between items-center mb-4">
         <SwitcherAndToggle organizationId={organizationId} slimOrganizations={slimOrganizations} />
-        <div className="flex flex-col">
-          <SidebarLink
-            label="Back to organization"
-            href={`/${organizationSlug}`}
-            icon={<ArrowLeft className="h-5 w-5" />}
-          />
-          {project.team_id && (
-            <SidebarLink
-              label="Back to team"
-              href={`/${organizationSlug}/team/${project.team_id}`}
-              icon={<ArrowLeft className="h-5 w-5" />}
-            />
-          )}
-          <SidebarLink
-            label="Project Home"
-            href={`/project/${projectSlug}`}
-            icon={<Layers className="h-5 w-5" />}
-          />
-          <SidebarLink
-            label="Image Generator"
-            href={`/project/${projectSlug}/image-generator`}
-            icon={<Image className="h-5 w-5" />}
-          />
-          <SidebarLink
-            label="Post Generator"
-            href={`/project/${projectSlug}/post-generator`}
-            icon={<Bird className="h-5 w-5" />}
-          />
-          <SidebarLink
-            label="Project Settings"
-            href={`/project/${projectSlug}/settings`}
-            icon={<Settings className="h-5 w-5" />}
-          />
-          <SidebarLink
-            label="Chats"
-            href={`/project/${projectSlug}/chats`}
-            icon={<History className="h-5 w-5" />}
-          />
-        </div>
       </div>
-      <OrganizationSwitcher
-        currentOrganizationId={organizationId}
-        slimOrganizations={slimOrganizations}
-      />
+
+      <div className="flex flex-col gap-0">
+        <SidebarLink
+          label="Back to organization"
+          href={`/org/${organizationId}`}
+          icon={<ArrowLeft className="size-4 text-foreground" />}
+        />
+        <SidebarLink
+          label="Projects"
+          href={`/org/${organizationId}/projects`}
+          icon={<Layers className="size-4 text-foreground" />}
+        />
+        <SidebarLink
+          label="Activity"
+          href={`/org/${organizationId}/activity`}
+          icon={<Activity className="size-4 text-foreground" />}
+        />
+        <SidebarLink
+          label="Policies"
+          href={`/org/${organizationId}/policies`}
+          icon={<Shield className="size-4 text-foreground" />}
+        />
+        <SidebarLink
+          label="Drift"
+          href={`/org/${organizationId}/drift`}
+          icon={<GitCompare className="size-4 text-foreground" />}
+        />
+        <SidebarLink
+          label="Docs"
+          href={`/org/${organizationId}/docs`}
+          icon={<FileText className="size-4 text-foreground" />}
+        />
+        <SidebarLink
+          label="Admin"
+          href={`/org/${organizationId}/admin`}
+          icon={<Settings className="size-4 text-foreground" />}
+        />
+        <SidebarLink
+          label="Ask in Slack"
+          href="#"
+          icon={<MessageCircle className="size-4 text-foreground" />}
+        />
+      </div>
     </div>
   );
 }

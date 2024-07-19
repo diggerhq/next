@@ -102,33 +102,12 @@ export const createOrganization = async (
 
   if (isOnboardingFlow) {
     // insert 3 dummy projects
-
-    const { error: projectError } = await supabaseClient
-      .from('projects')
-      .insert([
-        {
-          organization_id: organizationId,
-          name: 'Project 1',
-        },
-        {
-          organization_id: organizationId,
-          name: 'Project 2',
-        },
-        {
-          organization_id: organizationId,
-          name: 'Project 3',
-        },
-      ]);
-
-    if (projectError) {
-      return { status: 'error', message: projectError.message };
-    }
-
     const { error: updateError } = await supabaseClient
       .from('user_private_info')
       .update({ default_organization: organizationId })
       .eq('id', user.id);
 
+    console.log('updateError', updateError);
     if (updateError) {
       return { status: 'error', message: updateError.message };
     }
@@ -152,6 +131,8 @@ export const createOrganization = async (
     if (refreshSessionResponse.status === 'error') {
       return refreshSessionResponse;
     }
+
+    throw new Error('failed');
   }
 
   return {

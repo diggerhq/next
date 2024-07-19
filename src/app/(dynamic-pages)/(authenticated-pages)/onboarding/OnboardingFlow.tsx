@@ -32,6 +32,7 @@ export function UserOnboardingFlow({
   const [currentStep, setCurrentStep] = useState<FLOW_STATE>(
     getInitialFlowState(flowStates, onboardingStatus)
   );
+
   const { replace } = useRouter();
 
   const nextStep = useCallback(() => {
@@ -52,6 +53,8 @@ export function UserOnboardingFlow({
     visible: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -50 },
   };
+
+  console.log(currentStep)
 
   return (
     <AnimatePresence mode="wait">
