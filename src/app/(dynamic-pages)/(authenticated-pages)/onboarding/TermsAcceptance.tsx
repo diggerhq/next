@@ -14,10 +14,12 @@ export function TermsAcceptance({ onSuccess }: TermsAcceptanceProps) {
   const acceptTermsMutation = useMutation({
     mutationFn: () => acceptTermsOfService(true),
     onSuccess: () => {
+      console.log('Terms accepted!');
       toast({ title: "Terms accepted!", description: "Welcome aboard!" });
       onSuccess();
     },
     onError: () => {
+      console.log('Failed to accept terms');
       toast({ title: "Failed to accept terms", description: "Please try again.", variant: "destructive" });
     },
   });

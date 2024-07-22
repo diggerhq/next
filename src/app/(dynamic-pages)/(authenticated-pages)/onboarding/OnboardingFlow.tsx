@@ -41,9 +41,13 @@ export function UserOnboardingFlow({
       setCurrentStep(flowStates[currentIndex + 1]);
     }
   }, [currentStep, flowStates]);
+  console.log('flowStates : ', flowStates);
 
   useEffect(() => {
     if (currentStep === "COMPLETE") {
+      console.log('currentStep is COMPLETE', currentStep);
+      console.log('onboardingStatus : ', onboardingStatus);
+      console.log('now redirecting to /dashboard');
       replace("/dashboard");
     }
   }, [currentStep, replace]);
@@ -54,7 +58,7 @@ export function UserOnboardingFlow({
     exit: { opacity: 0, y: -50 },
   };
 
-  console.log(currentStep)
+  console.log('currentStep in OnboardingFlow : ', currentStep)
 
   return (
     <AnimatePresence mode="wait">

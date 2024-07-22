@@ -34,13 +34,14 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
       toast({ title: "Organization created!", description: "Your new organization is ready." });
       onSuccess();
     },
-    onError: () => {
+    onError: (error) => {
+      console.log('Failed to create organization. reason : ', error);
       toast({ title: "Failed to create organization", description: "Please try again.", variant: "destructive" });
     },
   });
 
   const onSubmit = (data: CreateOrganizationSchema) => {
-    console.log('submitting');
+    console.log('submitting data : ', data);
     createOrgMutation.mutate(data);
   };
 

@@ -85,10 +85,15 @@ export async function middleware(req: NextRequest) {
     // user is possibly logged in, but lets validate session
     const user = await supabase.auth.getUser();
     if (user.error) {
+      console.log('user is not logged in. reason : ', user.error);
       return NextResponse.redirect(toSiteURL('/login'));
     }
   }
   if (!isUnprotectedPage(req.nextUrl.pathname) && !maybeUser) {
+    console.log(
+      'protected page but user is not logged in. reason : ',
+      maybeUser,
+    );
     return NextResponse.redirect(toSiteURL('/login'));
   }
   if (

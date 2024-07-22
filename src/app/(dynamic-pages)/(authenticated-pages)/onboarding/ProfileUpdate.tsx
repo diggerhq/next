@@ -33,10 +33,12 @@ export function ProfileUpdate({
   const updateProfileMutation = useMutation({
     mutationFn: () => updateUserProfileNameAndAvatar({ fullName, avatarUrl }, { isOnboardingFlow: true }),
     onSuccess: () => {
+      console.log('Profile updated!');
       toast({ title: "Profile updated!", description: "Your profile has been successfully updated." });
       onSuccess();
     },
     onError: () => {
+      console.log('Failed to update profile');
       toast({ title: "Failed to update profile", description: "Please try again.", variant: "destructive" });
     },
   });
@@ -50,10 +52,12 @@ export function ProfileUpdate({
     onSuccess: (response) => {
       if (response.status === 'success') {
         setAvatarUrl(response.data);
+        console.log('Avatar uploaded!');
         toast({ title: "Avatar uploaded!", description: "Your new avatar has been set." });
       }
     },
     onError: () => {
+      console.log('Failed to upload avatar');
       toast({ title: "Error uploading avatar", description: "Please try again.", variant: "destructive" });
     },
   });
