@@ -11,13 +11,17 @@ async function getDefaultOrganizationOrSet(): Promise<string | null> {
     fetchSlimOrganizations(),
     getDefaultOrganization(),
   ]);
+  console.log('slimOrganizations on onboarding', slimOrganizations);
   const firstOrganization = slimOrganizations[0];
 
+  console.log('firstOrganization on onboarding', firstOrganization);
   if (defaultOrganizationId) {
+    console.log('defaultOrganizationId on onboarding', defaultOrganizationId);
     return defaultOrganizationId;
   }
 
   if (!firstOrganization) {
+    console.log('no firstOrganization on onboarding');
     return null;
   }
 
@@ -25,6 +29,7 @@ async function getDefaultOrganizationOrSet(): Promise<string | null> {
   // reason, because of an invite or for some other reason,
   // make sure that the default organization is set to the first
   await setDefaultOrganization(firstOrganization.id);
+  console.log('set default organization to firstOrganization on onboarding', firstOrganization.id);
 
   return firstOrganization.id;
 }
@@ -35,6 +40,8 @@ async function getOnboardingConditions(userId: string) {
     getDefaultOrganizationOrSet(),
   ]);
 
+  console.log('userProfile on onboarding', userProfile);
+  console.log('defaultOrganizationId on onboarding', defaultOrganizationId);
   return {
     userProfile,
     defaultOrganizationId,
