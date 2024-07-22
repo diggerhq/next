@@ -93,10 +93,6 @@ async function Dashboard({ params, searchParams }: DashboardProps) {
 
 export async function generateMetadata({ params }: DashboardProps): Promise<Metadata> {
   const { organizationId } = organizationParamSchema.parse(params);
-  console.log('------------------------------------')
-  console.log('Params', params);
-  console.log('Organization id', organizationId);
-  console.log('------------------------------------')
   const title = await getOrganizationTitle(organizationId);
   console.log('Organization title', title);
 

@@ -29,6 +29,7 @@ export async function getOrganizationRepos(organizationId: string) {
     throw error;
   }
 
+  revalidatePath(`/org/${organizationId}/projects`, 'page');
   revalidatePath(`/org/${organizationId}/projects/create`, 'page');
 
   return data;
