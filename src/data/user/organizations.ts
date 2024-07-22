@@ -141,7 +141,7 @@ export const createOrganization = async (
     }
 
     revalidatePath('/org/[organizationId]', 'layout');
-    return { status: 'success', data: slug };
+    return { status: 'success', data: organizationId };
   } catch (error) {
     console.error('Unexpected error in createOrganization:', error);
     return { status: 'error', message: 'An unexpected error occurred' };

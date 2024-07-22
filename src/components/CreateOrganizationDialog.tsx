@@ -63,7 +63,7 @@ export function CreateOrganizationDialog({
       },
       onSuccess: (response) => {
         if (response.status === "success" && response.data) {
-          router.push(`/${response.data}`);
+          router.push(`/org/${response.data}`);
         }
       },
     },
