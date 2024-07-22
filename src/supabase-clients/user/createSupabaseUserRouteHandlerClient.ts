@@ -9,14 +9,12 @@ type CookieOptions = createRouteHandlerClientParams['cookieOptions'];
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
-const optionalCookieOptions: CookieOptions = isDevelopment
-  ? undefined
-  : {
-      domain: '.digger.dev',
-      secure: false,
-      path: '/',
-      sameSite: 'lax',
-    };
+const optionalCookieOptions: CookieOptions = {
+  domain: isDevelopment ? undefined : '.digger.dev',
+  secure: !isDevelopment,
+  path: '/',
+  sameSite: 'lax',
+};
 
 // Outstanding bug
 //https://github.com/vercel/next.js/issues/45371

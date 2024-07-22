@@ -9,14 +9,12 @@ type createClientComponentClientParams = NonNullable<
 >;
 type CookieOptions = createClientComponentClientParams['cookieOptions'];
 
-const optionalCookieOptions: CookieOptions = isDevelopment
-  ? undefined
-  : {
-      domain: '.digger.dev',
-      secure: false,
-      path: '/',
-      sameSite: 'lax',
-    };
+const optionalCookieOptions: CookieOptions = {
+  domain: isDevelopment ? undefined : '.digger.dev',
+  secure: !isDevelopment,
+  path: '/',
+  sameSite: 'lax',
+};
 
 // apologies for the name, but it's the best I could come up with as
 // the util exported from @supabase/auth-helpers-nextjs is called

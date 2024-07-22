@@ -9,14 +9,12 @@ type createServerComponentClientParams = NonNullable<
 >;
 type CookieOptions = createServerComponentClientParams['cookieOptions'];
 
-const optionalCookieOptions: CookieOptions = isDevelopment
-  ? undefined
-  : {
-      domain: '.digger.dev',
-      secure: false,
-      path: '/',
-      sameSite: 'lax',
-    };
+const optionalCookieOptions: CookieOptions = {
+  domain: isDevelopment ? undefined : '.digger.dev',
+  secure: !isDevelopment,
+  path: '/',
+  sameSite: 'lax',
+};
 
 export const createSupabaseUserServerComponentClient = () =>
   createServerComponentClient<Database>(
