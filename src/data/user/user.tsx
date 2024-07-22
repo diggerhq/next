@@ -292,7 +292,10 @@ export async function setOnboardingStatus(): Promise<
     },
   });
 
+  console.log('updateAuthUser : ', updateAuthUser);
+
   if (updateAuthUser.error) {
+    console.log('Failed to update onboarding status. reason : ', updateAuthUser.error);
     return {
       status: "error",
       message: updateAuthUser.error.message,
@@ -302,6 +305,7 @@ export async function setOnboardingStatus(): Promise<
   const refreshSessionResponse = await supabaseClient.auth.refreshSession();
 
   if (refreshSessionResponse.error) {
+    console.log('Failed to refresh session. reason : ', refreshSessionResponse.error);
     return {
       status: "error",
       message: refreshSessionResponse.error.message,

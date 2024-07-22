@@ -77,8 +77,17 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient<Database>({ req, res });
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
+  console.log(
+    'Checking if user should be onboarded:',
+    req.nextUrl.pathname,
+    maybeUser,
+  );
   if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
     console.log('redirecting to onboarding');
+    console.log(
+      'shouldOnboardUser result:',
+      shouldOnboardUser(req.nextUrl.pathname, maybeUser),
+    );
     return NextResponse.redirect(toSiteURL('/onboarding'));
   }
   if (!isUnprotectedPage(req.nextUrl.pathname) && maybeUser) {

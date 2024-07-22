@@ -33,7 +33,7 @@ export function UserOnboardingFlow({
     getInitialFlowState(flowStates, onboardingStatus)
   );
 
-  const { replace } = useRouter();
+  const router = useRouter();
 
   const nextStep = useCallback(() => {
     const currentIndex = flowStates.indexOf(currentStep);
@@ -48,9 +48,9 @@ export function UserOnboardingFlow({
       console.log('currentStep is COMPLETE', currentStep);
       console.log('onboardingStatus : ', onboardingStatus);
       console.log('now redirecting to /dashboard');
-      replace("/dashboard");
+      router.push("/dashboard");
     }
-  }, [currentStep, replace]);
+  }, [currentStep, router, onboardingStatus]);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 50 },
