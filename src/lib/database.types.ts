@@ -2,7 +2,7 @@ export type Json =
   | string
   | number
   | boolean
-  | null 
+  | null
   | { [key: string]: Json | undefined }
   | Json[]
 
@@ -93,6 +93,505 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      digger_batches: {
+        Row: {
+          batch_type: string
+          branch_name: string
+          comment_id: number | null
+          digger_config: string | null
+          github_installation_id: number | null
+          gitlab_project_id: number | null
+          id: string
+          pr_number: number | null
+          repo_full_name: string
+          repo_name: string
+          repo_owner: string
+          source_details: string | null
+          status: number
+          vcs: string | null
+        }
+        Insert: {
+          batch_type: string
+          branch_name: string
+          comment_id?: number | null
+          digger_config?: string | null
+          github_installation_id?: number | null
+          gitlab_project_id?: number | null
+          id?: string
+          pr_number?: number | null
+          repo_full_name: string
+          repo_name: string
+          repo_owner: string
+          source_details?: string | null
+          status: number
+          vcs?: string | null
+        }
+        Update: {
+          batch_type?: string
+          branch_name?: string
+          comment_id?: number | null
+          digger_config?: string | null
+          github_installation_id?: number | null
+          gitlab_project_id?: number | null
+          id?: string
+          pr_number?: number | null
+          repo_full_name?: string
+          repo_name?: string
+          repo_owner?: string
+          source_details?: string | null
+          status?: number
+          vcs?: string | null
+        }
+        Relationships: []
+      }
+      digger_job_parent_links: {
+        Row: {
+          created_at: string | null
+          deleted_at: string | null
+          digger_job_id: string | null
+          id: number
+          parent_digger_job_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_at?: string | null
+          digger_job_id?: string | null
+          id?: number
+          parent_digger_job_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          deleted_at?: string | null
+          digger_job_id?: string | null
+          id?: number
+          parent_digger_job_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      digger_job_summaries: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          resources_created: number
+          resources_deleted: number
+          resources_updated: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          resources_created?: number
+          resources_deleted?: number
+          resources_updated?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          resources_created?: number
+          resources_deleted?: number
+          resources_updated?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      digger_job_tokens: {
+        Row: {
+          created_at: string | null
+          deleted_at: string | null
+          expiry: string | null
+          id: number
+          organisation_id: number | null
+          type: string | null
+          updated_at: string | null
+          value: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_at?: string | null
+          expiry?: string | null
+          id?: number
+          organisation_id?: number | null
+          type?: string | null
+          updated_at?: string | null
+          value?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          deleted_at?: string | null
+          expiry?: string | null
+          id?: number
+          organisation_id?: number | null
+          type?: string | null
+          updated_at?: string | null
+          value?: string | null
+        }
+        Relationships: []
+      }
+      digger_jobs: {
+        Row: {
+          batch_id: string
+          created_at: string
+          deleted_at: string | null
+          digger_job_id: string
+          digger_job_summary_id: string | null
+          id: string
+          job_spec: string | null
+          plan_footprint: string | null
+          pr_comment_url: string | null
+          status: number
+          status_updated_at: string | null
+          terraform_output: string | null
+          updated_at: string
+          workflow_file: string | null
+          workflow_run_url: string | null
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          deleted_at?: string | null
+          digger_job_id: string
+          digger_job_summary_id?: string | null
+          id?: string
+          job_spec?: string | null
+          plan_footprint?: string | null
+          pr_comment_url?: string | null
+          status: number
+          status_updated_at?: string | null
+          terraform_output?: string | null
+          updated_at?: string
+          workflow_file?: string | null
+          workflow_run_url?: string | null
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          digger_job_id?: string
+          digger_job_summary_id?: string | null
+          id?: string
+          job_spec?: string | null
+          plan_footprint?: string | null
+          pr_comment_url?: string | null
+          status?: number
+          status_updated_at?: string | null
+          terraform_output?: string | null
+          updated_at?: string
+          workflow_file?: string | null
+          workflow_run_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_digger_jobs_batch"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "digger_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_digger_jobs_digger_job_summary"
+            columns: ["digger_job_summary_id"]
+            isOneToOne: false
+            referencedRelation: "digger_job_summaries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      digger_locks: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          lock_id: number
+          organization_id: string
+          resource: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          lock_id: number
+          organization_id: string
+          resource: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          lock_id?: number
+          organization_id?: string
+          resource?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_digger_locks_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      digger_run_queue_items: {
+        Row: {
+          created_at: string | null
+          deleted_at: string | null
+          digger_run_id: number | null
+          id: number
+          project_id: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          deleted_at?: string | null
+          digger_run_id?: number | null
+          id?: number
+          project_id?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          deleted_at?: string | null
+          digger_run_id?: number | null
+          id?: number
+          project_id?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      digger_run_stages: {
+        Row: {
+          batch_id: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_digger_run_stages_batch"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "digger_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      digger_runs: {
+        Row: {
+          apply_stage_id: string | null
+          approval_author: string | null
+          approval_date: string | null
+          commit_id: string
+          created_at: string
+          deleted_at: string | null
+          digger_config: string | null
+          github_installation_id: number | null
+          id: string
+          is_approved: boolean | null
+          plan_stage_id: string | null
+          pr_number: number | null
+          project_name: string | null
+          repo_id: number
+          run_type: string
+          status: string
+          triggertype: string
+          updated_at: string
+        }
+        Insert: {
+          apply_stage_id?: string | null
+          approval_author?: string | null
+          approval_date?: string | null
+          commit_id: string
+          created_at?: string
+          deleted_at?: string | null
+          digger_config?: string | null
+          github_installation_id?: number | null
+          id?: string
+          is_approved?: boolean | null
+          plan_stage_id?: string | null
+          pr_number?: number | null
+          project_name?: string | null
+          repo_id?: number
+          run_type: string
+          status: string
+          triggertype: string
+          updated_at?: string
+        }
+        Update: {
+          apply_stage_id?: string | null
+          approval_author?: string | null
+          approval_date?: string | null
+          commit_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          digger_config?: string | null
+          github_installation_id?: number | null
+          id?: string
+          is_approved?: boolean | null
+          plan_stage_id?: string | null
+          pr_number?: number | null
+          project_name?: string | null
+          repo_id?: number
+          run_type?: string
+          status?: string
+          triggertype?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_digger_runs_apply_stage"
+            columns: ["apply_stage_id"]
+            isOneToOne: false
+            referencedRelation: "digger_run_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_digger_runs_plan_stage"
+            columns: ["plan_stage_id"]
+            isOneToOne: false
+            referencedRelation: "digger_run_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_digger_runs_repo"
+            columns: ["repo_id"]
+            isOneToOne: false
+            referencedRelation: "repos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      github_app_installation_links: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          github_installation_id: number
+          id: string
+          organization_id: string
+          status: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          github_installation_id: number
+          id?: string
+          organization_id: string
+          status: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          github_installation_id?: number
+          id?: string
+          organization_id?: string
+          status?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_github_app_installation_links_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      github_app_installations: {
+        Row: {
+          account_id: number
+          created_at: string
+          deleted_at: string | null
+          github_app_id: number
+          github_installation_id: number
+          id: string
+          login: string
+          repo: string | null
+          status: number
+          updated_at: string
+        }
+        Insert: {
+          account_id: number
+          created_at?: string
+          deleted_at?: string | null
+          github_app_id: number
+          github_installation_id: number
+          id?: string
+          login: string
+          repo?: string | null
+          status: number
+          updated_at?: string
+        }
+        Update: {
+          account_id?: number
+          created_at?: string
+          deleted_at?: string | null
+          github_app_id?: number
+          github_installation_id?: number
+          id?: string
+          login?: string
+          repo?: string | null
+          status?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      github_apps: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          github_app_url: string
+          github_id: number
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          github_app_url: string
+          github_id: number
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          github_app_url?: string
+          github_id?: number
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       internal_blog_author_posts: {
         Row: {
@@ -765,6 +1264,10 @@ export type Database = {
           id: number
           name: string
           organization_id: string | null
+          repo_full_name: string | null
+          repo_name: string | null
+          repo_organisation: string | null
+          repo_url: string | null
           updated_at: string | null
         }
         Insert: {
@@ -774,6 +1277,10 @@ export type Database = {
           id?: number
           name: string
           organization_id?: string | null
+          repo_full_name?: string | null
+          repo_name?: string | null
+          repo_organisation?: string | null
+          repo_url?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -783,6 +1290,10 @@ export type Database = {
           id?: number
           name?: string
           organization_id?: string | null
+          repo_full_name?: string | null
+          repo_name?: string | null
+          repo_organisation?: string | null
+          repo_url?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1558,6 +2069,10 @@ export type Database = {
           metadata: Json
           updated_at: string
         }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {

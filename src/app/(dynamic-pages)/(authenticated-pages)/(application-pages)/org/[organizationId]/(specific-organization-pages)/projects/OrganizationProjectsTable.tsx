@@ -26,7 +26,7 @@ import moment from 'moment';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-type ProjectWithRepo = Tables<'projects'> & { repoName: string | null };
+type ProjectWithRepo = Tables<'projects'> & { repoFullName: string | null };
 
 type Props = {
   projects: Tables<'projects'>[];
@@ -40,7 +40,7 @@ export function OrganizationProjectsTable({ projects }: Props) {
       const updatedProjects = await Promise.all(
         projects.map(async (project) => {
           const repoDetails = await getRepoDetails(project.repo_id);
-          return { ...project, repoName: repoDetails?.name ?? null };
+          return { ...project, repoFullName: repoDetails?.repo_full_name ?? null };
         })
       );
       setProjectsWithRepos(updatedProjects);
@@ -79,8 +79,8 @@ export function OrganizationProjectsTable({ projects }: Props) {
         <div className="flex items-center bg-muted/50 p-1 rounded-md border w-fit px-2">
           <GitBranch className="mr-1 h-4 w-4" />
           <span>
-            {row.original.repoName ? `${row.original.repoName.toLowerCase().replace(/\s+/g, '-').replace(/[A-Z]/g, (letter) => letter.toLowerCase())}` : ''}
-            {row.original.repoName && ((row.getValue('terraform_working_dir') as string) || '') ? '/' : ''}
+            {row.original.repoFullName ? `${row.original.repoFullName.toLowerCase().replace(/\s+/g, '-').replace(/[A-Z]/g, (letter) => letter.toLowerCase())}` : ''}
+            {row.original.repoFullName && ((row.getValue('terraform_working_dir') as string) || '') ? '/' : ''}
             {((row.getValue('terraform_working_dir') as string) || '').replace(/\s+/g, '-').replace(/[A-Z]/g, (letter) => letter.toLowerCase())}
           </span>
         </div>

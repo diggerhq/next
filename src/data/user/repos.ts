@@ -6,7 +6,7 @@ export async function getRepoDetails(repoId: number) {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const { data, error } = await supabaseClient
     .from('repos')
-    .select('id, name')
+    .select('id, repo_full_name')
     .eq('id', repoId)
     .single();
 
@@ -21,7 +21,7 @@ export async function getOrganizationRepos(organizationId: string) {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const { data, error } = await supabaseClient
     .from('repos')
-    .select('id, name')
+    .select('id, repo_full_name')
     .eq('organization_id', organizationId);
 
   if (error) {

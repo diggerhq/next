@@ -58,87 +58,94 @@ export const createOrganization = async (
     isOnboardingFlow?: boolean;
   } = {},
 ): Promise<SAPayload<string>> => {
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const user = await serverGetLoggedInUser();
+  try {
+    const supabaseClient = createSupabaseUserServerActionClient();
+    const user = await serverGetLoggedInUser();
 
-  const organizationId = uuid();
+    const organizationId = uuid();
 
-  if (RESTRICTED_SLUG_NAMES.includes(slug)) {
-    return { status: 'error', message: 'Slug is restricted' };
-  }
-
-  if (!SLUG_PATTERN.test(slug)) {
-    return {
-      status: 'error',
-      message: 'Slug does not match the required pattern',
-    };
-  }
-
-  const { error } = await supabaseClient.from('organizations').insert({
-    title: name,
-    id: organizationId,
-    slug: slug,
-  });
-
-  revalidatePath('/org/[organizationId]', 'layout');
-
-  if (error) {
-    return { status: 'error', message: error.message };
-  }
-
-  const { error: orgMemberErrors } = await supabaseAdminClient
-    .from('organization_members')
-    .insert([
-      {
-        member_id: user.id,
-        organization_id: organizationId,
-        member_role: 'owner',
-      },
-    ]);
-
-  if (orgMemberErrors) {
-    return { status: 'error', message: orgMemberErrors.message };
-  }
-
-  if (isOnboardingFlow) {
-    // insert 3 dummy projects
-    const { error: updateError } = await supabaseClient
-      .from('user_private_info')
-      .update({ default_organization: organizationId })
-      .eq('id', user.id);
-
-    console.log('updateError', updateError);
-    if (updateError) {
-      return { status: 'error', message: updateError.message };
+    if (RESTRICTED_SLUG_NAMES.includes(slug)) {
+      return { status: 'error', message: 'Slug is restricted' };
     }
 
-    const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
-      onboardingHasCreatedOrganization: true,
-    };
-
-    const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
-      data: updateUserMetadataPayload,
-    });
-
-    if (updateUserMetadataResponse.error) {
+    if (!SLUG_PATTERN.test(slug)) {
       return {
         status: 'error',
-        message: updateUserMetadataResponse.error.message,
+        message: 'Slug does not match the required pattern',
       };
     }
 
-    const refreshSessionResponse = await refreshSessionAction();
-    if (refreshSessionResponse.status === 'error') {
-      return refreshSessionResponse;
+    const { error: insertError } = await supabaseClient
+      .from('organizations')
+      .insert({
+        title: name,
+        id: organizationId,
+        slug: slug,
+      });
+
+    if (insertError) {
+      console.error('Error inserting organization:', insertError);
+      return { status: 'error', message: insertError.message };
     }
 
-    throw new Error('failed');
-  }
+    const { error: orgMemberErrors } = await supabaseAdminClient
+      .from('organization_members')
+      .insert([
+        {
+          member_id: user.id,
+          organization_id: organizationId,
+          member_role: 'owner',
+        },
+      ]);
 
-  return {
-    status: 'success',
-    data: slug,
-  };
+    if (orgMemberErrors) {
+      console.error('Error inserting organization member:', orgMemberErrors);
+      return { status: 'error', message: orgMemberErrors.message };
+    }
+
+    if (isOnboardingFlow) {
+      const { error: updateError } = await supabaseClient
+        .from('user_private_info')
+        .update({ default_organization: organizationId })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('Error updating user private info:', updateError);
+        return { status: 'error', message: updateError.message };
+      }
+
+      const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
+        onboardingHasCreatedOrganization: true,
+      };
+
+      const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
+        data: updateUserMetadataPayload,
+      });
+
+      if (updateUserMetadataResponse.error) {
+        console.error(
+          'Error updating user metadata:',
+          updateUserMetadataResponse.error,
+        );
+        return {
+          status: 'error',
+          message: updateUserMetadataResponse.error.message,
+        };
+      }
+
+      const refreshSessionResponse = await refreshSessionAction();
+      if (refreshSessionResponse.status === 'error') {
+        console.error('Error refreshing session:', refreshSessionResponse);
+        return refreshSessionResponse;
+      }
+    }
+
+    revalidatePath('/org/[organizationId]', 'layout');
+    return { status: 'success', data: slug };
+  } catch (error) {
+    console.error('Unexpected error in createOrganization:', error);
+    return { status: 'error', message: 'An unexpected error occurred' };
+  }
 };
 
 export async function fetchSlimOrganizations() {

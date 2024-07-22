@@ -48,6 +48,7 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
   const matchOnboarding = match(onboardingPaths);
   const isOnboardingRoute = matchOnboarding(pathname);
   if (!isUnprotectedPage(pathname) && user && !isOnboardingRoute) {
+    console.log('user is not onboarded reason : ', user);
     const userMetadata = authUserMetadataSchema.parse(user.user_metadata);
     const {
       onboardingHasAcceptedTerms,
@@ -59,9 +60,13 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
       !onboardingHasCompletedProfile ||
       !onboardingHasCreatedOrganization
     ) {
+      console.log(
+        `user is not onboarded reason : onboardingHasAcceptedTerms : ${userMetadata.onboardingHasAcceptedTerms} onboardingHasCompletedProfile : ${userMetadata.onboardingHasCompletedProfile} onboardingHasCreatedOrganization : ${userMetadata.onboardingHasCreatedOrganization}`,
+      );
       return true;
     }
   }
+  console.log('user is onboarded');
   return false;
 }
 
