@@ -26,7 +26,6 @@ export async function GET(request: Request) {
     // HACK_ALERT!!!
     // cookie is probably set on 'next.digger.dev' we have to change it to `.digger.dev`
     const cookieKey = `sb-${process.env.SUPABASE_PROJECT_REF}-auth-token`;
-    const cookieValue = cookies().get(cookieKey)?.value;
     const cookieStore = cookies();
     const currentCookieValue = cookieStore.get(cookieKey)?.value;
     // get domain of current reques

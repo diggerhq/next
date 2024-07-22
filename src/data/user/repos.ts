@@ -1,6 +1,7 @@
 'use server';
 
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
+import { revalidatePath } from 'next/cache';
 
 export async function getRepoDetails(repoId: number) {
   const supabaseClient = createSupabaseUserServerComponentClient();
@@ -27,6 +28,8 @@ export async function getOrganizationRepos(organizationId: string) {
   if (error) {
     throw error;
   }
+
+  revalidatePath(`/org/${organizationId}/projects/create`, 'page');
 
   return data;
 }
