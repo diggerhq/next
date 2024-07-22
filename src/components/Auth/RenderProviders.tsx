@@ -14,7 +14,7 @@ function capitalize(word: string) {
   return word.charAt(0).toUpperCase() + lower.slice(1);
 }
 
-const isDemo = true;
+const isDemo = false;
 
 export const RenderProviders = ({
   providers,
@@ -31,11 +31,10 @@ export const RenderProviders = ({
         const AuthIcon = SocialIcons[provider];
         const component = (
           <Button
-            variant="default"
+            variant="outline"
             size="default"
             disabled={isLoading || isDemo}
             onClick={() => onProviderLoginRequested(provider)}
-            className="bg-white dark:bg-white text-black dark:text-black border h-10 border-gray-400 dark:border-gray-600 rounded-lg"
           >
             <div className="mr-2">
               <AuthIcon />

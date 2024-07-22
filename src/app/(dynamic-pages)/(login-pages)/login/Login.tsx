@@ -196,7 +196,7 @@ export function Login({
                 </CardHeader>
                 <CardContent className="space-y-2 p-0">
                   <RenderProviders
-                    providers={['google', 'github', 'twitter']}
+                    providers={['github']}
                     isLoading={providerMutation.isLoading}
                     onProviderLoginRequested={providerMutation.mutate}
                   />
