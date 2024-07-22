@@ -68,11 +68,15 @@ export const signInWithMagicLink = async (
 export const signInWithProvider = async (
   provider: AuthProvider,
   next?: string,
-): Promise<SAPayload<{
-  url: string;
-}>> => {
+): Promise<
+  SAPayload<{
+    url: string;
+  }>
+> => {
   const supabase = createSupabaseUserServerActionClient();
-  const redirectToURL = new URL(toSiteURL('/auth/callback'));
+  const redirectToURL = new URL(
+    toSiteURL(`/auth/callback?provider=${provider}`),
+  );
   if (next) {
     redirectToURL.searchParams.set('next', next);
   }
@@ -83,7 +87,6 @@ export const signInWithProvider = async (
     },
   });
 
-
   if (error) {
     return { status: 'error', message: error.message };
   }
@@ -93,8 +96,8 @@ export const signInWithProvider = async (
   return {
     status: 'success',
     data: {
-      url: providerUrl
-    }
+      url: providerUrl,
+    },
   };
 };
 
