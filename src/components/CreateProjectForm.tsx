@@ -152,10 +152,11 @@ export default function CreateProjectForm({ organizationId, repositories }: Crea
                             <CardTitle className="text-lg">Select a repository</CardTitle>
                             <CardDescription className="text-sm text-muted-foreground">Choose the repository for your project</CardDescription>
                         </div>
-
                         <Link
                             href="https://github.com/apps/digger-cloud-next/installations/select_target"
                             onClick={(e) => e.stopPropagation()}
+                            target="_blank"
+                            rel="noopener noreferrer"
                         >
                             <Button
                                 type="button"
