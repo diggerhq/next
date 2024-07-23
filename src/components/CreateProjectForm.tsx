@@ -153,7 +153,7 @@ export default function CreateProjectForm({ organizationId, repositories }: Crea
                             <CardDescription className="text-sm text-muted-foreground">Choose the repository for your project</CardDescription>
                         </div>
                         <Link
-                            href="https://github.com/apps/digger-cloud-next/installations/select_target"
+                            href={`https://github.com/apps/digger-cloud-next/installations/select_target?organization_id=${organizationId}`}
                             onClick={(e) => e.stopPropagation()}
                             target="_blank"
                             rel="noopener noreferrer"
