@@ -1,10 +1,10 @@
 import { ApplicationLayoutShell } from '@/components/ApplicationLayoutShell';
 import { InternalNavbar } from '@/components/NavigationMenu/InternalNavbar';
 import { PageHeading } from '@/components/PageHeading';
+import { TabsNavigationV2 } from '@/components/TabsNavigation/TabsNavigation';
 import { getProjectTitleById, getSlimProjectBySlug } from '@/data/user/projects';
 import { projectSlugParamSchema } from '@/utils/zod-schemas/params';
 import { Suspense, type ReactNode } from 'react';
-import { ApprovalControls } from './ApprovalControls';
 
 
 async function ProjectPageHeading({ projectId }: { projectId: string }) {
@@ -12,11 +12,7 @@ async function ProjectPageHeading({ projectId }: { projectId: string }) {
   return (
     <PageHeading
       title={projectTitle}
-      actions={
-        <Suspense>
-          <ApprovalControls projectId={projectId} />
-        </Suspense>
-      }
+      subTitle={`Project ID : ${projectId} `}
     />
   );
 }
@@ -35,6 +31,21 @@ export default async function ProjectLayout({
   const { projectSlug } = projectSlugParamSchema.parse(params);
   const project = await getSlimProjectBySlug(projectSlug);
 
+  const tabs = [
+    {
+      label: 'Runs',
+      href: `/project/${projectSlug}`,
+    },
+    {
+      label: 'TFVars',
+      href: `/project/${projectSlug}/tfvars`,
+    },
+    {
+      label: 'Settings',
+      href: `/project/${projectSlug}/settings`,
+    },
+  ];
+
   return (
 
     <ApplicationLayoutShell sidebar={sidebar}>
@@ -44,10 +55,13 @@ export default async function ProjectLayout({
             <Suspense>{navbar}</Suspense>
           </div>
         </InternalNavbar>
-        <div className="space-y-8 m-6">
-          <div className="space-y-0">
+        <div className="m-6">
+          <div className="flex flex-col">
             <Suspense>
               <ProjectPageHeading projectId={project.id} />
+            </Suspense>
+            <Suspense>
+              <TabsNavigationV2 tabs={tabs} />
             </Suspense>
           </div>
           {children}

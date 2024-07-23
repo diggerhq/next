@@ -25,23 +25,19 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
 
   const createOrgMutation = useMutation({
     mutationFn: async ({ organizationTitle, organizationSlug }: CreateOrganizationSchema) => {
-      console.log('creating organization mutation');
       return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true })
     }
     ,
     onSuccess: (data) => {
-      console.log('success', data);
       toast({ title: "Organization created!", description: "Your new organization is ready." });
       onSuccess();
     },
     onError: (error) => {
-      console.log('Failed to create organization. reason : ', error);
       toast({ title: "Failed to create organization", description: "Please try again.", variant: "destructive" });
     },
   });
 
   const onSubmit = (data: CreateOrganizationSchema) => {
-    console.log('submitting data : ', data);
     createOrgMutation.mutate(data);
   };
 

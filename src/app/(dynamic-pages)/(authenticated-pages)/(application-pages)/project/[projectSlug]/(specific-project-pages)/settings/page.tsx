@@ -1,18 +1,15 @@
-import { T } from '@/components/ui/Typography';
 import { getSlimProjectBySlug } from '@/data/user/projects';
 import { projectSlugParamSchema } from '@/utils/zod-schemas/params';
+import ProjectSettings from '../ProjectSettings';
 
 
 
-export default async function ProjectSettings({ params }: { params: unknown }) {
+export default async function ProjectSettingsPage({ params }: { params: unknown }) {
   const { projectSlug } = projectSlugParamSchema.parse(params);
   const project = await getSlimProjectBySlug(projectSlug);
   return (
-    <div className="space-y-2">
-      <T.H3>Project Settings</T.H3>
-      <T.Subtle>
-        Add settings for your projects depending on your usecase
-      </T.Subtle>
+    <div className="flex flex-col space-y-4 max-w-5xl mt-2">
+      <ProjectSettings />
     </div>
   );
 }

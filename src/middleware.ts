@@ -48,7 +48,6 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
   const matchOnboarding = match(onboardingPaths);
   const isOnboardingRoute = matchOnboarding(pathname);
   if (!isUnprotectedPage(pathname) && user && !isOnboardingRoute) {
-    console.log('user is not onboarded reason : ', user);
     const userMetadata = authUserMetadataSchema.parse(user.user_metadata);
     const {
       onboardingHasAcceptedTerms,
@@ -60,9 +59,6 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
       !onboardingHasCompletedProfile ||
       !onboardingHasCreatedOrganization
     ) {
-      console.log(
-        `user is not onboarded reason : onboardingHasAcceptedTerms : ${userMetadata.onboardingHasAcceptedTerms} onboardingHasCompletedProfile : ${userMetadata.onboardingHasCompletedProfile} onboardingHasCreatedOrganization : ${userMetadata.onboardingHasCreatedOrganization}`,
-      );
       return true;
     }
   }
@@ -77,32 +73,17 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient<Database>({ req, res });
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
-  console.log(
-    'Checking if user should be onboarded:',
-    req.nextUrl.pathname,
-    maybeUser,
-  );
   if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
-    console.log('redirecting to onboarding');
-    console.log(
-      'shouldOnboardUser result:',
-      shouldOnboardUser(req.nextUrl.pathname, maybeUser),
-    );
     return NextResponse.redirect(toSiteURL('/onboarding'));
   }
   if (!isUnprotectedPage(req.nextUrl.pathname) && maybeUser) {
     // user is possibly logged in, but lets validate session
     const user = await supabase.auth.getUser();
     if (user.error) {
-      console.log('user is not logged in. reason : ', user.error);
       return NextResponse.redirect(toSiteURL('/login'));
     }
   }
   if (!isUnprotectedPage(req.nextUrl.pathname) && !maybeUser) {
-    console.log(
-      'protected page but user is not logged in. reason : ',
-      maybeUser,
-    );
     return NextResponse.redirect(toSiteURL('/login'));
   }
   if (

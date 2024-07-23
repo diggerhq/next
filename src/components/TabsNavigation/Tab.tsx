@@ -1,7 +1,8 @@
 'use client';
+import { cn } from '@/utils/cn';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { TabProps } from './types';
+import { TabProps, TabPropsV2 } from './types';
 export const Tab = ({ label, href, icon }: TabProps) => {
   const pathname = usePathname();
   const isActive = pathname === href;
@@ -14,6 +15,23 @@ export const Tab = ({ label, href, icon }: TabProps) => {
   return (
     <Link href={href} className={className}>
       {icon} <span>{label}</span>
+    </Link>
+  );
+};
+
+export const TabV2 = ({ label, href }: TabPropsV2) => {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+  const className = cn(
+    'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+    isActive
+      ? 'bg-background text-foreground shadow-sm'
+      : 'text-muted-foreground hover:text-foreground'
+  );
+
+  return (
+    <Link href={href} className={className}>
+      <span>{label}</span>
     </Link>
   );
 };
