@@ -12,7 +12,7 @@ type TFVarsDetailsProps = {
         tfvars: EnvVar[];
         updated_at: string;
     };
-    onUpdate: (name: string, value: string, isSecret: boolean) => Promise<EnvVar[]>;
+    onUpdate: (oldName: string, newName: string, value: string, isSecret: boolean) => Promise<EnvVar[]>;
     onDelete: (name: string) => Promise<EnvVar[]>;
     onBulkUpdate: (vars: EnvVar[]) => Promise<EnvVar[]>;
 }

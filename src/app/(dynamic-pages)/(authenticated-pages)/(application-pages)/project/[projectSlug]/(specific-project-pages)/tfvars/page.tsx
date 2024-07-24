@@ -30,9 +30,12 @@ export default async function TFVarsPage({ params }: { params: unknown }) {
 
     const envVars = await getAllEnvVars(project.id, MASTER_PASSWORD, ENCRYPTION_SALT);
 
-    async function handleUpdate(name: string, value: string, isSecret: boolean) {
+    async function handleUpdate(oldName: string, newName: string, value: string, isSecret: boolean) {
         'use server'
-        await storeEncryptedEnvVar(project.id, name, value, isSecret, MASTER_PASSWORD, ENCRYPTION_SALT);
+        if (oldName !== newName) {
+            await deleteEnvVar(project.id, oldName);
+        }
+        await storeEncryptedEnvVar(project.id, newName, value, isSecret, MASTER_PASSWORD, ENCRYPTION_SALT);
         return getAllEnvVars(project.id, MASTER_PASSWORD, ENCRYPTION_SALT);
     }
 
@@ -44,11 +47,26 @@ export default async function TFVarsPage({ params }: { params: unknown }) {
 
     async function handleBulkUpdate(vars: EnvVar[]) {
         'use server'
-        for (const envVar of vars) {
-            if (!envVar.is_secret) {
-                await storeEncryptedEnvVar(project.id, envVar.name, envVar.value, envVar.is_secret, MASTER_PASSWORD, ENCRYPTION_SALT);
+        const currentVars = await getAllEnvVars(project.id, MASTER_PASSWORD, ENCRYPTION_SALT);
+        const currentVarsMap = Object.fromEntries(currentVars.map(v => [v.name, v]));
+
+        for (const newVar of vars) {
+            const currentVar = currentVarsMap[newVar.name];
+            if (currentVar) {
+                if (!currentVar.is_secret && (currentVar.value !== newVar.value || currentVar.name !== newVar.name)) {
+                    await handleUpdate(currentVar.name, newVar.name, newVar.value, currentVar.is_secret);
+                }
+            } else {
+                await handleUpdate(newVar.name, newVar.name, newVar.value, false);
             }
         }
+
+        for (const currentVar of currentVars) {
+            if (!vars.some(v => v.name === currentVar.name) && !currentVar.is_secret) {
+                await deleteEnvVar(project.id, currentVar.name);
+            }
+        }
+
         return getAllEnvVars(project.id, MASTER_PASSWORD, ENCRYPTION_SALT);
     }
 

@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { EnvVar } from "@/types/userTypes";
 import { motion } from 'framer-motion';
-import { Copy, Edit, Plus, Save, Trash } from 'lucide-react';
+import { Copy, Edit, LockKeyhole, Plus, Save, Trash, Unlock } from 'lucide-react';
 import moment from 'moment';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 
 type TFVarTableProps = {
     envVars: EnvVar[];
-    onUpdate: (name: string, value: string, isSecret: boolean) => Promise<EnvVar[]>;
+    onUpdate: (oldName: string, newName: string, value: string, isSecret: boolean) => Promise<EnvVar[]>;
     onDelete: (name: string) => Promise<EnvVar[]>;
     onBulkUpdate: (vars: EnvVar[]) => Promise<EnvVar[]>;
 };
@@ -31,7 +31,7 @@ const EmptyState: React.FC<{ onAddVariable: () => void }> = ({ onAddVariable }) 
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
-            <Card className="mt-6 border-none bg-transparent shadow-none">
+            <Card className=" border-none bg-transparent shadow-none">
                 <CardContent className="flex flex-col items-center justify-center py-12">
                     <h3 className="text-2xl font-semibold mb-2">No Environment Variables Yet</h3>
                     <p className="text-muted-foreground mb-6 text-center max-w-md">
@@ -52,7 +52,7 @@ const EmptyState: React.FC<{ onAddVariable: () => void }> = ({ onAddVariable }) 
 };
 
 export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }: TFVarTableProps) {
-    const [editingVar, setEditingVar] = useState<EnvVar | null>(null);
+    const [editingVar, setEditingVar] = useState<{ originalName: string, currentVar: EnvVar } | null>(null);
     const [newVar, setNewVar] = useState<Omit<EnvVar, 'updated_at'>>({ name: '', value: '', is_secret: false });
     const [bulkEditMode, setBulkEditMode] = useState(false);
     const [bulkEditValue, setBulkEditValue] = useState<string>('');
@@ -61,14 +61,31 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
     const router = useRouter();
 
     const handleEdit = (envVar: EnvVar) => {
-        setEditingVar({ ...envVar, value: envVar.is_secret ? '' : envVar.value });
+        setEditingVar({
+            originalName: envVar.name,
+            currentVar: {
+                ...envVar,
+                value: envVar.is_secret ? '' : envVar.value
+            }
+        });
     };
+
 
     const handleSave = async () => {
         if (editingVar) {
+            if (editingVar.currentVar.name.toLowerCase() !== editingVar.originalName.toLowerCase() &&
+                envVars.some(v => v.name.toLowerCase() === editingVar.currentVar.name.toLowerCase())) {
+                toast.error('A variable with this name already exists');
+                return;
+            }
             setIsLoading(true);
             try {
-                await onUpdate(editingVar.name, editingVar.value, editingVar.is_secret);
+                await onUpdate(
+                    editingVar.originalName,
+                    editingVar.currentVar.name,
+                    editingVar.currentVar.value,
+                    editingVar.currentVar.is_secret
+                );
                 toast.success('Variable updated successfully');
                 setEditingVar(null);
                 router.refresh();
@@ -80,15 +97,16 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
         }
     };
 
+
     const handleAddNew = async () => {
         if (newVar.name && newVar.value) {
-            if (envVars.some(v => v.name === newVar.name)) {
+            if (envVars.some(v => v.name.toLowerCase() === newVar.name.toLowerCase())) {
                 toast.error('A variable with this name already exists');
                 return;
             }
             setIsLoading(true);
             try {
-                await onUpdate(newVar.name, newVar.value, newVar.is_secret);
+                await onUpdate(newVar.name, newVar.name, newVar.value, newVar.is_secret);
                 toast.success('New variable added successfully');
                 setNewVar({ name: '', value: '', is_secret: false });
                 setShowAddForm(false);
@@ -118,6 +136,13 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
         try {
             const parsedVars = JSON.parse(bulkEditValue);
             if (Array.isArray(parsedVars)) {
+                // Check for duplicate names in the parsed vars
+                const names = parsedVars.map(v => v.name.toLowerCase());
+                if (new Set(names).size !== names.length) {
+                    toast.error('Duplicate variable names are not allowed');
+                    return;
+                }
+
                 setIsLoading(true);
                 await onBulkUpdate(parsedVars);
                 toast.success('Bulk update successful');
@@ -130,6 +155,7 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
             setIsLoading(false);
         }
     };
+
 
     const toggleBulkEdit = () => {
         if (!bulkEditMode) {
@@ -167,16 +193,15 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
                     rows={24}
                     className="font-mono"
                 />
-                <div className="space-x-2">
+                <div className="flex gap-2 w-full justify-end">
+                    <Button variant="outline" onClick={toggleBulkEdit}>Cancel</Button>
                     <Button onClick={handleBulkEdit} disabled={isLoading}>
                         {isLoading ? 'Applying...' : 'Apply Bulk Edit'}
                     </Button>
-                    <Button variant="outline" onClick={toggleBulkEdit}>Cancel</Button>
                 </div>
             </div>
         );
     }
-
     if (envVars.length === 0 && !showAddForm) {
         return <EmptyState onAddVariable={() => setShowAddForm(true)} />;
     }
@@ -198,22 +223,38 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
                     </TableHeader>
                 )}
                 <TableBody>
-                    {envVars.map((envVar) => (
+                    {envVars.map((envVar, index) => (
                         <TableRow key={envVar.name}>
-                            <TableCell>{envVar.name}</TableCell>
                             <TableCell>
-                                {editingVar && editingVar.name === envVar.name ? (
+                                {editingVar && editingVar.originalName === envVar.name ? (
                                     <Input
-                                        type={envVar.is_secret ? "password" : "text"}
-                                        value={editingVar.value}
-                                        onChange={(e) => setEditingVar({ ...editingVar, value: e.target.value })}
-                                        placeholder={envVar.is_secret ? "Enter new secret value" : ""}
+                                        value={editingVar.currentVar.name}
+                                        onChange={(e) => setEditingVar({
+                                            ...editingVar,
+                                            currentVar: { ...editingVar.currentVar, name: e.target.value.toUpperCase() }
+                                        })}
+                                    />
+                                ) : (
+                                    envVar.name
+                                )}</TableCell>
+                            <TableCell>
+                                {editingVar && editingVar.originalName === envVar.name ? (
+                                    <Input
+                                        type={editingVar.currentVar.is_secret ? "password" : "text"}
+                                        value={editingVar.currentVar.value}
+                                        onChange={(e) => setEditingVar({
+                                            ...editingVar,
+                                            currentVar: { ...editingVar.currentVar, value: e.target.value }
+                                        })}
+                                        placeholder={editingVar.currentVar.is_secret ? "Enter new secret value" : ""}
                                     />
                                 ) : (
                                     <span>{envVar.is_secret ? '********' : envVar.value}</span>
                                 )}
                             </TableCell>
-                            <TableCell>{envVar.is_secret ? 'Yes' : 'No'}</TableCell>
+                            <TableCell>
+                                {envVar.is_secret ? <LockKeyhole className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                            </TableCell>
                             <TableCell>{moment(envVar.updated_at).fromNow()}</TableCell>
                             <TableCell>
                                 <Button variant="ghost" size="icon" onClick={() => handleCopy(envVar)}>
@@ -221,7 +262,7 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
                                 </Button>
                             </TableCell>
                             <TableCell>
-                                {editingVar && editingVar.name === envVar.name ? (
+                                {editingVar && editingVar.originalName === envVar.name ? (
                                     <Button variant="ghost" size="icon" onClick={handleSave} disabled={isLoading}>
                                         <Save className="h-4 w-4" />
                                     </Button>
@@ -294,7 +335,6 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
                 <>
                     <div className="mt-4 flex justify-end">
                         <Button variant="outline" onClick={() => setShowAddForm(!showAddForm)}>
-                            <Plus className="h-4 w-4 mr-2" />
                             {showAddForm ? 'Cancel' : 'Add New Variable'}
                         </Button>
                     </div>
