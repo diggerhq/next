@@ -4,7 +4,7 @@ CREATE TABLE encrypted_env_vars (
     name VARCHAR(255) NOT NULL,
     encrypted_value BYTEA NOT NULL,
     iv BYTEA NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+    is_secret BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE
 );

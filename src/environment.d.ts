@@ -24,10 +24,11 @@ declare global {
       UNKEY_API_ID: string;
       TESTMAIL_PREFIX?: string;
       OPENAI_API_KEY?: string;
+      MASTER_PASSWORD: string;
+      ENCRYPTION_SALT: string;
     }
   }
 }
 
 // eslint-disable-next-line prettier/prettier
-export { };
-
+export {};

@@ -1,39 +1,164 @@
-import {
-  createCipheriv,
-  createDecipheriv,
-  pbkdf2Sync,
-  randomBytes,
-} from 'crypto';
+import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
+import { EnvVar } from '@/types/userTypes';
+import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 
-function deriveKey(password: string, salt: string): Buffer {
-  return pbkdf2Sync(password, salt, 100000, 32, 'sha256');
+import { scrypt } from 'crypto';
+import { promisify } from 'util';
+
+const scryptAsync = promisify(scrypt);
+
+async function deriveKey(projectId: string): Promise<Buffer> {
+  // Use a fixed salt or derive it from the projectId
+  const salt = 'fixed_salt_value'; // You can also use projectId.slice(0, 16) if it's long enough
+  return scryptAsync(projectId, salt, 32) as Promise<Buffer>;
 }
 
-function encrypt(
+export async function encrypt(
   text: string,
-  ENCRYPTION_SALT: string,
-  MASTER_PASSWORD: string,
-): { iv: string; encryptedData: string } {
-  const iv = randomBytes(16);
-  const key = deriveKey(MASTER_PASSWORD, ENCRYPTION_SALT);
-  const cipher = createCipheriv('aes-256-cbc', key, iv);
-  let encrypted = cipher.update(text, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return {
-    iv: iv.toString('hex'),
-    encryptedData: encrypted,
-  };
+  projectId: string,
+): Promise<string> {
+  const iv = randomBytes(12);
+  const key = await deriveKey(projectId);
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  let encrypted = cipher.update(text, 'utf8', 'base64');
+  encrypted += cipher.final('base64');
+  const authTag = cipher.getAuthTag();
+
+  // Combine IV, auth tag, and encrypted data
+  return (
+    iv.toString('base64') + '.' + authTag.toString('base64') + '.' + encrypted
+  );
 }
 
-function decrypt(
-  iv: string,
-  encryptedData: string,
-  ENCRYPTION_SALT: string,
-  MASTER_PASSWORD: string,
-): string {
-  const key = deriveKey(MASTER_PASSWORD, ENCRYPTION_SALT);
-  const decipher = createDecipheriv('aes-256-cbc', key, Buffer.from(iv, 'hex'));
-  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+export async function decrypt(
+  encryptedText: string,
+  projectId: string,
+): Promise<string> {
+  const [ivBase64, authTagBase64, encryptedData] = encryptedText.split('.');
+  const iv = Buffer.from(ivBase64, 'base64');
+  const authTag = Buffer.from(authTagBase64, 'base64');
+  const key = await deriveKey(projectId);
+
+  const decipher = createDecipheriv('aes-256-gcm', key, iv);
+  decipher.setAuthTag(authTag);
+
+  let decrypted = decipher.update(encryptedData, 'base64', 'utf8');
   decrypted += decipher.final('utf8');
+
   return decrypted;
+}
+export async function storeEncryptedEnvVar(
+  projectId: string,
+  name: string,
+  value: string,
+  isSecret: boolean,
+  masterPassword: string,
+  salt: string,
+) {
+  console.log('Encryption: Storing encrypted var:', {
+    projectId,
+    name,
+    isSecret,
+  });
+  const encrypted = await encrypt(value, projectId);
+
+  const { data, error } = await supabaseAdminClient
+    .from('encrypted_env_vars')
+    .upsert(
+      {
+        project_id: projectId,
+        name,
+        encrypted_value: encrypted,
+        is_secret: isSecret,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: 'project_id,name',
+      },
+    );
+
+  if (error) {
+    console.error('Encryption: Error storing variable:', error);
+    throw error;
+  }
+  console.log('Encryption: Variable stored successfully');
+  return data;
+}
+export async function getDecryptedEnvVar(
+  projectId: string,
+  name: string,
+  masterPassword: string,
+) {
+  const { data, error } = await supabaseAdminClient
+    .from('encrypted_env_vars')
+    .select('encrypted_value, is_secret')
+    .eq('project_id', projectId)
+    .eq('name', name)
+    .single();
+
+  if (error) throw error;
+  if (data.is_secret) {
+    return { value: null, isSecret: true };
+  }
+  const decryptedValue = await decrypt(data.encrypted_value, projectId);
+  return { value: decryptedValue, isSecret: false };
+}
+
+export async function getAllEnvVarNames(projectId: string) {
+  const { data, error } = await supabaseAdminClient
+    .from('encrypted_env_vars')
+    .select('name, is_secret')
+    .eq('project_id', projectId);
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteEnvVar(projectId: string, name: string) {
+  const { error } = await supabaseAdminClient
+    .from('encrypted_env_vars')
+    .delete()
+    .eq('project_id', projectId)
+    .eq('name', name);
+
+  if (error) throw error;
+}
+
+export async function getAllEnvVars(
+  projectId: string,
+  masterPassword: string,
+  salt: string,
+): Promise<EnvVar[]> {
+  const { data, error } = await supabaseAdminClient
+    .from('encrypted_env_vars')
+    .select('name, encrypted_value, is_secret, updated_at')
+    .eq('project_id', projectId);
+
+  if (error) throw error;
+
+  console.log('Fetched data:', data);
+  // convert bytea to string
+  return Promise.all(
+    data.map(async (item) => {
+      console.log(item.encrypted_value);
+      try {
+        return {
+          name: item.name,
+          value: item.is_secret
+            ? '********'
+            : await decrypt(item.encrypted_value, projectId),
+          is_secret: item.is_secret,
+          updated_at: item.updated_at,
+        };
+      } catch (error) {
+        console.error(`Error processing item ${item.name}:`, error);
+        return {
+          name: item.name,
+          value: '[Error: Unable to decrypt]',
+          is_secret: item.is_secret,
+          updated_at: item.updated_at,
+        };
+      }
+    }),
+  );
 }

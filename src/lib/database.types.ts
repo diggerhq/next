@@ -486,6 +486,41 @@ export type Database = {
           },
         ]
       }
+      encrypted_env_vars: {
+        Row: {
+          encrypted_value: string
+          id: string
+          is_secret: boolean
+          name: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          encrypted_value?: string
+          id?: string
+          is_secret?: boolean
+          name: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          encrypted_value?: string
+          id?: string
+          is_secret?: boolean
+          name?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encrypted_env_vars_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       github_app_installation_links: {
         Row: {
           created_at: string
