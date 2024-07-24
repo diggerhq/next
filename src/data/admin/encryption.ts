@@ -7,10 +7,10 @@ import { promisify } from 'util';
 
 const scryptAsync = promisify(scrypt);
 
-async function deriveKey(projectId: string): Promise<Buffer> {
-  // Use a fixed salt or derive it from the projectId
-  const salt = 'fixed_salt_value'; // You can also use projectId.slice(0, 16) if it's long enough
-  return scryptAsync(projectId, salt, 32) as Promise<Buffer>;
+async function deriveKey(projectId: string, salt: Buffer): Promise<Buffer> {
+  // Combine masterPassword, projectId, and salt to create a unique key
+  const keyMaterial = process.env.MASTER_PASSWORD + projectId;
+  return scryptAsync(keyMaterial, salt, 32) as Promise<Buffer>;
 }
 
 export async function encrypt(
@@ -18,15 +18,22 @@ export async function encrypt(
   projectId: string,
 ): Promise<string> {
   const iv = randomBytes(12);
-  const key = await deriveKey(projectId);
+  const salt = randomBytes(16);
+  const key = await deriveKey(projectId, salt);
   const cipher = createCipheriv('aes-256-gcm', key, iv);
   let encrypted = cipher.update(text, 'utf8', 'base64');
   encrypted += cipher.final('base64');
   const authTag = cipher.getAuthTag();
 
-  // Combine IV, auth tag, and encrypted data
+  // Combine salt, IV, auth tag, and encrypted data
   return (
-    iv.toString('base64') + '.' + authTag.toString('base64') + '.' + encrypted
+    salt.toString('base64') +
+    '.' +
+    iv.toString('base64') +
+    '.' +
+    authTag.toString('base64') +
+    '.' +
+    encrypted
   );
 }
 
@@ -34,10 +41,12 @@ export async function decrypt(
   encryptedText: string,
   projectId: string,
 ): Promise<string> {
-  const [ivBase64, authTagBase64, encryptedData] = encryptedText.split('.');
+  const [saltBase64, ivBase64, authTagBase64, encryptedData] =
+    encryptedText.split('.');
+  const salt = Buffer.from(saltBase64, 'base64');
   const iv = Buffer.from(ivBase64, 'base64');
   const authTag = Buffer.from(authTagBase64, 'base64');
-  const key = await deriveKey(projectId);
+  const key = await deriveKey(projectId, salt);
 
   const decipher = createDecipheriv('aes-256-gcm', key, iv);
   decipher.setAuthTag(authTag);
