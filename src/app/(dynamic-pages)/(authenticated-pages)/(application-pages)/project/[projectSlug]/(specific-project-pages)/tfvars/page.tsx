@@ -26,6 +26,8 @@ export default async function TFVarsPage({ params }: { params: unknown }) {
     const { projectSlug } = projectSlugParamSchema.parse(params);
     const project = await getSlimProjectBySlug(projectSlug);
     const tfvars = await getTFVarsByProjectId(project.id);
+    const MASTER_PASSWORD = process.env.MASTER_PASSWORD || 'digger-password';
+    const ENCRYPTION_SALT = process.env.ENCRYPTION_SALT || 'digger-salt';
 
     return (
         <div className="flex flex-col space-y-4 max-w-5xl mt-2">
