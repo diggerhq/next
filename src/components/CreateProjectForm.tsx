@@ -19,6 +19,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { InputTags } from "./InputTags";
 import { T } from "./ui/Typography";
+import { Checkbox } from "./ui/checkbox";
 
 const MotionCard = motion(Card);
 
@@ -27,6 +28,7 @@ const createProjectFormSchema = z.object({
     repository: z.number().int().positive("Please select a repository"),
     terraformDir: z.string().min(1, "Terraform working directory is required"),
     labels: z.array(z.string()),
+    managedState: z.boolean().default(true),
 });
 
 type CreateProjectFormData = z.infer<typeof createProjectFormSchema>;
@@ -50,6 +52,7 @@ export default function CreateProjectForm({ organizationId, repositories }: Crea
             name: "",
             repository: repositories[0]?.id || 0,
             terraformDir: "",
+            managedState: true,
             labels: [],
         },
     });
@@ -62,6 +65,7 @@ export default function CreateProjectForm({ organizationId, repositories }: Crea
                 name: data.name,
                 slug,
                 repoId: data.repository,
+                managedState: data.managedState,
                 terraformWorkingDir: data.terraformDir,
                 labels: data.labels,
             });
@@ -268,6 +272,20 @@ export default function CreateProjectForm({ organizationId, repositories }: Crea
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
+                            <div className="flex items-center space-x-2">
+                                <Controller
+                                    name="managedState"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            id="managedState"
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    )}
+                                />
+                                <Label htmlFor="managedState">Managed State</Label>
+                            </div>
                             <div>
                                 <Label htmlFor="labels">Labels</Label>
                                 <Controller

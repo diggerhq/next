@@ -68,6 +68,7 @@ export const createProjectAction = async ({
   slug,
   repoId,
   terraformWorkingDir,
+  managedState,
   labels,
 }: {
   organizationId: string;
@@ -75,6 +76,7 @@ export const createProjectAction = async ({
   slug: string;
   repoId: number;
   terraformWorkingDir: string;
+  managedState: boolean;
   labels: string[];
 }): Promise<SAPayload<Tables<"projects">>> => {
   "use server";
@@ -87,7 +89,7 @@ export const createProjectAction = async ({
       slug,
       repo_id: repoId,
       terraform_working_dir: terraformWorkingDir,
-      is_managing_state: true,
+      is_managing_state: managedState,
       is_in_main_branch: true,
       is_generated: true,
       project_status: "draft",
