@@ -71,3 +71,54 @@ export async function upsertTFVarsByProjectId(
   if (error) throw error;
   return data;
 }
+
+export async function getRunById(runId: string) {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('digger_runs')
+    .select(
+      `
+      *,
+      projects(name),
+      repos(name)
+    `,
+    )
+    .eq('id', runId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getRunsByRepoId(repoId: string) {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('digger_runs')
+    .select(
+      `
+      id,
+      commit_id,
+      status,
+      created_at,
+      projects(name),
+      repos(name)
+    `,
+    )
+    .eq('repo_id', repoId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getRunsByProjectId(projectId: string) {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('digger_runs')
+    .select('*')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+}

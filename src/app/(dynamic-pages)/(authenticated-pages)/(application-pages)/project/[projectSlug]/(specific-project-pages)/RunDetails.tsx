@@ -1,10 +1,11 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tables } from "@/lib/database.types";
 import { motion } from "framer-motion";
-import { Run, RunsTable } from "./RunsTable";
+import { RunsTable } from "./RunsTable";
 
-export default function RunsDetails({ runs }: { runs: Run[] }) {
+export default function RunDetails({ runs, project }: { runs: Tables<'digger_runs'>[], project: Tables<'projects'> }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}

@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, InputProps } from "@/components/ui/input";
-import { XIcon } from "lucide-react";
+import { Edit2, XIcon } from "lucide-react";
 import { Dispatch, SetStateAction, forwardRef, useState } from "react";
 
 type InputTagsProps = InputProps & {
@@ -14,13 +14,26 @@ type InputTagsProps = InputProps & {
 export const InputTags = forwardRef<HTMLInputElement, InputTagsProps>(
     ({ value, onChange, ...props }, ref) => {
         const [pendingDataPoint, setPendingDataPoint] = useState("");
+        const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-        const addPendingDataPoint = () => {
+        const addOrUpdateDataPoint = () => {
             if (pendingDataPoint.trim()) {
-                const newDataPoints = new Set([...value, pendingDataPoint.trim()]);
-                onChange(Array.from(newDataPoints));
+                if (editingIndex !== null) {
+                    const newDataPoints = [...value];
+                    newDataPoints[editingIndex] = pendingDataPoint.trim();
+                    onChange(Array.from(new Set(newDataPoints)));
+                    setEditingIndex(null);
+                } else {
+                    const newDataPoints = new Set([...value, pendingDataPoint.trim()]);
+                    onChange(Array.from(newDataPoints));
+                }
                 setPendingDataPoint("");
             }
+        };
+
+        const editTag = (index: number) => {
+            setPendingDataPoint(value[index]);
+            setEditingIndex(index);
         };
 
         return (
@@ -32,7 +45,7 @@ export const InputTags = forwardRef<HTMLInputElement, InputTagsProps>(
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
                                 e.preventDefault();
-                                addPendingDataPoint();
+                                addOrUpdateDataPoint();
                             }
                         }}
                         className="rounded-r-none"
@@ -42,17 +55,24 @@ export const InputTags = forwardRef<HTMLInputElement, InputTagsProps>(
                     <Button
                         type="button"
                         variant="secondary"
-                        className=" border mt-1 border-l-0"
-                        onClick={addPendingDataPoint}
+                        className="border mt-1 border-l-0"
+                        onClick={addOrUpdateDataPoint}
                     >
-                        Add
+                        {editingIndex !== null ? "Update" : "Add"}
                     </Button>
                 </div>
                 {value.length > 0 && (
-                    <div className=" rounded-md mt-1 min-h-[2.5rem] overflow-y-auto flex gap-2 flex-wrap items-center">
+                    <div className="rounded-md mt-1 min-h-[2.5rem] overflow-y-auto flex gap-2 flex-wrap items-center">
                         {value.map((item, idx) => (
                             <Badge key={idx} variant="secondary">
                                 {item}
+                                <button
+                                    type="button"
+                                    className="w-3 ml-2"
+                                    onClick={() => editTag(idx)}
+                                >
+                                    <Edit2 className="w-3" />
+                                </button>
                                 <button
                                     type="button"
                                     className="w-3 ml-2"
@@ -70,3 +90,5 @@ export const InputTags = forwardRef<HTMLInputElement, InputTagsProps>(
         );
     }
 );
+
+InputTags.displayName = "InputTags";

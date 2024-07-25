@@ -309,3 +309,41 @@ export const getProjectsTotalCount = async ({
 
   return Math.ceil(count / limit) ?? 0;
 };
+
+
+// data/user/projects.ts
+
+
+export async function updateProjectSettingsAction({
+  projectId,
+  terraformWorkingDir,
+  labels,
+  managedState,
+}: {
+  projectId: string;
+  terraformWorkingDir: string;
+  labels: string[];
+  managedState: boolean;
+}): Promise<SAPayload<unknown>> {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .update({
+        terraform_working_dir: terraformWorkingDir,
+        labels,
+        is_managing_state: managedState,
+      })
+      .eq('id', projectId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return { status: 'success', data };
+  } catch (error) {
+    console.error("Error updating project settings:", error);
+    return { status: 'error', message: 'Failed to update project settings' };
+  }
+}
