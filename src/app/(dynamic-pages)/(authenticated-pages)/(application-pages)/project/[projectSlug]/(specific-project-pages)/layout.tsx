@@ -1,10 +1,8 @@
-import { ApplicationLayoutShell } from '@/components/ApplicationLayoutShell';
-import { InternalNavbar } from '@/components/NavigationMenu/InternalNavbar';
-import { PageHeading } from '@/components/PageHeading';
-import { TabsNavigationV2 } from '@/components/TabsNavigation/TabsNavigation';
-import { getProjectTitleById, getSlimProjectBySlug } from '@/data/user/projects';
-import { projectSlugParamSchema } from '@/utils/zod-schemas/params';
-import { Suspense, type ReactNode } from 'react';
+import { PageHeading } from "@/components/PageHeading";
+import { TabsNavigationV2 } from "@/components/TabsNavigation/TabsNavigation";
+import { getProjectTitleById, getSlimProjectBySlug } from "@/data/user/projects";
+import { projectSlugParamSchema } from "@/utils/zod-schemas/params";
+import { Suspense } from "react";
 
 
 async function ProjectPageHeading({ projectId }: { projectId: string }) {
@@ -16,18 +14,7 @@ async function ProjectPageHeading({ projectId }: { projectId: string }) {
     />
   );
 }
-
-export default async function ProjectLayout({
-  params,
-  children,
-  navbar,
-  sidebar,
-}: {
-  children: ReactNode;
-  params: unknown;
-  navbar: ReactNode;
-  sidebar: ReactNode;
-}) {
+export default async function ProjectPagesLayout({ params, children }: { params: unknown, children: React.ReactNode }) {
   const { projectSlug } = projectSlugParamSchema.parse(params);
   const project = await getSlimProjectBySlug(projectSlug);
 
@@ -45,28 +32,16 @@ export default async function ProjectLayout({
       href: `/project/${projectSlug}/settings`,
     },
   ];
+  return <>
+    <div className="flex flex-col">
+      <Suspense>
+        <ProjectPageHeading projectId={project.id} />
+      </Suspense>
+      <Suspense>
+        <TabsNavigationV2 tabs={tabs} />
+      </Suspense>
+    </div>
+    {children}
+  </>
 
-  return (
-
-    <ApplicationLayoutShell sidebar={sidebar}>
-      <div className="">
-        <InternalNavbar>
-          <div className="flex w-full justify-between items-center">
-            <Suspense>{navbar}</Suspense>
-          </div>
-        </InternalNavbar>
-        <div className="m-6">
-          <div className="flex flex-col">
-            <Suspense>
-              <ProjectPageHeading projectId={project.id} />
-            </Suspense>
-            <Suspense>
-              <TabsNavigationV2 tabs={tabs} />
-            </Suspense>
-          </div>
-          {children}
-        </div>
-      </div>
-    </ApplicationLayoutShell>
-  );
 }

@@ -20,3 +20,7 @@ export const projectParamSchema = z.object({
 export const projectSlugParamSchema = z.object({
   projectSlug: z.string(),
 });
+
+export const runIdParamSchema = z.object({
+  runId: z.string().uuid(),
+});

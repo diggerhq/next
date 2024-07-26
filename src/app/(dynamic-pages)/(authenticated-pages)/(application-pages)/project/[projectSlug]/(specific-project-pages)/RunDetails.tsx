@@ -5,7 +5,7 @@ import { Tables } from "@/lib/database.types";
 import { motion } from "framer-motion";
 import { RunsTable } from "./RunsTable";
 
-export default function RunDetails({ runs, project }: { runs: Tables<'digger_runs'>[], project: Tables<'projects'> }) {
+export default function RunsDetails({ runs, project }: { runs: Tables<'digger_runs'>[], project: Tables<'projects'> }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -32,7 +32,7 @@ export default function RunDetails({ runs, project }: { runs: Tables<'digger_run
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.15, delay: 0.2 }}
                     >
-                        <RunsTable runs={runs} />
+                        <RunsTable runs={runs} projectSlug={project.slug} />
                     </motion.div>
                 </CardContent>
             </Card>
