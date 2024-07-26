@@ -24,7 +24,7 @@ export async function generateMetadata({
 
 
 import { getRunsByProjectId } from "@/data/user/runs";
-import RunDetails from "./RunDetails";
+import AllRunsDetails from "./AllRunsDetails";
 
 // const dummyRuns: Run[] = [
 //   {
@@ -96,7 +96,7 @@ export default async function ProjectPage({ params }: { params: unknown }) {
 
   return (
     <div className="flex flex-col space-y-4 max-w-5xl mt-2">
-      <RunDetails
+      <AllRunsDetails
         project={project}
         runs={runs}
       />

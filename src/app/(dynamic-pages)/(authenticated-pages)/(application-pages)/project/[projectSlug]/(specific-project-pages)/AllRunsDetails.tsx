@@ -3,9 +3,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tables } from "@/lib/database.types";
 import { motion } from "framer-motion";
-import { RunsTable } from "./RunsTable";
+import { AllRunsTable } from "./AllRunsTable";
 
-export default function RunsDetails({ runs, project }: { runs: Tables<'digger_runs'>[], project: Tables<'projects'> }) {
+export default function AllRunsDetails({ runs, project }: { runs: Tables<'digger_runs'>[], project: Tables<'projects'> }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -32,7 +32,7 @@ export default function RunsDetails({ runs, project }: { runs: Tables<'digger_ru
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.15, delay: 0.2 }}
                     >
-                        <RunsTable runs={runs} projectSlug={project.slug} />
+                        <AllRunsTable runs={runs} projectSlug={project.slug} />
                     </motion.div>
                 </CardContent>
             </Card>

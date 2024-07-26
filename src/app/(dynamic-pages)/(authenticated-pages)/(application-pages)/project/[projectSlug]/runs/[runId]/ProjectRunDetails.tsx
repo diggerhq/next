@@ -13,9 +13,7 @@ import { CheckCircle2, Clock, GitPullRequest, Loader2, Play, XCircle } from 'luc
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-import { statusColors } from "../../(specific-project-pages)/RunsTable";
-
-type RunStage = 'pending_approval' | 'pending_apply' | 'rejected' | 'applied';
+import { statusColors } from "../../(specific-project-pages)/AllRunsTable";
 
 
 const logEntries = [
@@ -75,7 +73,6 @@ const logEntries = [
     { time: "2024-07-27T14:33:29Z", author: "Siddharth Ponnapalli", title: "Configured EC2 instance user data for automation" }
 ];
 
-
 function RenderContent({
     activeStage,
     run,
@@ -128,12 +125,11 @@ export const ProjectRunDetails: React.FC<{
 }> = ({ run, loggedInUser, isUserOrgAdmin }) => {
     const router = useRouter();
     const [activeStage, setActiveStage] = useState<'plan' | 'apply'>('plan');
-    const [applyLogs, setApplyLogs] = useState<string[]>([]);
 
     useEffect(() => {
         if (run.status === 'pending_apply') {
             const timer = setTimeout(async () => {
-                await changeRunStatus(run.id, 'applied');
+                await changeRunStatus(run.id, 'succeeded');
                 setActiveStage('apply');
                 router.refresh();
             }, 5000);
@@ -141,12 +137,6 @@ export const ProjectRunDetails: React.FC<{
             return () => clearTimeout(timer);
         }
     }, [run.status, run.id, router]);
-
-    useEffect(() => {
-        if (run.apply_logs) {
-            setApplyLogs(run.apply_logs.split('\n'));
-        }
-    }, [run.apply_logs]);
 
     const { mutate: approveMutation, isLoading: isApproving } = useSAToastMutation(
         async () => await approveRun(run.id, loggedInUser.id),
@@ -199,7 +189,7 @@ export const ProjectRunDetails: React.FC<{
                 </CardContent>
 
                 <div className="space-y-2 flex-grow pt-8">
-                    <RunStage
+                    <RunStageSidebarItem
                         icon={<GitPullRequest />}
                         name="Plan"
                         isActive={activeStage === 'plan'}
@@ -221,11 +211,11 @@ export const ProjectRunDetails: React.FC<{
                             </CardContent>
                         </Card>
                     )}
-                    <RunStage
+                    <RunStageSidebarItem
                         icon={<Play />}
                         name="Apply"
                         isActive={activeStage === 'apply'}
-                        isComplete={run.status === 'applied'}
+                        isComplete={run.status === 'succeeded'}
                         isDisabled={run.status === 'pending_approval' || run.status === 'rejected'}
                         onClick={() => setActiveStage('apply')}
                     />
@@ -242,13 +232,13 @@ export const ProjectRunDetails: React.FC<{
                         </motion.div>
                     )}
                 </div>
-                {run.is_approved && run.status !== 'rejected' || 'pending_approval' && (
+                {run.status === 'succeeded' && (
                     <T.Small className="flex items-center"><CheckCircle2 className="size-5 text-green-500 mr-2" /> Approved by: </T.Small>
                 )}
                 {run.status === 'rejected' && (
                     <p className="flex items-center"><XCircle className="text-red-500 mr-2" /> Rejected by: </p>
                 )}
-                {(run.status === 'pending_apply' || run.status === 'applied' || run.status === 'rejected') && (
+                {(run.status === 'succeeded' || run.status === 'rejected') && (
                     <motion.div
                         className="pt-4 mt-auto"
                         initial={{ opacity: 0, y: 50 }}
@@ -312,7 +302,7 @@ export const ProjectRunDetails: React.FC<{
     );
 };
 
-const RunStage: React.FC<{
+const RunStageSidebarItem: React.FC<{
     icon: React.ReactNode,
     name: string,
     isActive: boolean,

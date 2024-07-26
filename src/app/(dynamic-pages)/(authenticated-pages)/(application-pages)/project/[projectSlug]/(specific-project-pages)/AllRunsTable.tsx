@@ -4,26 +4,36 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Activity } from "lucide-react";
 import moment from "moment";
 import Link from "next/link";
+import { runStageEnum } from "./enums";
 
 export type StatusColor = {
     [key: string]: string;
 };
 
+const statusOrder = [
+    runStageEnum.running,
+    runStageEnum.queued,
+    runStageEnum.pending_approval,
+    runStageEnum.pending_apply,
+    runStageEnum.succeeded,
+    runStageEnum.rejected,
+    runStageEnum.failed
+];
+
 export const statusColors: StatusColor = {
     queued: 'bg-yellow-200/50 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200',
-    'pending_approval': 'bg-blue-200/50 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
+    pending_approval: 'bg-blue-200/50 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
     running: 'bg-purple-200/50 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200',
-    approved: 'bg-green-200/50 text-green-800 dark:bg-green-900/50 dark:text-green-200',
+    pending_apply: 'bg-green-200/50 text-green-800 dark:bg-green-900/50 dark:text-green-200',
     succeeded: 'bg-green-200/50 text-green-800 dark:bg-green-900/50 dark:text-green-200',
     failed: 'bg-red-200/50 text-red-800 dark:bg-red-900/50 dark:text-red-200',
 };
 
-const statusOrder = ['running', 'queued', 'pending_approval', 'approved', 'succeeded', 'failed'];
 
-export const RunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'>[], projectSlug: string }) => {
+export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'>[], projectSlug: string }) => {
     const sortedRuns = [...runs].sort((a, b) => {
-        const statusA = statusOrder.indexOf(a.status.toLowerCase());
-        const statusB = statusOrder.indexOf(b.status.toLowerCase());
+        const statusA = statusOrder.indexOf(a.status.toLowerCase() as runStageEnum);
+        const statusB = statusOrder.indexOf(b.status.toLowerCase() as runStageEnum);
         if (statusA !== statusB) return statusA - statusB;
         return moment(b.created_at).valueOf() - moment(a.created_at).valueOf();
     });
