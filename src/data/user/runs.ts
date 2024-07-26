@@ -1,6 +1,7 @@
 'use server';
 
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
+import { SAPayload } from '@/types';
 
 export async function getTFVarsByProjectId(projectId: string) {
   const supabaseClient = createSupabaseUserServerComponentClient();
@@ -121,4 +122,77 @@ export async function getRunsByProjectId(projectId: string) {
 
   if (error) throw error;
   return data;
+}
+
+export async function requestRunApproval(
+  runId: string,
+): Promise<SAPayload<string>> {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('digger_runs')
+    .update({ status: 'pending_approval' })
+    .eq('id', runId)
+    .select('id')
+    .single();
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+  return { status: 'success', data: data.id };
+}
+
+export async function approveRun(
+  runId: string,
+  userId: string,
+): Promise<SAPayload<string>> {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('digger_runs')
+    .update({
+      status: 'pending_apply',
+      approver_user_id: userId,
+      is_approved: true,
+    })
+    .eq('id', runId)
+    .select('id')
+    .single();
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+  return { status: 'success', data: data.id };
+}
+
+export async function rejectRun(
+  runId: string,
+  userId: string,
+): Promise<SAPayload<string>> {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('digger_runs')
+    .update({
+      status: 'rejected',
+      approver_user_id: userId,
+      is_approved: false,
+    })
+    .eq('id', runId)
+    .select('id')
+    .single();
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+  return { status: 'success', data: data.id };
+}
+
+export async function changeRunStatus(runId: string, status: string) {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { error } = await supabase
+    .from('digger_runs')
+    .update({ status: status })
+    .eq('id', runId)
+    .select('id')
+    .single();
+
+  if (error) throw error;
 }

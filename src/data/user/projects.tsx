@@ -347,3 +347,20 @@ export async function updateProjectSettingsAction({
     return { status: 'error', message: 'Failed to update project settings' };
   }
 }
+
+export async function deleteProject(projectId: string): Promise<SAPayload<unknown>> {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('projects')
+    .update({
+      deleted_at: new Date().toISOString(),
+    })
+    .eq('id', projectId)
+    .single();
+
+  if (error) {
+    return { status: 'error', message: error.message };
+  }
+
+  return { status: 'success', data };
+}

@@ -59,6 +59,7 @@ module.exports = {
       fontFamily: {
         sans: ['var(--font-satoshi)'],
         display: ['Lexend', ...defaultTheme.fontFamily.sans],
+        mono: ['var(--font-geist-mono)'],
       },
       keyframes: {
         accordionDown: {

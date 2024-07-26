@@ -1,5 +1,6 @@
 import '@/styles/globals.css';
 import '@/styles/prosemirror.css';
+import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
 import { Metadata } from 'next';
 import 'server-only';
@@ -22,7 +23,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={GeistSans.className} suppressHydrationWarning>
+    <html lang="en" className={`${GeistSans.className} ${GeistMono.variable}`} suppressHydrationWarning>
       <head></head>
       <body className="">
         <AppProviders>{children}</AppProviders>

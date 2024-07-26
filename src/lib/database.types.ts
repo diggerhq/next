@@ -208,7 +208,7 @@ export type Database = {
           deleted_at: string | null
           expiry: string | null
           id: number
-          organisation_id: number | null
+          organisation_id: string | null
           type: string | null
           updated_at: string | null
           value: string | null
@@ -218,7 +218,7 @@ export type Database = {
           deleted_at?: string | null
           expiry?: string | null
           id?: number
-          organisation_id?: number | null
+          organisation_id?: string | null
           type?: string | null
           updated_at?: string | null
           value?: string | null
@@ -228,12 +228,20 @@ export type Database = {
           deleted_at?: string | null
           expiry?: string | null
           id?: number
-          organisation_id?: number | null
+          organisation_id?: string | null
           type?: string | null
           updated_at?: string | null
           value?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_jt_organisation_id"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       digger_jobs: {
         Row: {
@@ -403,9 +411,11 @@ export type Database = {
       }
       digger_runs: {
         Row: {
+          apply_logs: string | null
           apply_stage_id: string | null
           approval_author: string | null
           approval_date: string | null
+          approver_user_id: string | null
           commit_id: string
           created_at: string
           deleted_at: string | null
@@ -415,17 +425,21 @@ export type Database = {
           is_approved: boolean | null
           plan_stage_id: string | null
           pr_number: number | null
+          project_id: string
           project_name: string | null
           repo_id: number
           run_type: string
           status: string
+          terraform_output: string | null
           triggertype: string
           updated_at: string
         }
         Insert: {
+          apply_logs?: string | null
           apply_stage_id?: string | null
           approval_author?: string | null
           approval_date?: string | null
+          approver_user_id?: string | null
           commit_id: string
           created_at?: string
           deleted_at?: string | null
@@ -435,17 +449,21 @@ export type Database = {
           is_approved?: boolean | null
           plan_stage_id?: string | null
           pr_number?: number | null
+          project_id: string
           project_name?: string | null
           repo_id?: number
           run_type: string
           status: string
+          terraform_output?: string | null
           triggertype: string
           updated_at?: string
         }
         Update: {
+          apply_logs?: string | null
           apply_stage_id?: string | null
           approval_author?: string | null
           approval_date?: string | null
+          approver_user_id?: string | null
           commit_id?: string
           created_at?: string
           deleted_at?: string | null
@@ -455,10 +473,12 @@ export type Database = {
           is_approved?: boolean | null
           plan_stage_id?: string | null
           pr_number?: number | null
+          project_id?: string
           project_name?: string | null
           repo_id?: number
           run_type?: string
           status?: string
+          terraform_output?: string | null
           triggertype?: string
           updated_at?: string
         }
@@ -475,6 +495,13 @@ export type Database = {
             columns: ["plan_stage_id"]
             isOneToOne: false
             referencedRelation: "digger_run_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_digger_runs_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
           {
