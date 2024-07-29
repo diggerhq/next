@@ -79,9 +79,9 @@ export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={5}>
+                            <TableCell colSpan={5} className="w-full justify-center">
                                 <motion.div
-                                    className="flex flex-col items-center justify-center h-64 text-center"
+                                    className="flex flex-col items-center justify-center mx-auto max-w-96 h-64 text-center"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5 }}
@@ -93,9 +93,8 @@ export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'
                                     >
                                         <Activity className="h-8 w-8 text-gray-400" />
                                     </motion.div>
-                                    <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">No runs available</h3>
-                                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        Runs will appear here once they are initiated.
+                                    <p className="mt-2 text-sm text-foreground">
+                                        Runs will appear here once they are initiated. Note you need to setup your repo with digger_workflow.yml to be able to trigger runs, for more information refer to the which includes example workflow file <Link href="https://docs.digger.dev/getting-started/github-actions-+-aws" className="text-blue-500 underline" >Docs quickstart</Link>
                                     </p>
                                 </motion.div>
                             </TableCell>

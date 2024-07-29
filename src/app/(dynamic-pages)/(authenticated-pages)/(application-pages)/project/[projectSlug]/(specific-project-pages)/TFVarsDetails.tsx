@@ -1,7 +1,7 @@
 'use client'
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { EnvVar } from "@/types/userTypes";
 import { motion } from "framer-motion";
 import TFVarTable from "./TFVarTable";
@@ -39,12 +39,14 @@ export default function TFVarsDetails({ tfvarsdata, onUpdate, onDelete, onBulkUp
                         onBulkUpdate={onBulkUpdate}
                     />
                 </CardContent>
-                <Alert>
-                    <AlertTitle>PROTIP</AlertTitle>
-                    <AlertDescription>
-                        If you want to use these env variables directly in your terraform variables prefix them with TF_VAR_xxx
-                    </AlertDescription>
-                </Alert>
+                <CardFooter>
+                    <Alert variant='default' className="bg-muted/50" >
+                        <AlertTitle>PROTIP</AlertTitle>
+                        <AlertDescription>
+                            If you want to use these env variables directly in your terraform variables prefix them with TF_VAR_xxx
+                        </AlertDescription>
+                    </Alert>
+                </CardFooter>
             </Card>
         </motion.div>
     );
