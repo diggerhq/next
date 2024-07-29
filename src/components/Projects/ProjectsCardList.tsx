@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Table } from "@/types";
@@ -69,9 +68,6 @@ export const ProjectsCardList = ({
             <Link href={`/project/${project.slug}`} className="block p-4">
               <MotionCardContent className="p-0 space-y-3" variants={contentVariants} initial="hidden" animate="visible">
                 <motion.div className="flex justify-between items-center" variants={itemVariants}>
-                  <Badge variant="secondary" className="text-xs font-normal">
-                    {statusEmojis[project.project_status]} {capitalizeFirstLetter(project.project_status)}
-                  </Badge>
                   <span className="text-xs text-muted-foreground">ID: {project.id.slice(0, 7)}</span>
                 </motion.div>
                 <motion.h2 className="text-lg font-semibold" variants={itemVariants}>{project.name}</motion.h2>

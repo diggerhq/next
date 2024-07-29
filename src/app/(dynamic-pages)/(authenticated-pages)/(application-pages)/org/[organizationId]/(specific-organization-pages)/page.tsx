@@ -8,7 +8,7 @@ import {
   organizationParamSchema,
   projectsfilterSchema
 } from "@/utils/zod-schemas/params";
-import { FileText, Layers, Plus } from "lucide-react";
+import { Layers, Plus } from "lucide-react";
 import type { Metadata } from 'next';
 import Link from "next/link";
 import { Suspense } from "react";
@@ -16,7 +16,6 @@ import type { z } from "zod";
 import { DashboardClientWrapper } from "./DashboardClientWrapper";
 import { DashboardLoadingFallback } from "./DashboardLoadingFallback";
 import ProjectsLoadingFallback from "./ProjectsLoadingFallback";
-import { OrganizationGraphs } from "./_graphs/OrganizationGraphs";
 
 async function Projects({
   organizationId,
@@ -47,10 +46,6 @@ async function Dashboard({ params, searchParams }: DashboardProps) {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
           <CardTitle className="text-3xl font-bold tracking-tight">Dashboard</CardTitle>
           <div className="flex space-x-4">
-            <Button variant="outline" size="sm">
-              <FileText className="mr-2 h-4 w-4" />
-              Export PDF
-            </Button>
             <Link href={`/org/${organizationId}/projects/create`}>
               <Button variant="default" size="sm">
                 <Plus className="mr-2 h-4 w-4" />
@@ -86,7 +81,6 @@ async function Dashboard({ params, searchParams }: DashboardProps) {
           </Suspense>
         </CardContent>
       </Card>
-      <OrganizationGraphs />
     </DashboardClientWrapper>
   );
 }

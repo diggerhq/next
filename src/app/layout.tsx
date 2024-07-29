@@ -8,7 +8,7 @@ import { AppProviders } from './AppProviders';
 
 export const metadata: Metadata = {
   icons: {
-    icon: '/images/logo-black-main.ico',
+    icon: '/images/favicon.ico',
   },
   title: 'Nextbase Ultimate',
   description: 'Nextbase Ultimate',
