@@ -14,7 +14,7 @@ export async function getSlimProjectById(projectId: string) {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const { data, error } = await supabaseClient
     .from("projects")
-    .select("id,name,project_status,organization_id,team_id,slug")
+    .select("id,name,project_status,organization_id,team_id,slug, repo_id")
     .eq("id", projectId)
     .single();
   if (error) {

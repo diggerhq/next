@@ -13,10 +13,24 @@ export const generateSlug = (title: string) => {
     strict: true,
     replacement: '-',
   });
-  return slug
-}
+  return slug;
+};
 
 export const nanoid = customAlphabet(
   '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
   7,
 ); //
+
+export const ToTitleCase = (str: string) => {
+  return str
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
+export const ToSnakeCase = (str: string) => {
+  return str
+    .split(' ')
+    .map((word) => word.toLowerCase())
+    .join('_');
+};
