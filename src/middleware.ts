@@ -37,6 +37,10 @@ const unprotectedPagePrefixes = [
   `/waitlist(/.*)?`,
 ];
 
+function isLandingPage(pathname: string) {
+  return pathname === '/';
+}
+
 function isUnprotectedPage(pathname: string) {
   return unprotectedPagePrefixes.some((prefix) => {
     const matchPath = match(prefix);
@@ -75,6 +79,19 @@ export async function middleware(req: NextRequest) {
   const maybeUser = sessionResponse?.data.session?.user;
   if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
     return NextResponse.redirect(toSiteURL('/onboarding'));
+  }
+  if (isLandingPage(req.nextUrl.pathname)) {
+    if (maybeUser) {
+      //user is logged in, lets validate session and redirect on success
+      const user = await supabase.auth.getUser();
+      if (user.error) {
+        return NextResponse.redirect(toSiteURL('/login'));
+      }
+      return NextResponse.redirect(toSiteURL('/dashboard'));
+    } else {
+      //user is not logged in, lets redirect to login
+      return NextResponse.redirect(toSiteURL('/login'));
+    }
   }
   if (!isUnprotectedPage(req.nextUrl.pathname) && maybeUser) {
     // user is possibly logged in, but lets validate session
