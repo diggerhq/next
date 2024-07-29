@@ -50,22 +50,34 @@ export default async function RunDetailPage({
 
 }: RunDetailPageProps) {
     const { runId } = runIdParamSchema.parse(params);
-    const run = await getRunById(runId);
-    const project_id = run.project_id;
-    const [project, user] = await Promise.all([
-        getSlimProjectById(project_id),
+
+    // Fetch run and user data in parallel
+    const [run, user] = await Promise.all([
+        getRunById(runId),
         serverGetLoggedInUser()
     ]);
-    const { repo_full_name } = await getRepoDetails(project.repo_id);
 
-    const userProfile = await getUserProfile(user.id);
+    const project_id = run.project_id;
+
+    // Fetch project, user profile, and repo details in parallel
+    const [project, userProfile, repoDetails] = await Promise.all([
+        getSlimProjectById(project_id),
+        getUserProfile(user.id),
+        getRepoDetails(run.repo_id)
+    ]);
+
+    // Fetch organization role and batch IDs in parallel
     const [organizationRole, planBatchId, applyBatchId] = await Promise.all([
         getLoggedInUserOrganizationRole(project.organization_id),
         getBatchIdFromPlanStageId(run.plan_stage_id),
         getBatchIdFromApplyStageId(run.apply_stage_id)
     ]);
-    const { terraform_output: planTerraformOutput, workflow_run_url: planWorkflowRunUrl } = await getTFOutputAndWorkflowURLFromBatchId(planBatchId);
-    const { terraform_output: applyLogs, workflow_run_url: applyWorkflowRunUrl } = await getOutputLogsAndWorkflowURLFromBatchId(applyBatchId);
+
+    // Fetch terraform outputs and workflow URLs in parallel
+    const [planData, applyData] = await Promise.all([
+        getTFOutputAndWorkflowURLFromBatchId(planBatchId),
+        getOutputLogsAndWorkflowURLFromBatchId(applyBatchId)
+    ]);
 
     const isOrganizationAdmin =
         organizationRole === "admin" || organizationRole === "owner";
@@ -88,11 +100,11 @@ export default async function RunDetailPage({
                     <DynamicProjectRunDetails run={run}
                         loggedInUser={userProfile}
                         isUserOrgAdmin={isOrganizationAdmin}
-                        tfOutput={planTerraformOutput}
-                        workflowRunUrl={planWorkflowRunUrl}
-                        applyTerraformOutput={applyLogs}
-                        applyWorkflowRunUrl={applyWorkflowRunUrl}
-                        fullRepoName={repo_full_name} />
+                        tfOutput={planData.terraform_output}
+                        workflowRunUrl={planData.workflow_run_url}
+                        applyTerraformOutput={applyData.terraform_output}
+                        applyWorkflowRunUrl={applyData.workflow_run_url}
+                        fullRepoName={repoDetails.repo_full_name} />
                 </Suspense>
             }
         </div>
