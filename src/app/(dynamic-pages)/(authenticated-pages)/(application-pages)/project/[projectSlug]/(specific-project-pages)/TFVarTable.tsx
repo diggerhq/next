@@ -341,7 +341,7 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
                     <Separator className="my-4" />
                     <div className="mt-8">
                         <h3 className="text-lg font-semibold">Bulk Edit Environment Variables</h3>
-                        <p className="text-sm text-gray-600 mb-4">
+                        <p className="text-sm text-muted-foreground mb-4">
                             Edit all environment variables at once in JSON format. Be careful with this operation.
                         </p>
                         <div className="flex gap-2">

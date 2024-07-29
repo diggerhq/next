@@ -2,6 +2,7 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { EnvVar } from "@/types/userTypes";
 import { motion } from "framer-motion";
 import TFVarTable from "./TFVarTable";
@@ -39,7 +40,8 @@ export default function TFVarsDetails({ tfvarsdata, onUpdate, onDelete, onBulkUp
                         onBulkUpdate={onBulkUpdate}
                     />
                 </CardContent>
-                <CardFooter>
+                <Separator />
+                <CardFooter className="mt-6">
                     <Alert variant='default' className="bg-muted/50" >
                         <AlertTitle>PROTIP</AlertTitle>
                         <AlertDescription>
