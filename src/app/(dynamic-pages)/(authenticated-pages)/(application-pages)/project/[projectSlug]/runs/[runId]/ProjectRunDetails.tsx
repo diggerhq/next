@@ -191,7 +191,7 @@ export const ProjectRunDetails: React.FC<{
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
             >
-                <CardContent className="bg-muted/50 pt-4 border rounded-lg">
+                <CardContent className="bg-muted/50 pt-4 border rounded-lg overflow-hidden">
                     <h2 className="text-lg font-semibold mb-4">Run Details</h2>
                     <div className="space-y-2">
                         <DetailItem label="Triggered at" value={new Date(run.created_at).toLocaleString()} />
@@ -344,7 +344,7 @@ const RunStageSidebarItem: React.FC<{
 );
 
 const DetailItem: React.FC<{ label: string, value: string | React.ReactNode }> = ({ label, value }) => (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 w-full">
         <p className="text-sm text-[var(--muted-foreground)]">{label}:</p>
         {typeof value === 'string' ? <p className="text-sm">{value}</p> : value}
     </div>
