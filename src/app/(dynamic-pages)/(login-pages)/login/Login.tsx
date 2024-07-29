@@ -54,6 +54,7 @@ export function Login({
     onError: (errorPayload) => {
       console.error(errorPayload);
     },
+    dismissOnSuccess: true,
   });
 
 
@@ -82,6 +83,7 @@ export function Login({
         }
       },
       successMessage: 'A magic link has been sent to your email!',
+      dismissOnSuccess: true,
       onSuccess: () => {
         setEmailSentSuccessMessage('A magic link has been sent to your email!');
       },
@@ -109,6 +111,7 @@ export function Login({
         }
       },
       successMessage: 'Logged in!',
+      dismissOnSuccess: true,
     },
   );
   const providerMutation = useSAToastMutation(
@@ -122,6 +125,7 @@ export function Login({
       onSuccess: (payload) => {
         window.location.href = payload.data.url;
       },
+      dismissOnSuccess: true,
     },
   );
   return (

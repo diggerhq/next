@@ -41,10 +41,7 @@ export default function DashboardPage() {
     >
       {initialOrgRedirectMutation.isLoading && (
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-2xl font-bold"
+          className="text-2xl "
         >
           Loading your dashboard...
         </motion.div>
