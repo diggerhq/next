@@ -8,10 +8,10 @@ import { AppProviders } from './AppProviders';
 
 export const metadata: Metadata = {
   icons: {
-    icon: '/images/favicon.ico',
+    icon: '/images/favicon-logo-digger.ico?v=3',
   },
-  title: 'Nextbase Ultimate',
-  description: 'Nextbase Ultimate',
+  title: 'Digger',
+  description: 'Digger',
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? `https://usenextbase.com`,
   ),
