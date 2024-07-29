@@ -39,7 +39,7 @@ export function Login({
 
   useDidMount(() => {
     console.log('prefetching dashboard')
-    router.prefetch('/dashboard', {
+    router.prefetch('/org/123', {
       kind: PrefetchKind.AUTO
     })
   })
