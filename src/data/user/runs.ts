@@ -130,7 +130,7 @@ export async function requestRunApproval(
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('digger_runs')
-    .update({ status: 'pending_approval' })
+    .update({ status: 'Pending Approval' })
     .eq('id', runId)
     .select('id')
     .single();
@@ -149,7 +149,7 @@ export async function approveRun(
   const { data, error } = await supabase
     .from('digger_runs')
     .update({
-      status: 'pending_apply',
+      status: 'Approved',
       approver_user_id: userId,
       is_approved: true,
     })
@@ -171,7 +171,7 @@ export async function rejectRun(
   const { data, error } = await supabase
     .from('digger_runs')
     .update({
-      status: 'rejected',
+      status: 'Discarded',
       approver_user_id: userId,
       is_approved: false,
     })
@@ -195,4 +195,39 @@ export async function changeRunStatus(runId: string, status: string) {
     .single();
 
   if (error) throw error;
+}
+
+export async function getBatchIdFromPlanStageId(planStageId: string | null) {
+  if (!planStageId) return null;
+  const supabase = createSupabaseUserServerComponentClient();
+  const { error, data } = await supabase
+    .from('digger_run_stages')
+    .select('batch_id')
+    .eq('id', planStageId)
+    .single();
+
+  if (error) throw error;
+
+  return data.batch_id;
+}
+
+export async function getTFOutputAndWorkflowURLFromBatchId(
+  batchId: string | null,
+) {
+  if (!batchId) return { terraform_output: null, workflow_run_url: null };
+
+  const supabase = createSupabaseUserServerComponentClient();
+  const { error, data } = await supabase
+    .from('digger_jobs')
+    .select('terraform_output, workflow_run_url')
+    .eq('batch_id', batchId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return {
+    terraform_output: data?.terraform_output ?? null,
+    workflow_run_url: data?.workflow_run_url ?? null,
+  };
 }

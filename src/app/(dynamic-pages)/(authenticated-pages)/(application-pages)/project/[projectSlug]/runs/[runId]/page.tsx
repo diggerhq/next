@@ -3,7 +3,8 @@ import { PageHeading } from "@/components/PageHeading";
 import { T } from "@/components/ui/Typography";
 import { getLoggedInUserOrganizationRole } from "@/data/user/organizations";
 import { getSlimProjectById } from "@/data/user/projects";
-import { getRunById } from "@/data/user/runs";
+import { getRepoDetails } from "@/data/user/repos";
+import { getBatchIdFromPlanStageId, getRunById, getTFOutputAndWorkflowURLFromBatchId } from "@/data/user/runs";
 import { getUserProfile } from "@/data/user/user";
 import { Table } from "@/types";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
@@ -29,6 +30,9 @@ type ProjectRunDetailsProps = {
     run: Table<'digger_runs'>,
     loggedInUser: Table<'user_profiles'>,
     isUserOrgAdmin: boolean
+    tfOutput: string | null
+    workflowRunUrl: string | null
+    fullRepoName: string | null
 }
 
 
@@ -50,8 +54,14 @@ export default async function RunDetailPage({
         getSlimProjectById(project_id),
         serverGetLoggedInUser()
     ]);
+    const { repo_full_name } = await getRepoDetails(project.repo_id);
+
     const userProfile = await getUserProfile(user.id);
-    const organizationRole = await getLoggedInUserOrganizationRole(project.organization_id);
+    const [organizationRole, batchId] = await Promise.all([
+        getLoggedInUserOrganizationRole(project.organization_id),
+        getBatchIdFromPlanStageId(run.plan_stage_id)
+    ]);
+    const { terraform_output, workflow_run_url } = await getTFOutputAndWorkflowURLFromBatchId(batchId);
 
     const isOrganizationAdmin =
         organizationRole === "admin" || organizationRole === "owner";
@@ -71,7 +81,7 @@ export default async function RunDetailPage({
                         </T.P>
                     }
                 >
-                    <DynamicProjectRunDetails run={run} loggedInUser={userProfile} isUserOrgAdmin={isOrganizationAdmin} />
+                    <DynamicProjectRunDetails run={run} loggedInUser={userProfile} isUserOrgAdmin={isOrganizationAdmin} tfOutput={terraform_output} workflowRunUrl={workflow_run_url} fullRepoName={repo_full_name} />
                 </Suspense>
             }
         </div>
