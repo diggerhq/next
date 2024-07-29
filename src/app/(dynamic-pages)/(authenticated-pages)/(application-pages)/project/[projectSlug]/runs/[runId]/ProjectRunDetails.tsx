@@ -73,6 +73,31 @@ const logEntries = [
     { time: "2024-07-27T14:33:29Z", author: "Siddharth Ponnapalli", title: "Configured EC2 instance user data for automation" }
 ];
 
+const terraformOutput = `Terraform used the selected providers to generate the following
+execution plan. Resource actions are indicated with the
+following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # null_resource.test5000 will be created
+  + resource "null_resource" "test5000" {
+      + id = (known after apply)
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+null_resource.test5000: Creating...
+null_resource.test5000: Creation complete after 0s [id=1100760775258092881]
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed.`;
+
 function RenderContent({
     activeStage,
     run,
@@ -104,13 +129,7 @@ function RenderContent({
             <div className="flex flex-col flex-1">
                 <h3 className="text-lg font-semibold mb-2">Apply logs</h3>
                 <div className="dark font-mono bg-muted p-4 rounded-md overflow-auto flex-1 max-h-[600px] text-sm whitespace-pre-wrap text-white">
-                    {logEntries.map((log, index) => (
-                        <div className="flex gap-4 overflow-hidden text-ellipsis whitespace-nowrap break-all" key={log.time + index}>
-                            <p className="text-green-500">{log.time}</p>
-                            <p className="text-muted-foreground">{log.author}</p>
-                            <p className="text-white font-bold">{log.title}</p>
-                        </div>
-                    ))}
+                    {terraformOutput}
                 </div>
             </div>
         );
