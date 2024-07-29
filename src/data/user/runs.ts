@@ -211,7 +211,41 @@ export async function getBatchIdFromPlanStageId(planStageId: string | null) {
   return data.batch_id;
 }
 
+export async function getBatchIdFromApplyStageId(applyStageId: string | null) {
+  if (!applyStageId) return null;
+  const supabase = createSupabaseUserServerComponentClient();
+  const { error, data } = await supabase
+    .from('digger_run_stages')
+    .select('batch_id')
+    .eq('id', applyStageId)
+    .single();
+
+  if (error) throw error;
+
+  return data.batch_id;
+}
+
 export async function getTFOutputAndWorkflowURLFromBatchId(
+  batchId: string | null,
+) {
+  if (!batchId) return { terraform_output: null, workflow_run_url: null };
+
+  const supabase = createSupabaseUserServerComponentClient();
+  const { error, data } = await supabase
+    .from('digger_jobs')
+    .select('terraform_output, workflow_run_url')
+    .eq('batch_id', batchId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return {
+    terraform_output: data?.terraform_output ?? null,
+    workflow_run_url: data?.workflow_run_url ?? null,
+  };
+}
+export async function getOutputLogsAndWorkflowURLFromBatchId(
   batchId: string | null,
 ) {
   if (!batchId) return { terraform_output: null, workflow_run_url: null };

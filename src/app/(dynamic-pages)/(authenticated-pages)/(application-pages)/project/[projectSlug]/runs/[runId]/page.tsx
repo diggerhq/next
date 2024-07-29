@@ -4,7 +4,7 @@ import { T } from "@/components/ui/Typography";
 import { getLoggedInUserOrganizationRole } from "@/data/user/organizations";
 import { getSlimProjectById } from "@/data/user/projects";
 import { getRepoDetails } from "@/data/user/repos";
-import { getBatchIdFromPlanStageId, getRunById, getTFOutputAndWorkflowURLFromBatchId } from "@/data/user/runs";
+import { getBatchIdFromApplyStageId, getBatchIdFromPlanStageId, getOutputLogsAndWorkflowURLFromBatchId, getRunById, getTFOutputAndWorkflowURLFromBatchId } from "@/data/user/runs";
 import { getUserProfile } from "@/data/user/user";
 import { Table } from "@/types";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
@@ -32,6 +32,8 @@ type ProjectRunDetailsProps = {
     isUserOrgAdmin: boolean
     tfOutput: string | null
     workflowRunUrl: string | null
+    applyTerraformOutput: string | null
+    applyWorkflowRunUrl: string | null
     fullRepoName: string | null
 }
 
@@ -57,11 +59,13 @@ export default async function RunDetailPage({
     const { repo_full_name } = await getRepoDetails(project.repo_id);
 
     const userProfile = await getUserProfile(user.id);
-    const [organizationRole, batchId] = await Promise.all([
+    const [organizationRole, planBatchId, applyBatchId] = await Promise.all([
         getLoggedInUserOrganizationRole(project.organization_id),
-        getBatchIdFromPlanStageId(run.plan_stage_id)
+        getBatchIdFromPlanStageId(run.plan_stage_id),
+        getBatchIdFromApplyStageId(run.apply_stage_id)
     ]);
-    const { terraform_output, workflow_run_url } = await getTFOutputAndWorkflowURLFromBatchId(batchId);
+    const { terraform_output: planTerraformOutput, workflow_run_url: planWorkflowRunUrl } = await getTFOutputAndWorkflowURLFromBatchId(planBatchId);
+    const { terraform_output: applyLogs, workflow_run_url: applyWorkflowRunUrl } = await getOutputLogsAndWorkflowURLFromBatchId(applyBatchId);
 
     const isOrganizationAdmin =
         organizationRole === "admin" || organizationRole === "owner";
@@ -81,7 +85,14 @@ export default async function RunDetailPage({
                         </T.P>
                     }
                 >
-                    <DynamicProjectRunDetails run={run} loggedInUser={userProfile} isUserOrgAdmin={isOrganizationAdmin} tfOutput={terraform_output} workflowRunUrl={workflow_run_url} fullRepoName={repo_full_name} />
+                    <DynamicProjectRunDetails run={run}
+                        loggedInUser={userProfile}
+                        isUserOrgAdmin={isOrganizationAdmin}
+                        tfOutput={planTerraformOutput}
+                        workflowRunUrl={planWorkflowRunUrl}
+                        applyTerraformOutput={applyLogs}
+                        applyWorkflowRunUrl={applyWorkflowRunUrl}
+                        fullRepoName={repo_full_name} />
                 </Suspense>
             }
         </div>

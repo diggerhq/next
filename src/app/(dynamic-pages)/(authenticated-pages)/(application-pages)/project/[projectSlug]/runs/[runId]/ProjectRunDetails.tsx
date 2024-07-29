@@ -23,12 +23,16 @@ function RenderContent({
     activeStage,
     run,
     tfOutput,
-    workflowRunUrl
+    workflowRunUrl,
+    applyTerraformOutput,
+    applyWorkflowRunUrl
 }: {
     activeStage: string;
     run: Table<'digger_runs'>;
     tfOutput: string | null;
     workflowRunUrl: string | null;
+    applyTerraformOutput: string | null;
+    applyWorkflowRunUrl: string | null;
 }) {
     if (activeStage === 'plan') {
         return (
@@ -58,7 +62,7 @@ function RenderContent({
                     run.status !== ToTitleCase('pending_plan') &&
                     run.status !== ToTitleCase('running_plan') && (
                         <pre className="bg-muted p-4 rounded-md overflow-auto flex-1 max-h-[600px] text-sm whitespace-pre-wrap">
-                            {run.terraform_output || 'No plan output available'}
+                            {tfOutput}
                         </pre>
                     )}
             </div>
@@ -76,9 +80,29 @@ function RenderContent({
         }
         return (
             <div className="flex flex-col flex-1">
-                <h3 className="text-lg font-semibold mb-2">Apply logs</h3>
+                <div className="flex items-center justify-start gap-2 mb-2">
+                    <h3 className="text-lg font-semibold ">Apply logs</h3>
+
+                    {applyWorkflowRunUrl && ['pending_apply', 'running_apply', 'succeeded', 'failed'].includes(ToSnakeCase(run.status)) && (
+                        <TooltipProvider>
+                            <Tooltip delayDuration={0}>
+                                <TooltipTrigger asChild>
+                                    <Link
+                                        href={applyWorkflowRunUrl}
+                                        target="_blank"
+                                    >
+                                        <LinkIcon className="size-4 text-muted-foreground hover:text-foreground cursor-pointer" />
+                                    </Link>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="flex items-center gap-4">
+                                    View workflow run
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                </div>
                 <div className="dark font-mono bg-muted p-4 rounded-md overflow-auto flex-1 max-h-[600px] text-sm whitespace-pre-wrap text-white">
-                    {tfOutput}
+                    {applyTerraformOutput}
                 </div>
             </div>
         );
@@ -92,8 +116,10 @@ export const ProjectRunDetails: React.FC<{
     isUserOrgAdmin: boolean
     tfOutput: string | null
     workflowRunUrl: string | null
+    applyTerraformOutput: string | null
+    applyWorkflowRunUrl: string | null
     fullRepoName: string | null
-}> = ({ run, loggedInUser, isUserOrgAdmin, tfOutput, workflowRunUrl, fullRepoName }) => {
+}> = ({ run, loggedInUser, isUserOrgAdmin, tfOutput, workflowRunUrl, applyTerraformOutput, applyWorkflowRunUrl, fullRepoName }) => {
     const router = useRouter();
     const [activeStage, setActiveStage] = useState<'plan' | 'apply'>('plan');
 
@@ -265,7 +291,7 @@ export const ProjectRunDetails: React.FC<{
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <RenderContent activeStage={activeStage} run={run} tfOutput={tfOutput} workflowRunUrl={workflowRunUrl} />
+                            <RenderContent activeStage={activeStage} run={run} tfOutput={tfOutput} workflowRunUrl={workflowRunUrl} applyTerraformOutput={applyTerraformOutput} applyWorkflowRunUrl={applyWorkflowRunUrl} />
                         </motion.div>
                     </AnimatePresence>
                 </div>
