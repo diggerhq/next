@@ -41,7 +41,7 @@ function RenderContent({
                 <div className="flex items-center justify-start gap-2 mb-2">
                     <h3 className="text-lg font-semibold ">Terraform Plan Output</h3>
 
-                    {workflowRunUrl && run.status !== ToTitleCase('queued') && (
+                    {workflowRunUrl && workflowRunUrl !== '#' && run.status !== ToTitleCase('queued') && (
                         <TooltipProvider>
                             <Tooltip delayDuration={0}>
                                 <TooltipTrigger asChild>
@@ -84,7 +84,7 @@ function RenderContent({
                 <div className="flex items-center justify-start gap-2 mb-2">
                     <h3 className="text-lg font-semibold ">Apply logs</h3>
 
-                    {applyWorkflowRunUrl && ['pending_apply', 'running_apply', 'succeeded', 'failed'].includes(ToSnakeCase(run.status)) && (
+                    {applyWorkflowRunUrl && applyWorkflowRunUrl !== '#' && ['pending_apply', 'running_apply', 'succeeded', 'failed'].includes(ToSnakeCase(run.status)) && (
                         <TooltipProvider>
                             <Tooltip delayDuration={0}>
                                 <TooltipTrigger asChild>
