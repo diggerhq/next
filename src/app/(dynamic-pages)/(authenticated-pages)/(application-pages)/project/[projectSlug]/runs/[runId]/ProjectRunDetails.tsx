@@ -68,7 +68,7 @@ function RenderContent({
             </div>
         );
     } else if (activeStage === 'apply') {
-        if (run.status === ToTitleCase('pending_approval') || run.status === ToTitleCase('rejected')) {
+        if (run.status === ToTitleCase('pending_approval') || run.status === ToTitleCase('discarded')) {
             return (
                 <div className="flex items-center h-[500px] justify-center flex-1">
                     <div className="text-center">
@@ -95,15 +95,17 @@ function RenderContent({
                                     </Link>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="flex items-center gap-4">
-                                    View workflow run
+                                    View apply job
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                     )}
                 </div>
-                <div className="dark font-mono bg-muted p-4 rounded-md overflow-auto flex-1 max-h-[600px] text-sm whitespace-pre-wrap text-white">
-                    {applyTerraformOutput}
-                </div>
+                {run.status === ToTitleCase('succeeded') && (
+                    <div className="dark font-mono bg-muted p-4 rounded-md overflow-auto flex-1 max-h-[600px] text-sm whitespace-pre-wrap text-white">
+                        {applyTerraformOutput}
+                    </div>
+                )}
             </div>
         );
     }
@@ -200,8 +202,8 @@ export const ProjectRunDetails: React.FC<{
                         name="Apply"
                         isActive={activeStage === 'apply'}
                         isRunning={run.status === ToTitleCase('running_apply')}
-                        isComplete={run.status === ToTitleCase('succeeded')}
-                        isDisabled={run.status !== ToTitleCase('succeeded')}
+                        isComplete={['succeeded'].includes(ToSnakeCase(run.status))}
+                        isDisabled={!['running_apply', 'succeeded'].includes(ToSnakeCase(run.status))}
                         onClick={() => setActiveStage('apply')}
                     />
 

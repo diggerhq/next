@@ -17,7 +17,7 @@ export const statusColors: StatusColor = {
     pending_approval: 'bg-blue-200/50 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',
     approved: 'bg-green-200/50 text-green-800 dark:bg-green-900/50 dark:text-green-200',
     pending_apply: 'bg-green-200/50 text-green-800 dark:bg-green-900/50 dark:text-green-200',
-    running_apply: 'bg-teal-200/50 text-teal-800 dark:bg-teal-900/50 dark:text-teal-200',
+    running_apply: 'bg-indigo-200/50 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200',
     succeeded: 'bg-green-200/50 text-green-800 dark:bg-green-900/50 dark:text-green-200',
     failed: 'bg-red-200/50 text-red-800 dark:bg-red-900/50 dark:text-red-200',
     discarded: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-950 dark:text-neutral-200',
