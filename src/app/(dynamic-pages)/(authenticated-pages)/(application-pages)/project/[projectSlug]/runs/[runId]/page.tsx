@@ -35,6 +35,8 @@ type ProjectRunDetailsProps = {
     applyTerraformOutput: string | null
     applyWorkflowRunUrl: string | null
     fullRepoName: string | null
+    planBatchId: string | null
+    applyBatchId: string | null
 }
 
 
@@ -104,7 +106,10 @@ export default async function RunDetailPage({
                         workflowRunUrl={planData.workflow_run_url}
                         applyTerraformOutput={applyData.terraform_output}
                         applyWorkflowRunUrl={applyData.workflow_run_url}
-                        fullRepoName={repoDetails.repo_full_name} />
+                        fullRepoName={repoDetails.repo_full_name}
+                        planBatchId={planBatchId}
+                        applyBatchId={applyBatchId}
+                    />
                 </Suspense>
             }
         </div>
