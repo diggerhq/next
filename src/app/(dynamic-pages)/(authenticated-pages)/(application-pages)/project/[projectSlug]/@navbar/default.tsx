@@ -29,7 +29,7 @@ export default async function ProjectNavbar({ params }: { params: unknown }) {
       <Link href={`/project/${project.id}`}>
         <span className="flex items-center space-x-2">
           <Suspense fallback={<Skeleton className="w-16 h-6" />}>
-            <Title projectId={project.id} />
+            <Title projectId={project.slug} />
           </Suspense>
         </span>
       </Link>
