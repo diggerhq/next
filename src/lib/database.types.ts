@@ -354,25 +354,25 @@ export type Database = {
         Row: {
           created_at: string | null
           deleted_at: string | null
-          digger_run_id: number | null
+          digger_run_id: string | null
           id: number
-          project_id: number | null
+          project_id: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           deleted_at?: string | null
-          digger_run_id?: number | null
+          digger_run_id?: string | null
           id?: number
-          project_id?: number | null
+          project_id?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           deleted_at?: string | null
-          digger_run_id?: number | null
+          digger_run_id?: string | null
           id?: number
-          project_id?: number | null
+          project_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
