@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { tfvarsOnBulkUpdate, tfvarsOnDelete, tfvarsOnUpdate } from "@/data/user/tfvars";
 import { EnvVar } from "@/types/userTypes";
 import { motion } from 'framer-motion';
 import { Copy, Edit, LockKeyhole, Plus, Save, Trash, Unlock } from 'lucide-react';
@@ -19,9 +20,7 @@ import { toast } from 'sonner';
 
 type TFVarTableProps = {
     envVars: EnvVar[];
-    onUpdate: (oldName: string, newName: string, value: string, isSecret: boolean) => Promise<EnvVar[]>;
-    onDelete: (name: string) => Promise<EnvVar[]>;
-    onBulkUpdate: (vars: EnvVar[]) => Promise<EnvVar[]>;
+    projectId: string;
 };
 
 const EmptyState: React.FC<{ onAddVariable: () => void }> = ({ onAddVariable }) => {
@@ -51,7 +50,7 @@ const EmptyState: React.FC<{ onAddVariable: () => void }> = ({ onAddVariable }) 
     );
 };
 
-export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }: TFVarTableProps) {
+export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
     const [editingVar, setEditingVar] = useState<{ originalName: string, currentVar: EnvVar } | null>(null);
     const [newVar, setNewVar] = useState<Omit<EnvVar, 'updated_at'>>({ name: '', value: '', is_secret: false });
     const [bulkEditMode, setBulkEditMode] = useState(false);
@@ -70,7 +69,6 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
         });
     };
 
-
     const handleSave = async () => {
         if (editingVar) {
             if (editingVar.currentVar.name.toLowerCase() !== editingVar.originalName.toLowerCase() &&
@@ -80,11 +78,12 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
             }
             setIsLoading(true);
             try {
-                await onUpdate(
+                await tfvarsOnUpdate(
                     editingVar.originalName,
                     editingVar.currentVar.name,
                     editingVar.currentVar.value,
-                    editingVar.currentVar.is_secret
+                    editingVar.currentVar.is_secret,
+                    projectId
                 );
                 toast.success('Variable updated successfully');
                 setEditingVar(null);
@@ -97,7 +96,6 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
         }
     };
 
-
     const handleAddNew = async () => {
         if (newVar.name && newVar.value) {
             if (envVars.some(v => v.name.toLowerCase() === newVar.name.toLowerCase())) {
@@ -106,7 +104,7 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
             }
             setIsLoading(true);
             try {
-                await onUpdate(newVar.name, newVar.name, newVar.value, newVar.is_secret);
+                await tfvarsOnUpdate(newVar.name, newVar.name, newVar.value, newVar.is_secret, projectId);
                 toast.success('New variable added successfully');
                 setNewVar({ name: '', value: '', is_secret: false });
                 setShowAddForm(false);
@@ -122,7 +120,7 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
     const handleDeleteVar = async (name: string) => {
         setIsLoading(true);
         try {
-            await onDelete(name);
+            await tfvarsOnDelete(name, projectId);
             toast.success('Variable deleted successfully');
             router.refresh();
         } catch (error) {
@@ -136,7 +134,6 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
         try {
             const parsedVars = JSON.parse(bulkEditValue);
             if (Array.isArray(parsedVars)) {
-                // Check for duplicate names in the parsed vars
                 const names = parsedVars.map(v => v.name.toLowerCase());
                 if (new Set(names).size !== names.length) {
                     toast.error('Duplicate variable names are not allowed');
@@ -144,7 +141,7 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
                 }
 
                 setIsLoading(true);
-                await onBulkUpdate(parsedVars);
+                await tfvarsOnBulkUpdate(parsedVars, projectId);
                 toast.success('Bulk update successful');
                 setBulkEditMode(false);
                 router.refresh();
@@ -155,7 +152,6 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
             setIsLoading(false);
         }
     };
-
 
     const toggleBulkEdit = () => {
         if (!bulkEditMode) {
@@ -345,7 +341,6 @@ export default function TFVarTable({ envVars, onUpdate, onDelete, onBulkUpdate }
                             Edit all environment variables at once in JSON format. Be careful with this operation.
                         </p>
                         <div className="flex gap-2">
-                            {/* <Button variant="outline" className='w-full' onClick={handleCopyAll}>Copy All</Button> */}
                             <Button variant="secondary" className="w-full" onClick={toggleBulkEdit}>
                                 {bulkEditMode ? 'Cancel Bulk Edit' : 'Bulk Edit'}
                             </Button>

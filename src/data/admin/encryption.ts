@@ -61,8 +61,6 @@ export async function storeEncryptedEnvVar(
   name: string,
   value: string,
   isSecret: boolean,
-  masterPassword: string,
-  salt: string,
 ) {
   console.log('Encryption: Storing encrypted var:', {
     projectId,
@@ -93,11 +91,7 @@ export async function storeEncryptedEnvVar(
   console.log('Encryption: Variable stored successfully');
   return data;
 }
-export async function getDecryptedEnvVar(
-  projectId: string,
-  name: string,
-  masterPassword: string,
-) {
+export async function getDecryptedEnvVar(projectId: string, name: string) {
   const { data, error } = await supabaseAdminClient
     .from('encrypted_env_vars')
     .select('encrypted_value, is_secret')
@@ -133,11 +127,7 @@ export async function deleteEnvVar(projectId: string, name: string) {
   if (error) throw error;
 }
 
-export async function getAllEnvVars(
-  projectId: string,
-  masterPassword: string,
-  salt: string,
-): Promise<EnvVar[]> {
+export async function getAllEnvVars(projectId: string): Promise<EnvVar[]> {
   const { data, error } = await supabaseAdminClient
     .from('encrypted_env_vars')
     .select('name, encrypted_value, is_secret, updated_at')

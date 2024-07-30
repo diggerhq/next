@@ -1,3 +1,4 @@
+// TFVarsDetails.tsx
 'use client'
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -8,18 +9,11 @@ import { motion } from "framer-motion";
 import TFVarTable from "./TFVarTable";
 
 type TFVarsDetailsProps = {
-    tfvarsdata: {
-        id: string;
-        project_id: string;
-        tfvars: EnvVar[];
-        updated_at: string;
-    };
-    onUpdate: (oldName: string, newName: string, value: string, isSecret: boolean) => Promise<EnvVar[]>;
-    onDelete: (name: string) => Promise<EnvVar[]>;
-    onBulkUpdate: (vars: EnvVar[]) => Promise<EnvVar[]>;
+    projectId: string;
+    initialEnvVars: EnvVar[];
 }
 
-export default function TFVarsDetails({ tfvarsdata, onUpdate, onDelete, onBulkUpdate }: TFVarsDetailsProps) {
+export default function TFVarsDetails({ projectId, initialEnvVars }: TFVarsDetailsProps) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -34,10 +28,8 @@ export default function TFVarsDetails({ tfvarsdata, onUpdate, onDelete, onBulkUp
                 </CardHeader>
                 <CardContent>
                     <TFVarTable
-                        envVars={tfvarsdata.tfvars}
-                        onUpdate={onUpdate}
-                        onDelete={onDelete}
-                        onBulkUpdate={onBulkUpdate}
+                        projectId={projectId}
+                        envVars={initialEnvVars}
                     />
                 </CardContent>
                 <Separator />
