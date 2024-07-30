@@ -37,7 +37,7 @@ export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'
                     <TableHead className="text-left">Run ID</TableHead>
                     <TableHead className="text-left">Commit ID</TableHead>
                     <TableHead className="text-left">Status</TableHead>
-                    <TableHead className="text-left">Date</TableHead>
+                    <TableHead className="text-left">Last updated</TableHead>
                     <TableHead className="text-left">User</TableHead>
                 </TableRow>
             </TableHeader>
@@ -65,7 +65,7 @@ export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'
                                         {run.status.toUpperCase()}
                                     </span>
                                 </TableCell>
-                                <TableCell>{moment(run.created_at).fromNow()}</TableCell>
+                                <TableCell>{moment(run.updated_at).fromNow()}</TableCell>
                                 <TableCell>{run.approval_author}</TableCell>
                             </motion.tr>
                         ))

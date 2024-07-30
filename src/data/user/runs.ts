@@ -152,6 +152,7 @@ export async function approveRun(
       status: 'Approved',
       approver_user_id: userId,
       is_approved: true,
+      updated_at: new Date().toISOString(),
     })
     .eq('id', runId)
     .select('id')
@@ -174,6 +175,7 @@ export async function rejectRun(
       status: 'Discarded',
       approver_user_id: userId,
       is_approved: false,
+      updated_at: new Date().toISOString(),
     })
     .eq('id', runId)
     .select('id')
