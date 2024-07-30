@@ -11,9 +11,6 @@ import { Suspense } from 'react';
 export async function generateMetadata({ params }: { params: unknown }) {
   try {
     const { organizationId } = organizationParamSchema.parse(params);
-    console.log('----------------------------------------')
-    console.log('in [...catchAll]/page organizationId', organizationId)
-    console.log('----------------------------------------')
     const organizationTitle = await getOrganizationTitle(organizationId);
 
     return {

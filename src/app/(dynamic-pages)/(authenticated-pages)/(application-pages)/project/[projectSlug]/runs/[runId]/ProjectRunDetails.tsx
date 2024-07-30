@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { approveRun, rejectRun } from "@/data/user/runs";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
 import { ToSnakeCase, ToTitleCase } from "@/lib/utils";
+import { supabaseUserClientComponentClient } from "@/supabase-clients/user/supabaseUserClientComponentClient";
 import { Table } from "@/types";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from 'framer-motion';
@@ -15,7 +16,7 @@ import { CheckCircle2, Clock, GitPullRequest, LinkIcon, Loader2, Play, XCircle }
 import Image from 'next/image';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { statusColors } from "../../(specific-project-pages)/AllRunsTable";
 
 
@@ -121,7 +122,7 @@ export const ProjectRunDetails: React.FC<{
     applyTerraformOutput: string | null
     applyWorkflowRunUrl: string | null
     fullRepoName: string | null
-}> = ({ run, loggedInUser, isUserOrgAdmin, tfOutput, workflowRunUrl, applyTerraformOutput, applyWorkflowRunUrl, fullRepoName }) => {
+}> = ({ run: initialRun, loggedInUser, isUserOrgAdmin, tfOutput, workflowRunUrl, applyTerraformOutput, applyWorkflowRunUrl, fullRepoName }) => {
     const router = useRouter();
     const [activeStage, setActiveStage] = useState<'plan' | 'apply'>('plan');
 
@@ -148,6 +149,31 @@ export const ProjectRunDetails: React.FC<{
             },
         }
     );
+
+    const [run, setRun] = useState(initialRun);
+
+
+    useEffect(() => {
+        const channel = supabaseUserClientComponentClient
+            .channel(`digger_run_${run.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'digger_runs',
+                    filter: `id=eq.${run.id}`
+                },
+                (payload) => {
+                    setRun(payload.new as Table<'digger_runs'>);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabaseUserClientComponentClient.removeChannel(channel);
+        };
+    }, [run.id]);
 
     return (
         <div className="flex rounded-lg bg-background border overflow-hidden h-[calc(100vh-220px)] w-full">

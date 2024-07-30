@@ -21,10 +21,5 @@ const optionalCookieOptions: CookieOptions = {
 // createClientComponentClient
 export const supabaseUserClientComponentClient =
   createClientComponentClient<Database>({
-    options: {
-      global: {
-        fetch,
-      },
-    },
     cookieOptions: optionalCookieOptions,
   });
