@@ -5,8 +5,8 @@ import { T } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/button";
 import { getProjects, getProjectsTotalCount } from "@/data/user/projects";
 import {
-  organizationParamSchema,
-  projectsfilterSchema
+  projectsfilterSchema,
+  teamParamSchema
 } from "@/utils/zod-schemas/params";
 import { Plus } from "lucide-react";
 import type { Metadata } from "next";
@@ -15,13 +15,14 @@ import { Suspense } from "react";
 import type { DashboardProps } from "../page";
 import { OrganizationProjectsTable } from "./OrganizationProjectsTable";
 
-async function ProjectsTableWithPagination({
+export async function ProjectsTableWithPagination({
   organizationId,
+  teamId,
   searchParams,
-}: { organizationId: string; searchParams: unknown }) {
+}: { organizationId: string; teamId: number | null; searchParams: unknown }) {
   const filters = projectsfilterSchema.parse(searchParams);
   const [projects, totalPages] = await Promise.all([
-    getProjects({ ...filters, organizationId }),
+    getProjects({ ...filters, organizationId, teamId }),
     getProjectsTotalCount({ ...filters, organizationId }),
   ]);
 
@@ -42,7 +43,7 @@ export default async function Page({
   params,
   searchParams,
 }: DashboardProps) {
-  const { organizationId } = organizationParamSchema.parse(params);
+  const { organizationId, teamId } = teamParamSchema.parse(params);
   const filters = projectsfilterSchema.parse(searchParams);
 
   return (
@@ -78,6 +79,7 @@ export default async function Page({
         >
           <ProjectsTableWithPagination
             organizationId={organizationId}
+            teamId={teamId ?? null}
             searchParams={searchParams}
           />
         </Suspense>

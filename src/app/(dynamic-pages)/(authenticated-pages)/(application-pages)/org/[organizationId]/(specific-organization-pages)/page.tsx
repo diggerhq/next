@@ -1,9 +1,11 @@
 import { ProjectsCardList } from "@/components/Projects/ProjectsCardList";
 import { Search } from "@/components/Search";
+import { TeamsCardList } from "@/components/Teams/TeamsCardList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOrganizationTitle } from "@/data/user/organizations";
 import { getProjects } from "@/data/user/projects";
+import { getTeams } from "@/data/user/teams";
 import {
   organizationParamSchema,
   projectsfilterSchema
@@ -16,6 +18,7 @@ import type { z } from "zod";
 import { DashboardClientWrapper } from "./DashboardClientWrapper";
 import { DashboardLoadingFallback } from "./DashboardLoadingFallback";
 import ProjectsLoadingFallback from "./ProjectsLoadingFallback";
+import TeamsLoadingFallback from "./TeamsLoadingFallback";
 
 async function Projects({
   organizationId,
@@ -26,10 +29,26 @@ async function Projects({
 }) {
   const projects = await getProjects({
     organizationId,
+    teamId: null,
     ...filters,
   });
   return <ProjectsCardList projects={projects} />;
 }
+async function Teams({
+  organizationId,
+  filters,
+}: {
+  organizationId: string;
+  filters: z.infer<typeof projectsfilterSchema>;
+}) {
+  const teams = await getTeams({
+    organizationId,
+    ...filters,
+  });
+  return <TeamsCardList teams={teams} />;
+}
+
+
 
 export type DashboardProps = {
   params: { organizationId: string };
@@ -80,6 +99,35 @@ async function Dashboard({ params, searchParams }: DashboardProps) {
             )}
           </Suspense>
         </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+          <CardTitle>Recent Teams</CardTitle>
+          <div className="flex items-center space-x-4">
+            <Search className="w-[200px]" placeholder="Search teams" />
+            <Button variant="secondary" size="sm" asChild>
+              <Link href={`/org/${organizationId}/teams`}>
+                <Layers className="mr-2 h-4 w-4" />
+                View all teams
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<TeamsLoadingFallback quantity={3} />}>
+            <Teams
+              organizationId={organizationId}
+              filters={validatedSearchParams}
+            />
+            {validatedSearchParams.query && (
+              <p className="mt-4 text-sm text-muted-foreground">
+                Searching for{" "}
+                <span className="font-medium">{validatedSearchParams.query}</span>
+              </p>
+            )}
+          </Suspense>
+        </CardContent>
+
       </Card>
     </DashboardClientWrapper>
   );

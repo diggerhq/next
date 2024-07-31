@@ -7,7 +7,7 @@ import { DesktopSidebarFallback } from '@/components/SidebarComponents/SidebarFa
 import { SwitcherAndToggle } from '@/components/SidebarComponents/SidebarLogo';
 import { fetchSlimOrganizations, getOrganizationSlugByOrganizationId } from '@/data/user/organizations';
 import { organizationParamSchema } from '@/utils/zod-schemas/params';
-import { Activity, FileText, GitCompare, Home, Layers, MessageCircle, Settings, Shield } from 'lucide-react';
+import { Activity, FileText, GitCompare, Home, Layers, MessageCircle, Settings, Shield, Users } from 'lucide-react';
 
 async function OrganizationSidebarInternal({
   organizationId,
@@ -40,6 +40,11 @@ async function OrganizationSidebarInternal({
           label="Projects"
           href={`/org/${organizationId}/projects`}
           icon={<Layers className="size-4 text-foreground" />}
+        />
+        <SidebarLink
+          label="Teams"
+          href={`/org/${organizationId}/teams`}
+          icon={<Users className="size-4 text-foreground" />}
         />
         <SidebarLink
           label="Activity"

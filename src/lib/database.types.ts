@@ -1458,6 +1458,59 @@ export type Database = {
           },
         ]
       }
+      team_members: {
+        Row: {
+          created_at: string | null
+          id: number
+          role: Database["public"]["Enums"]["project_team_member_role"]
+          team_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          role?: Database["public"]["Enums"]["project_team_member_role"]
+          team_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          role?: Database["public"]["Enums"]["project_team_member_role"]
+          team_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          name?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
       user_api_keys: {
         Row: {
           created_at: string
@@ -1780,12 +1833,19 @@ export type Database = {
           member_id: string
         }[]
       }
-      get_organization_id_by_team_id: {
-        Args: {
-          p_id: number
-        }
-        Returns: string
-      }
+      get_organization_id_by_team_id:
+        | {
+            Args: {
+              p_id: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_id: number
+            }
+            Returns: string
+          }
       get_organization_id_for_project_id: {
         Args: {
           project_id: string
@@ -1808,11 +1868,27 @@ export type Database = {
           organization_id: string
         }[]
       }
+      get_team_admins_by_team_id: {
+        Args: {
+          team_id: number
+        }
+        Returns: {
+          user_id: string
+        }[]
+      }
       get_team_id_for_project_id: {
         Args: {
           project_id: string
         }
         Returns: number
+      }
+      get_team_members_team_id: {
+        Args: {
+          team_id: number
+        }
+        Returns: {
+          user_id: string
+        }[]
       }
       increment_credits: {
         Args: {

@@ -76,7 +76,7 @@ export const parseNotification = (
         return {
           title: 'Accepted invitation to join organization',
           description: `${notification.userFullName} has accepted your invitation to join your organization`,
-          href: `/organization/${notification.organizationId}/settings/members`,
+          href: `/org/${notification.organizationId}/settings/members`,
           image: 'UserCheck',
           type: notification.type,
           actionType: 'link',

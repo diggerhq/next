@@ -11,7 +11,7 @@ import { generateSlug } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { motion } from "framer-motion";
-import { AlertCircle, Github } from "lucide-react";
+import { AlertCircle, Github, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from 'react';
@@ -29,6 +29,7 @@ const createProjectFormSchema = z.object({
     terraformDir: z.string().min(1, "Terraform working directory is required"),
     labels: z.array(z.string()),
     managedState: z.boolean().default(true),
+    teamId: z.number().int().positive().nullable(),
 });
 
 type CreateProjectFormData = z.infer<typeof createProjectFormSchema>;
@@ -38,12 +39,18 @@ type Repository = {
     repo_full_name: string | null;
 };
 
+type Team = {
+    id: number;
+    name: string;
+};
+
 type CreateProjectFormProps = {
     organizationId: string;
     repositories: Repository[];
+    teams: Team[];
 };
 
-export default function CreateProjectForm({ organizationId, repositories }: CreateProjectFormProps) {
+export default function CreateProjectForm({ organizationId, repositories, teams }: CreateProjectFormProps) {
     const router = useRouter();
 
     const { control, handleSubmit, formState: { errors } } = useForm<CreateProjectFormData>({
@@ -54,6 +61,7 @@ export default function CreateProjectForm({ organizationId, repositories }: Crea
             terraformDir: "",
             managedState: true,
             labels: [],
+            teamId: null,
         },
     });
 
@@ -62,6 +70,7 @@ export default function CreateProjectForm({ organizationId, repositories }: Crea
             const slug = generateSlug(data.name);
             return await createProjectAction({
                 organizationId,
+                teamId: data.teamId,
                 name: data.name,
                 slug,
                 repoId: data.repository,
@@ -213,6 +222,60 @@ export default function CreateProjectForm({ organizationId, repositories }: Crea
                                 <T.H4 className="mb-1 mt-4">No Repositories Found</T.H4>
                                 <T.P className="text-muted-foreground mb-4">
                                     It looks like there are no repositories.
+                                </T.P>
+                            </div>
+                        )}
+                    </CardContent>
+                </MotionCard>
+                <MotionCard
+                    className="mb-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    <CardHeader className="flex flex-col">
+                        <CardTitle className="text-lg">Select a Team</CardTitle>
+                        <CardDescription className="text-sm text-muted-foreground">Choose the team for your project</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {teams.length > 0 ? (
+                            <Controller
+                                name="teamId"
+                                control={control}
+                                render={({ field }) => (
+                                    <div className="relative">
+                                        <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString() || ""}>
+                                            <SelectTrigger className={`w-full ${errors.teamId ? 'border-destructive' : ''}`}>
+                                                <SelectValue placeholder="Select a team" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {teams.map((team) => (
+                                                    <SelectItem key={team.id} value={team.id.toString()}>
+                                                        <div className="flex items-center">
+                                                            <Users className="mr-2 h-4 w-4" />
+                                                            <span>{team.name}</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.teamId && (
+                                            <div className="flex items-center mt-1 text-destructive">
+                                                <AlertCircle className="h-4 w-4 mr-1" />
+                                                <span className="text-sm">{errors.teamId.message}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            />
+                        ) : (
+                            <div className="text-center py-8">
+                                <div className="bg-muted/50 rounded-full p-4 inline-block">
+                                    <Users className="mx-auto size-8 text-muted-foreground" />
+                                </div>
+                                <T.H4 className="mb-1 mt-4">No Teams Found</T.H4>
+                                <T.P className="text-muted-foreground mb-4">
+                                    It looks like there are no teams available.
                                 </T.P>
                             </div>
                         )}

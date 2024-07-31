@@ -70,6 +70,7 @@ export const createProjectAction = async ({
   terraformWorkingDir,
   managedState,
   labels,
+  teamId,
 }: {
   organizationId: string;
   name: string;
@@ -78,6 +79,7 @@ export const createProjectAction = async ({
   terraformWorkingDir: string;
   managedState: boolean;
   labels: string[];
+  teamId: number | null;
 }): Promise<SAPayload<Tables<"projects">>> => {
   "use server";
   const supabaseClient = createSupabaseUserServerActionClient();
@@ -87,6 +89,7 @@ export const createProjectAction = async ({
       organization_id: organizationId,
       name,
       slug,
+      team_id: teamId,
       repo_id: repoId,
       terraform_working_dir: terraformWorkingDir,
       is_managing_state: managedState,
@@ -100,20 +103,23 @@ export const createProjectAction = async ({
     .select("*")
     .single();
 
-  console.log('createProjectAction', project);
-
 
   if (error) {
-    console.log('createProjectAction', error);
     return {
       status: 'error',
       message: error.message,
     };
   }
 
+  if (teamId) {
+    revalidatePath(`/org/[organizationId]/team/[teamId]`, "layout");
+  } else {
+    revalidatePath(`/org/[organizationId]`, "layout");
+    revalidatePath(`/org/[organizationId]/projects/`, "layout");
+  }
 
-  revalidatePath(`/org/[organizationId]`, "layout");
-  revalidatePath(`/org/[organizationId]/projects/`, "layout");
+
+
 
   return {
     status: 'success',
@@ -238,6 +244,7 @@ export const markProjectAsCompletedAction = async (projectId: string): Promise<S
 
 export const getProjects = async ({
   organizationId,
+  teamId,
   query = "",
   page = 1,
   limit = 5,
@@ -245,6 +252,7 @@ export const getProjects = async ({
   query?: string;
   page?: number;
   organizationId: string;
+  teamId: number | null;
   limit?: number;
 }) => {
   const zeroIndexedPage = page - 1;
@@ -254,6 +262,13 @@ export const getProjects = async ({
     .select("*")
     .eq("organization_id", organizationId)
     .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
+
+  // Add team filter
+  if (teamId !== null) {
+    supabaseQuery = supabaseQuery.eq('team_id', teamId);
+  } else {
+    supabaseQuery = supabaseQuery.is('team_id', null);
+  }
 
   if (query) {
     supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
