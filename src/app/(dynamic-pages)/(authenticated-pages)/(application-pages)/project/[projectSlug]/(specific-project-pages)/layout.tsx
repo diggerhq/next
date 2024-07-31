@@ -10,7 +10,7 @@ async function ProjectPageHeading({ projectId }: { projectId: string }) {
   return (
     <PageHeading
       title={projectTitle}
-      subTitle={`Project ID : ${projectId} `}
+      subTitle="Manage your project here"
     />
   );
 }

@@ -3,6 +3,7 @@ import { PageHeading } from '@/components/PageHeading';
 import { Search } from '@/components/Search';
 import { Button } from '@/components/ui/button';
 import { T } from '@/components/ui/Typography';
+import { getSlimTeamById } from '@/data/user/teams';
 import { projectsfilterSchema } from '@/utils/zod-schemas/params';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -27,10 +28,11 @@ export default async function TeamPage({
     const parsedParams = paramsSchema.parse(params);
     const filters = projectsfilterSchema.parse(searchParams);
     const { teamId, organizationId } = parsedParams;
+    const { name } = await getSlimTeamById(teamId);
     return (
         <div className="flex flex-col space-y-4 max-w-5xl mt-2">
             <PageHeading
-                title="Team"
+                title={name}
                 subTitle="You can create projects within team, or within your organization."
             />
             <div className="flex justify-between gap-2">

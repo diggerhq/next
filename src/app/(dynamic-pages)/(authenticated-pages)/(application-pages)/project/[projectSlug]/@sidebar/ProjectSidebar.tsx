@@ -5,7 +5,7 @@ import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { getSlimProjectById, getSlimProjectBySlug } from '@/data/user/projects';
 import { cn } from '@/utils/cn';
 import { projectSlugParamSchema } from '@/utils/zod-schemas/params';
-import { Activity, ArrowLeft, FileText, GitCompare, Layers, MessageCircle, Settings, Shield } from 'lucide-react';
+import { Activity, ArrowLeft, FileText, GitCompare, Layers, MessageCircle, Settings, Shield, Users } from 'lucide-react';
 import { Suspense } from 'react';
 
 async function ProjectSidebarInternal({ projectId, projectSlug }: { projectId: string; projectSlug: string }) {
@@ -36,6 +36,11 @@ async function ProjectSidebarInternal({ projectId, projectSlug }: { projectId: s
           label="Projects"
           href={`/org/${organizationId}/projects`}
           icon={<Layers className="size-4 text-foreground" />}
+        />
+        <SidebarLink
+          label="Teams"
+          href={`/org/${organizationId}/teams`}
+          icon={<Users className="size-4 text-foreground" />}
         />
         <SidebarLink
           label="Activity"
