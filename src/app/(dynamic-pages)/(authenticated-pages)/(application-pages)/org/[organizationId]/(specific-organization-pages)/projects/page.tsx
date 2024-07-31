@@ -1,9 +1,7 @@
 import { PageHeading } from "@/components/PageHeading";
-import { Pagination } from "@/components/Pagination";
 import { Search } from "@/components/Search";
 import { T } from "@/components/ui/Typography";
 import { Button } from "@/components/ui/button";
-import { getProjects, getProjectsTotalCount } from "@/data/user/projects";
 import {
   projectsfilterSchema,
   teamParamSchema
@@ -13,26 +11,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import type { DashboardProps } from "../page";
-import { OrganizationProjectsTable } from "./OrganizationProjectsTable";
-
-export async function ProjectsTableWithPagination({
-  organizationId,
-  teamId,
-  searchParams,
-}: { organizationId: string; teamId: number | null; searchParams: unknown }) {
-  const filters = projectsfilterSchema.parse(searchParams);
-  const [projects, totalPages] = await Promise.all([
-    getProjects({ ...filters, organizationId, teamId }),
-    getProjectsTotalCount({ ...filters, organizationId }),
-  ]);
-
-  return (
-    <>
-      <OrganizationProjectsTable projects={projects} />
-      <Pagination totalPages={totalPages} />
-    </>
-  );
-}
+import { AllProjectsTableWithPagination } from "./ProjectsWithPagination";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -77,9 +56,8 @@ export default async function Page({
             </T.P>
           }
         >
-          <ProjectsTableWithPagination
+          <AllProjectsTableWithPagination
             organizationId={organizationId}
-            teamId={teamId ?? null}
             searchParams={searchParams}
           />
         </Suspense>

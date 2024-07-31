@@ -252,6 +252,28 @@ export const getTeamMembersByTeamId = async (teamId: number) => {
   });
 };
 
+export const getTeamAdminUserNameByTeamId = async (teamId: number) => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('team_members')
+    .select(
+      `
+      user_profiles (
+        full_name
+      )
+    `,
+    )
+    .eq('team_id', teamId)
+    .eq('role', 'admin')
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.user_profiles?.full_name ?? null;
+};
+
 export const getCanLoggedInUserManageTeam = async (
   organizationId: string,
   teamId: number,

@@ -9,7 +9,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import type { Tables } from '@/lib/database.types';
 import {
     flexRender,
     getCoreRowModel,
@@ -24,14 +23,20 @@ import moment from 'moment';
 import Link from 'next/link';
 import { useState } from 'react';
 
-type Team = Tables<'teams'>;
+type TeamWithAdminName = {
+    adminName: string | null | undefined;
+    created_at: string | null;
+    id: number;
+    name: string;
+    organization_id: string;
+};
 
 type Props = {
-    teams: Team[];
+    teams: TeamWithAdminName[];
 };
 
 export function OrganizationTeamsTable({ teams }: Props) {
-    const columns: ColumnDef<Team>[] = [
+    const columns: ColumnDef<TeamWithAdminName>[] = [
         {
             accessorKey: 'name',
             header: 'Name',
@@ -50,9 +55,9 @@ export function OrganizationTeamsTable({ teams }: Props) {
             },
         },
         {
-            accessorKey: 'by',
-            header: 'By',
-            cell: ({ row }) => row.getValue('by') || 'unknown',
+            accessorKey: 'adminName',
+            header: 'Created by',
+            cell: ({ row }) => row.getValue('adminName') || 'unknown',
         },
     ];
 

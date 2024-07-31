@@ -242,6 +242,40 @@ export const markProjectAsCompletedAction = async (projectId: string): Promise<S
   return { status: 'success', data };
 };
 
+export const getAllProjectsInOrganization = async ({
+  organizationId,
+  query = "",
+  page = 1,
+  limit = 5,
+}: {
+  query?: string;
+  page?: number;
+  organizationId: string;
+  limit?: number;
+}) => {
+  const zeroIndexedPage = page - 1;
+  const supabase = createSupabaseUserServerComponentClient();
+  let supabaseQuery = supabase
+    .from("projects")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
+
+  if (query) {
+    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
+  }
+
+  const { data, error } = await supabaseQuery.order("created_at", {
+    ascending: false,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
 export const getProjects = async ({
   organizationId,
   teamId,

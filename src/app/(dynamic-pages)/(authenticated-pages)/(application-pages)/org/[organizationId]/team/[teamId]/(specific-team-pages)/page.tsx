@@ -9,7 +9,7 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { z } from 'zod';
-import { ProjectsTableWithPagination } from '../../../(specific-organization-pages)/projects/page';
+import { ProjectsTableWithPagination } from '../../../(specific-organization-pages)/projects/ProjectsWithPagination';
 
 const paramsSchema = z.object({
     teamId: z.coerce.number(),
