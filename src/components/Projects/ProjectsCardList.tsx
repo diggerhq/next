@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { CalendarDays, Clock, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "../ui/badge";
 
 export enum ProjectStatus {
   draft = "draft",
@@ -40,11 +41,13 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
+type ProjectCardsProps = {
+  projects: (Table<"projects"> & { teamName?: string })[];
+}
+
 export const ProjectsCardList = ({
   projects,
-}: {
-  projects: Table<"projects">[];
-}) => {
+}: ProjectCardsProps) => {
   if (projects.length === 0) {
     return (
       <p className="text-muted-foreground my-6">
@@ -69,6 +72,7 @@ export const ProjectsCardList = ({
               <MotionCardContent className="p-0 space-y-3" variants={contentVariants} initial="hidden" animate="visible">
                 <motion.div className="flex justify-between items-center" variants={itemVariants}>
                   <span className="text-xs text-muted-foreground">ID: {project.id.slice(0, 7)}</span>
+                  <Badge variant="outline" className="bg-primary/10 text-foreground">{project.teamName}</Badge>
                 </motion.div>
                 <motion.h2 className="text-lg font-semibold" variants={itemVariants}>{project.name}</motion.h2>
                 <motion.div className="flex items-center text-xs text-muted-foreground" variants={itemVariants}>

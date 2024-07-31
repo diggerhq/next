@@ -4,8 +4,8 @@ import { TeamsCardList } from "@/components/Teams/TeamsCardList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOrganizationTitle } from "@/data/user/organizations";
-import { getProjects } from "@/data/user/projects";
-import { getTeams } from "@/data/user/teams";
+import { getAllProjectsInOrganization } from "@/data/user/projects";
+import { getSlimTeamById, getTeams } from "@/data/user/teams";
 import {
   organizationParamSchema,
   projectsfilterSchema
@@ -27,12 +27,19 @@ async function Projects({
   organizationId: string;
   filters: z.infer<typeof projectsfilterSchema>;
 }) {
-  const projects = await getProjects({
+  const projects = await getAllProjectsInOrganization({
     organizationId,
-    teamId: null,
     ...filters,
   });
-  return <ProjectsCardList projects={projects} />;
+  const projectWithTeamNames = await Promise.all(projects.map(async (project) => {
+    if (project.team_id) {
+      const team = await getSlimTeamById(project.team_id);
+      const projectWithTeamName = { ...project, teamName: team.name };
+      return projectWithTeamName;
+    }
+    return project;
+  }));
+  return <ProjectsCardList projects={projectWithTeamNames} />;
 }
 async function Teams({
   organizationId,
