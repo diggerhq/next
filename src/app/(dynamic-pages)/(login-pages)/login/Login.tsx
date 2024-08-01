@@ -156,7 +156,7 @@ export function Login({
             <TabsContent value="password">
               <Card className="border-none shadow-none">
                 <CardHeader className="py-6 px-0">
-                  <CardTitle>Login to NextBase</CardTitle>
+                  <CardTitle>Login to Digger</CardTitle>
                   <CardDescription>
                     Login with the account you used to signup.
                   </CardDescription>
@@ -176,7 +176,7 @@ export function Login({
             <TabsContent value="magic-link">
               <Card className="border-none shadow-none">
                 <CardHeader className="py-6 px-0">
-                  <CardTitle>Login to NextBase</CardTitle>
+                  <CardTitle>Login to Digger</CardTitle>
                   <CardDescription>
                     Login with magic link we will send to your email.
                   </CardDescription>
@@ -193,7 +193,7 @@ export function Login({
             <TabsContent value="social-login">
               <Card className="border-none shadow-none">
                 <CardHeader className="py-6 px-0">
-                  <CardTitle>Login to NextBase</CardTitle>
+                  <CardTitle>Login to Digger</CardTitle>
                   <CardDescription>
                     Login with your social account.
                   </CardDescription>
