@@ -1,5 +1,5 @@
 // page.tsx
-import { getAllEnvVars } from "@/data/admin/encryption";
+import { getAllEnvVars } from "@/data/admin/env-vars";
 import { getSlimProjectBySlug } from "@/data/user/projects";
 import { projectSlugParamSchema } from "@/utils/zod-schemas/params";
 import type { Metadata } from "next";
