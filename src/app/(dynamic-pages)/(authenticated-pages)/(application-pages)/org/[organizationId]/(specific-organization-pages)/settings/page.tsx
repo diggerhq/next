@@ -9,6 +9,7 @@ import { Suspense } from "react";
 import { DeleteOrganization } from "./DeleteOrganization";
 import { EditOrganizationForm } from "./EditOrganizationForm";
 import { SetDefaultOrganizationPreference } from "./SetDefaultOrganizationPreference";
+import { SetSecretsKey } from "./SetSecretsKey";
 import { SettingsFormSkeleton } from "./SettingsSkeletons";
 
 async function EditOrganization({
@@ -68,6 +69,9 @@ export default async function EditOrganizationPage({
     <div className="space-y-8 max-w-4xl">
       <Suspense fallback={<SettingsFormSkeleton />}>
         <EditOrganization organizationId={organizationId} />
+      </Suspense>
+      <Suspense fallback={<SettingsFormSkeleton />}>
+        <SetSecretsKey organizationId={organizationId} />
       </Suspense>
       <Suspense fallback={<SettingsFormSkeleton />}>
         <SetDefaultOrganizationPreference organizationId={organizationId} />
