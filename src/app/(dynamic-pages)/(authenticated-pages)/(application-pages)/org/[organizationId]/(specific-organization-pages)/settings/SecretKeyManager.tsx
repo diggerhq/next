@@ -95,7 +95,7 @@ export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair
                                 </div>
                             </div>
                             {privateKey && (
-                                <Alert>
+                                <Alert className='bg-muted/50'>
                                     <AlertTitle>Private Key (ONLY SHOWN ONCE)</AlertTitle>
                                     <AlertDescription>
                                         <p className="mb-2">Save this in your GitHub Action Secrets (org level):</p>
