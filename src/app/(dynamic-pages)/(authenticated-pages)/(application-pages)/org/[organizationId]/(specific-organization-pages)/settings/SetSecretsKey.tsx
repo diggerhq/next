@@ -1,7 +1,8 @@
 'use server';
 
-import { Button } from '@/components/Button';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { createKeyPair, deletePublicKey, getPublicKey } from '@/data/user/secretKey';
+import { SecretsKeyManager } from './SecretKeyManager';
 
 const publicKey: string = 'asdfasdf'; //TODO state, fetch
 const privateKey: string = 'asdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaaasdfaa'; //TODO state
@@ -24,29 +25,26 @@ function Wrapper({ children }: { children: React.ReactNode }) {
     );
 }
 
-export async function SetSecretsKey({ }: {}) {
-    if (publicKey) {
-        return (
-            <Wrapper>
-                {/* TODO copy icon, formatting */}
-                {/* TODO delete button in Danger Zone */}
-                <p>
-                    <span><b>Public key:</b> {publicKey}</span>
-                </p>
-
-                {privateKey && (
-                    <p>
-                        <span><b>Private key (ONLY SHOWN ONCE - SAVE IN YOUR GITHUB ACTION SECRETS (ORG LEVEL)):</b><br /> {privateKey}</span>
-                    </p>
-                )}
-            </Wrapper>
-        );
-    } else {
-        return (
-            <Wrapper>
-                {/* TODO generate key pair, set private key state locally, send public key to the server */}
-                <Button>Create secrets key</Button>
-            </Wrapper>
-        );
-    }
+export async function SetSecretsKey({ organizationId }: { organizationId: string }) {
+    const publicKey = await getPublicKey(organizationId);
+    return (
+        <SecretsKeyManager
+            publicKey={publicKey}
+            onCreateKeyPair={async () => {
+                'use server';
+                const result = await createKeyPair(organizationId);
+                if (result.status === 'error') {
+                    throw new Error(result.message);
+                }
+                return result.data;
+            }}
+            onDeletePublicKey={async () => {
+                'use server';
+                const result = await deletePublicKey(organizationId);
+                if (result.status === 'error') {
+                    throw new Error(result.message);
+                }
+            }}
+        />
+    );
 }

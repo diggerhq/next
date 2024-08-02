@@ -1085,18 +1085,21 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          public_key: string | null
           slug: string
           title: string
         }
         Insert: {
           created_at?: string
           id?: string
+          public_key?: string | null
           slug?: string
           title?: string
         }
         Update: {
           created_at?: string
           id?: string
+          public_key?: string | null
           slug?: string
           title?: string
         }
@@ -1335,6 +1338,13 @@ export type Database = {
             columns: ["repo_id"]
             isOneToOne: false
             referencedRelation: "repos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]

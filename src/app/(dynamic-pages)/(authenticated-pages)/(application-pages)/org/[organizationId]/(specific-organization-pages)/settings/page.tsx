@@ -71,7 +71,7 @@ export default async function EditOrganizationPage({
         <EditOrganization organizationId={organizationId} />
       </Suspense>
       <Suspense fallback={<SettingsFormSkeleton />}>
-        <SetSecretsKey />
+        <SetSecretsKey organizationId={organizationId} />
       </Suspense>
       <Suspense fallback={<SettingsFormSkeleton />}>
         <SetDefaultOrganizationPreference organizationId={organizationId} />
