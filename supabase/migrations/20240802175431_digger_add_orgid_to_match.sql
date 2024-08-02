@@ -1,2 +1,2 @@
 ALTER TABLE digger_batches
-ADD COLUMN new_column_name UUID NULL;
+RENAME COLUMN new_column_name TO organization_id;
