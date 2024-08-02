@@ -21,13 +21,6 @@ export default async function TFVarsPage({ params }: { params: unknown }) {
     const { projectSlug } = projectSlugParamSchema.parse(params);
     const project = await getSlimProjectBySlug(projectSlug);
 
-    const MASTER_PASSWORD = process.env.MASTER_PASSWORD;
-    const ENCRYPTION_SALT = process.env.ENCRYPTION_SALT;
-
-    if (!MASTER_PASSWORD || !ENCRYPTION_SALT) {
-        throw new Error('MASTER_PASSWORD or ENCRYPTION_SALT is not set');
-    }
-
     const envVars = await getAllEnvVars(project.id);
 
     return (

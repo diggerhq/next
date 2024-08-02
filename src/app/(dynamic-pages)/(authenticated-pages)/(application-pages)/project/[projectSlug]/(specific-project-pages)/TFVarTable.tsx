@@ -9,13 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { getProjectPublicKey } from "@/data/admin/env-vars";
 import { tfvarsOnBulkUpdate, tfvarsOnDelete, tfvarsOnUpdate } from "@/data/user/tfvars";
 import { EnvVar } from "@/types/userTypes";
 import { motion } from 'framer-motion';
 import { Copy, Edit, LockKeyhole, Plus, Save, Trash, Unlock } from 'lucide-react';
 import moment from 'moment';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 type TFVarTableProps = {
@@ -57,7 +58,16 @@ export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
     const [bulkEditValue, setBulkEditValue] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [canCreateSecrets, setCanCreateSecrets] = useState(true);
     const router = useRouter();
+
+    useEffect(() => {
+        getProjectPublicKey(projectId).then(key => {
+            if (!key) {
+                setCanCreateSecrets(false);
+            }
+        })
+    });
 
     const handleEdit = (envVar: EnvVar) => {
         setEditingVar({
@@ -313,7 +323,7 @@ export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="plain_text">Plain Text</SelectItem>
-                                    <SelectItem value="secret">Secret</SelectItem>
+                                    <SelectItem value="secret" disabled={!canCreateSecrets}>Secret</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

@@ -1,3 +1,5 @@
+'use server';
+
 import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
 import { EnvVar } from '@/types/userTypes';
 import { constants, publicEncrypt } from 'crypto';
@@ -6,17 +8,7 @@ export async function encryptSecretWithPublicKey(
   text: string,
   projectId: string,
 ): Promise<string> {
-  const { data: orgData } = await supabaseAdminClient
-    .from('projects')
-    .select('organization_id')
-    .eq('id', projectId)
-    .single();
-  const { data: publicKeyData } = await supabaseAdminClient
-    .from('organizations')
-    .select('public_key')
-    .eq('id', orgData?.organization_id || '')
-    .single();
-  const publicKey = publicKeyData?.public_key;
+  const publicKey = await getProjectPublicKey(projectId);
   if (!publicKey) {
     console.error('No secrets key in the org');
     throw new Error('No secrets key in the org');
@@ -31,6 +23,26 @@ export async function encryptSecretWithPublicKey(
     buffer,
   );
   return encrypted.toString('base64');
+}
+
+export async function getProjectPublicKey(
+  projectId: string,
+): Promise<string | null> {
+  const { data: orgData } = await supabaseAdminClient
+    .from('projects')
+    .select('organization_id')
+    .eq('id', projectId)
+    .single();
+  const { data: publicKeyData } = await supabaseAdminClient
+    .from('organizations')
+    .select('public_key')
+    .eq('id', orgData?.organization_id || '')
+    .single();
+  if (publicKeyData?.public_key) {
+    return publicKeyData.public_key;
+  } else {
+    return null;
+  }
 }
 
 export async function storeEnvVar(
