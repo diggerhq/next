@@ -84,7 +84,7 @@ export const DeleteOrganization = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="w-full  max-w-4xl border-destructive/50 bg-destructive/5">
+      <Card className="w-full  max-w-5xl border-destructive/50 bg-destructive/5">
         <CardHeader>
           <CardTitle>
             Danger Zone

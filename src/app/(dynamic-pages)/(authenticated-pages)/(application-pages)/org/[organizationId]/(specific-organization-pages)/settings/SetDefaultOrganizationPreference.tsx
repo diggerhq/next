@@ -8,7 +8,7 @@ import { SetDefaultOrganizationButton } from './SetDefaultOrganizationButton';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <Card className="w-full  max-w-4xl ">
+    <Card className="w-full  max-w-5xl ">
       <CardHeader className="space-y-1">
         <CardTitle className="flex items-center space-x-2">
           Default Organization

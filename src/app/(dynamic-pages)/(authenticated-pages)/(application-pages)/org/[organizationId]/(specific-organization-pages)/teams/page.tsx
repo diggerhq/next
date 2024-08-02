@@ -41,20 +41,18 @@ export default async function Page({
 
                 <CreateTeamDialog organizationId={organizationId} />
             </div>
-            {
-                <Suspense
-                    fallback={
-                        <T.P className="text-muted-foreground my-6">
-                            Loading teams...
-                        </T.P>
-                    }
-                >
-                    <TeamsTableWithPagination
-                        organizationId={organizationId}
-                        searchParams={searchParams}
-                    />
-                </Suspense>
-            }
+            <Suspense
+                fallback={
+                    <T.P className="text-muted-foreground my-6">
+                        Loading teams...
+                    </T.P>
+                }
+            >
+                <TeamsTableWithPagination
+                    organizationId={organizationId}
+                    searchParams={searchParams}
+                />
+            </Suspense>
         </div>
     );
 }

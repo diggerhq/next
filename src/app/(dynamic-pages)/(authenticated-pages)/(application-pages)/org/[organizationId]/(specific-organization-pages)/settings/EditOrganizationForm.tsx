@@ -75,7 +75,7 @@ export function EditOrganizationForm({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="w-full max-w-4xl">
+      <Card className="w-full max-w-5xl">
         <CardHeader>
           <CardTitle>Edit Organization</CardTitle>
           <CardDescription>Update your organization's title and slug</CardDescription>

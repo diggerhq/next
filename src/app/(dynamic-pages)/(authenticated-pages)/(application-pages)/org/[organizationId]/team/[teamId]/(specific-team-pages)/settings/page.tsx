@@ -18,7 +18,7 @@ export default async function TeamSettingsPage({
     const { teamId, organizationId } = parsedParams;
 
     return (
-        <div className="space-y-8 max-w-4xl mt-2">
+        <div className="space-y-8 max-w-5xl mt-2">
             <PageHeading
                 title="Team Settings"
                 subTitle="Manage team members and settings here"

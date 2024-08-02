@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { T } from '@/components/ui/Typography';
 import { getSlimTeamById } from '@/data/user/teams';
 import { projectsfilterSchema } from '@/utils/zod-schemas/params';
-import { Plus } from 'lucide-react';
+import { Plus, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { z } from 'zod';
@@ -34,6 +34,14 @@ export default async function TeamPage({
             <PageHeading
                 title={slimteam?.name ?? 'Team'}
                 subTitle="You can create projects within team"
+                actions={
+                    <Link href={`/org/${organizationId}/team/${teamId}/settings`}>
+                        <Button variant="outline" size="sm">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Team Settings
+                        </Button>
+                    </Link>
+                }
             />
             <div className="flex justify-between gap-2">
                 <div className="md:w-1/3">

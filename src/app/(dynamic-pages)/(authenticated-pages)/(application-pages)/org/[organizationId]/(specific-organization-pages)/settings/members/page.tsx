@@ -52,7 +52,7 @@ async function TeamMembers({ organizationId }: { organizationId: string }) {
   );
 
   return (
-    <Card className="max-w-4xl">
+    <Card className="max-w-5xl">
       <div className="flex flex-row justify-between items-center pr-6 w-full">
         <CardHeader>
           <CardTitle>Organization Members</CardTitle>
@@ -120,7 +120,7 @@ async function TeamInvitations({ organizationId }: { organizationId: string }) {
   }
 
   return (
-    <Card className=" max-w-4xl">
+    <Card className=" max-w-5xl">
       <CardHeader>
         <CardTitle>Invitations</CardTitle>
         <CardDescription>

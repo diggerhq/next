@@ -37,7 +37,8 @@ export const getTeamsInOrganization = async (
     .order('created_at', { ascending: true });
 
   if (error) {
-    throw error;
+    console.error('Error fetching projects:', error);
+    return [];
   }
 
   if (!data) {
@@ -74,12 +75,12 @@ export const getTeams = async ({
   });
 
   if (error) {
+    console.error('Error fetching teams:', error);
     throw error;
   }
 
-  return data;
+  return data || [];
 };
-
 export const getTeamsTotalCount = async ({
   organizationId,
   query = '',
@@ -265,14 +266,50 @@ export const getTeamAdminUserNameByTeamId = async (teamId: number) => {
     `,
     )
     .eq('team_id', teamId)
-    .eq('role', 'admin')
-    .single();
+    .eq('role', 'admin');
 
   if (error) {
-    throw error;
+    console.error('Error fetching team admin names:', error);
+    return null;
   }
 
-  return data?.user_profiles?.full_name ?? null;
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  // If there are multiple admins, join their names
+  const adminNames = data
+    .map((item) => item.user_profiles?.full_name)
+    .filter(Boolean);
+  return adminNames.join(', ') || null;
+};
+export const getTeamOwnerNameByTeamId = async (teamId: number) => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('team_members')
+    .select(
+      `
+      user_profiles (
+        full_name
+      )
+    `,
+    )
+    .eq('team_id', teamId)
+    .eq('role', 'admin')
+    .order('created_at', { ascending: true })
+    .limit(1);
+
+  if (error) {
+    console.error('Error fetching team owner name:', error);
+    return null;
+  }
+
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  const ownerName = data[0].user_profiles?.full_name;
+  return ownerName || null;
 };
 
 export const getCanLoggedInUserManageTeam = async (
