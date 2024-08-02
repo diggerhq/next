@@ -28,12 +28,12 @@ export default async function TeamPage({
     const parsedParams = paramsSchema.parse(params);
     const filters = projectsfilterSchema.parse(searchParams);
     const { teamId, organizationId } = parsedParams;
-    const { name } = await getSlimTeamById(teamId);
+    const slimteam = await getSlimTeamById(teamId);
     return (
         <div className="flex flex-col space-y-4 max-w-5xl mt-2">
             <PageHeading
-                title={name}
-                subTitle="You can create projects within team, or within your organization."
+                title={slimteam?.name ?? 'Team'}
+                subTitle="You can create projects within team"
             />
             <div className="flex justify-between gap-2">
                 <div className="md:w-1/3">

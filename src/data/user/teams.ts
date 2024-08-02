@@ -18,12 +18,13 @@ export async function getSlimTeamById(teamId: number) {
     .select('id,name,organization_id')
     .eq('id', teamId)
     .single();
+
   if (error) {
-    throw error;
+    console.error(`Error fetching team with id ${teamId}:`, error);
+    return null;
   }
   return data;
 }
-
 export const getTeamsInOrganization = async (
   organizationId: string,
 ): Promise<Table<'teams'>[]> => {

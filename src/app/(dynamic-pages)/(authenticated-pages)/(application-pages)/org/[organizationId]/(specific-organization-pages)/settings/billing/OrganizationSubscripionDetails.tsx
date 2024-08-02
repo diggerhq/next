@@ -1,5 +1,5 @@
 'use server';
-import { PageHeading } from '@/components/PageHeading';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { T } from '@/components/ui/Typography';
 import { getActiveProductsWithPrices } from '@/data/user/organizations';
 import type { Enum, NormalizedSubscription, UnwrapPromise } from '@/types';
@@ -185,16 +185,22 @@ export async function OrganizationSubscripionDetails({
     normalizedSubscription.type === 'no-subscription'
   ) {
     return (
-      <>
-        <PageHeading
-          title="Subscription"
-          subTitle="This organization doesn't have any plan at the moment"
-        />
-        <ChoosePricingTable
-          organizationId={organizationId}
-          isOrganizationAdmin={isOrganizationAdmin}
-        />
-      </>
+      <Card className="w-full max-w-4xl">
+        <CardHeader>
+          <CardTitle>
+            Subscription
+          </CardTitle>
+          <CardDescription>
+            This organization doesn't have any plan at the moment
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChoosePricingTable
+            organizationId={organizationId}
+            isOrganizationAdmin={isOrganizationAdmin}
+          />
+        </CardContent>
+      </Card>
     );
   }
 

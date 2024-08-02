@@ -42,7 +42,8 @@ export const ConfirmAcceptInvitationDialog = ({
       },
       onSuccess: (response) => {
         if (response.status === 'success') {
-          router.push(`/${response.data}`);
+          console.log('invitation accepted ', response.data);
+          router.push(`/org/${response.data}`);
         }
       },
     });

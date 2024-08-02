@@ -1,14 +1,23 @@
 "use client";
-import { Button } from "@/components/Button";
-import { T } from "@/components/ui/Typography";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { updateOrganizationInfo } from "@/data/user/organizations";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
 import { generateSlug } from "@/lib/utils";
-import { createOrganizationSchema } from "@/utils/zod-schemas/organization";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+const formSchema = z.object({
+  organizationTitle: z.string().min(2).max(50),
+  organizationSlug: z.string().min(2).max(50),
+});
 
 export function EditOrganizationForm({
   initialTitle,
@@ -19,14 +28,10 @@ export function EditOrganizationForm({
   organizationId: string;
   initialSlug: string;
 }) {
+  const router = useRouter();
 
-  const router = useRouter()
-
-  const { register, handleSubmit, formState, setValue } = useForm<{
-    organizationTitle: string;
-    organizationSlug: string;
-  }>({
-    resolver: zodResolver(createOrganizationSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       organizationTitle: initialTitle,
       organizationSlug: initialSlug,
@@ -34,86 +39,104 @@ export function EditOrganizationForm({
   });
 
   const { mutate, isLoading } = useSAToastMutation(
-    async ({ organizationTitle, organizationSlug }: { organizationTitle: string, organizationSlug: string }) => {
+    async (values: z.infer<typeof formSchema>) => {
       return await updateOrganizationInfo(
         organizationId,
-        organizationTitle,
-        organizationSlug,
+        values.organizationTitle,
+        values.organizationSlug,
       );
     },
     {
       loadingMessage: "Updating organization information...",
       successMessage: "Organization information updated!",
-      errorMessage(error) {
-        try {
-          if (error instanceof Error) {
-            return String(error.message);
-          }
-          return `Failed to update organization information ${String(error)}`;
-        } catch (_err) {
-          console.warn(_err);
-          return "Failed to update organization information";
-        }
-      },
+      errorMessage: "Failed to update organization information",
       onSuccess(response) {
         if (response.status === "success" && response.data) {
-          router.push(`/${response.data.slug}/settings`)
+          router.push(`/org/${response.data.id}/settings`);
         }
       },
     },
   );
 
-  const onSubmit: SubmitHandler<{
-    organizationTitle: string;
-    organizationSlug: string;
-  }> = (data) => {
-    mutate(data);
-  };
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    mutate(values);
+  }
+
+  function onReset() {
+    form.reset({
+      organizationTitle: initialTitle,
+      organizationSlug: initialSlug,
+    });
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <T.H4>Edit Organization Title</T.H4>
-        <T.P className="text-muted-foreground">
-          This is the title that will be displayed on the organization page.
-        </T.P>
-      </div>
-      <form
-        data-testid="edit-organization-title-form"
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4 max-w-md"
-      >
-        <Input
-          type="text"
-          id="organization-title"
-          {...register("organizationTitle")}
-          onChange={(e) => {
-            setValue("organizationTitle", e.target.value, { shouldValidate: true });
-            setValue("organizationSlug", generateSlug(e.target.value), { shouldValidate: true });
-          }}
-        />
-        <div className="space-y-2">
-          <T.H4>Edit Organization Slug</T.H4>
-          <T.P className="text-muted-foreground">
-            This is the slug that will be displayed in the URL.
-          </T.P>
-        </div>
-        <Input
-
-          type="text"
-          id="organization-slug"
-          {...register("organizationSlug")}
-        />
-        <div className="inline-block">
-          <Button
-            disabled={isLoading || !formState.isValid}
-            type="submit"
-            id="update-organization-title-button"
-          >
-            {isLoading ? "Updating..." : "Update"}
-          </Button>
-        </div>
-      </form>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="w-full max-w-4xl">
+        <CardHeader>
+          <CardTitle>Edit Organization</CardTitle>
+          <CardDescription>Update your organization's title and slug</CardDescription>
+        </CardHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-8">
+              <FormField
+                control={form.control}
+                name="organizationTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Organization Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          form.setValue("organizationSlug", generateSlug(e.target.value), { shouldValidate: true });
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      This is the title that will be displayed on the organization page.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="organizationSlug"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Organization Slug</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This is the slug that will be displayed in the URL.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Organization"
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
+    </motion.div>
   );
 }

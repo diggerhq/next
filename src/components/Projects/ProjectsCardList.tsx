@@ -16,13 +16,6 @@ export enum ProjectStatus {
   completed = "completed",
 }
 
-const statusEmojis = {
-  draft: "📝",
-  pending_approval: "⏳",
-  approved: "🏗️",
-  completed: "✅",
-};
-
 const MotionCard = motion(Card);
 const MotionCardContent = motion(CardContent);
 
@@ -50,19 +43,31 @@ export const ProjectsCardList = ({
 }: ProjectCardsProps) => {
   if (projects.length === 0) {
     return (
-      <p className="text-muted-foreground my-6">
-        🔍 No matching projects found.
-      </p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center justify-center space-y-4 p-8 bg-muted rounded-lg"
+      >
+        <motion.h3
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-xl font-semibold text-center"
+        >
+          No projects found
+        </motion.h3>
+      </motion.div>
     );
   }
 
   return (
     <ScrollArea className="w-full">
       <div className="flex space-x-4 pb-4">
-        {projects.slice(0, 5).map((project, index) => (
+        {projects.map((project, index) => (
           <MotionCard
             key={project.id}
-            className="w-[300px] shadow-sm"
+            className="w-[300px] shadow-sm hover:bg-muted/50"
             variants={cardVariants}
             initial="hidden"
             animate="visible"
@@ -72,7 +77,7 @@ export const ProjectsCardList = ({
               <MotionCardContent className="p-0 space-y-3" variants={contentVariants} initial="hidden" animate="visible">
                 <motion.div className="flex justify-between items-center" variants={itemVariants}>
                   <span className="text-xs text-muted-foreground">ID: {project.id.slice(0, 7)}</span>
-                  <Badge variant="outline" className="bg-primary/10 text-foreground">{project.teamName}</Badge>
+                  <Badge variant="outline" className="bg-primary/10 text-foreground">{project.teamName ? project.teamName : 'Org level'}</Badge>
                 </motion.div>
                 <motion.h2 className="text-lg font-semibold" variants={itemVariants}>{project.name}</motion.h2>
                 <motion.div className="flex items-center text-xs text-muted-foreground" variants={itemVariants}>
@@ -96,7 +101,3 @@ export const ProjectsCardList = ({
     </ScrollArea>
   );
 };
-
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}

@@ -45,7 +45,7 @@ export const TeamsCardList = ({
                 {teams.slice(0, 5).map((team, index) => (
                     <MotionCard
                         key={team.id}
-                        className="w-[300px] shadow-sm"
+                        className="w-[300px] shadow-sm hover:bg-muted/50"
                         variants={cardVariants}
                         initial="hidden"
                         animate="visible"

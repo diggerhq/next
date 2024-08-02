@@ -1,6 +1,8 @@
 import { T } from '@/components/ui/Typography';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    Table as ShadcnTable,
+    Table,
     TableBody,
     TableCell,
     TableHead,
@@ -17,6 +19,7 @@ import {
     getTeamMembersByTeamId,
 } from '@/data/user/teams';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import { UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { AddUserToTeamDialog } from './AddUserToTeamDialog';
@@ -37,28 +40,41 @@ async function AddUserToTeam({
 
     if (addableMembers.length === 0) {
         return (
-            <div>
-                <T.H3>Want to invite a member to this team? </T.H3>
-                <T.Subtle>
-                    No more users to add. Invite users to the organization first{' '}
-                    <Link
-                        className="text-blue-500 underline cursor-pointer"
-                        href={`/org/${organizationId}/settings/members`}
-                    >
-                        here
-                    </Link>
-                    .
-                </T.Subtle>
-            </div>
+            <Card className='bg-muted/50 w-full px-0'>
+                <CardContent className='flex flex-row justify-between gap-4 px-0 pb-0'>
+                    <CardHeader>
+                        <CardTitle>Invite Members</CardTitle>
+                        <CardDescription>Add new members to your team</CardDescription>
+                    </CardHeader>
+                    <CardFooter className='pt-4 py-0'>
+                        <Button asChild>
+                            <Link href={`/org/${organizationId}/settings/members`}>
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Invite to Organization
+                            </Link>
+                        </Button>
+                    </CardFooter>
+                </CardContent>
+            </Card>
         );
     }
 
     return (
-        <AddUserToTeamDialog
-            organizationId={organizationId}
-            teamId={teamId}
-            addableMembers={addableMembers}
-        />
+        <Card className='bg-muted/50 w-full px-0'>
+            <CardContent className='flex flex-row justify-between gap-4 px-0 pb-0'>
+                <CardHeader>
+                    <CardTitle>Invite Members</CardTitle>
+                    <CardDescription>Add new members to your team</CardDescription>
+                </CardHeader>
+                <CardFooter className='pt-4 py-0'>
+                    <AddUserToTeamDialog
+                        organizationId={organizationId}
+                        teamId={teamId}
+                        addableMembers={addableMembers}
+                    />
+                </CardFooter>
+            </CardContent>
+        </Card>
     );
 }
 
@@ -85,40 +101,34 @@ export async function AutomaticTeamAdmins({
     });
 
     return (
-        <div className="space-y-2">
-            <div className="space-y-2 max-w-2xl">
-                <T.H2>Team Admins</T.H2>
-                <T.Subtle>
-                    Below are organization admins of the organization{' '}
-                    <strong>{organizationTitle} </strong>. As they are organization
-                    admins, they are automatically team admins of all teams in the
-                    organization.
-                </T.Subtle>
-            </div>
-
-            <div className="overflow-hidden shadow border sm:rounded-lg mt-8 max-w-2xl">
-                <ShadcnTable>
+        <Card>
+            <CardHeader>
+                <CardTitle>Team Admins</CardTitle>
+                <CardDescription>
+                    Organization admins of {organizationTitle} who are automatically team admins
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead scope="col">User</TableHead>{' '}
-                            <TableHead scope="col">Name</TableHead>
-                            <TableHead scope="col">Role</TableHead>
+                            <TableHead>User</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Role</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {autoTeamAdminList.map((member, index) => {
-                            return (
-                                <TableRow key={member.id}>
-                                    <TableCell>{member.rowNo}</TableCell>{' '}
-                                    <TableCell>{member.name}</TableCell>
-                                    <TableCell className="uppercase">{member.role}</TableCell>
-                                </TableRow>
-                            );
-                        })}
+                        {autoTeamAdminList.map((member) => (
+                            <TableRow key={member.id}>
+                                <TableCell>{member.rowNo}</TableCell>
+                                <TableCell>{member.name}</TableCell>
+                                <TableCell className="uppercase">{member.role}</TableCell>
+                            </TableRow>
+                        ))}
                     </TableBody>
-                </ShadcnTable>
-            </div>
-        </div>
+                </Table>
+            </CardContent>
+        </Card>
     );
 }
 
@@ -150,77 +160,72 @@ export async function TeamMembers({
             userId: userProfile.id,
         };
     });
-    return (
-        <div className="space-y-8">
-            <div>
-                <div className="space-y-2 max-w-lg">
-                    <T.H2>Team Members</T.H2>
-                    {teamMemberList.length ? (
-                        <T.Subtle>
-                            Below are team members who have been manually added to the team.
-                        </T.Subtle>
-                    ) : (
-                        <T.Subtle>There are no team members in this team.</T.Subtle>
-                    )}
-                </div>
 
-                {teamMemberList.length ? (
-                    <div className="overflow-hidden shadow border sm:rounded-lg mt-8 max-w-xl">
-                        <ShadcnTable>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead scope="col">User</TableHead>{' '}
-                                    <TableHead scope="col">Name</TableHead>
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Team Members</CardTitle>
+                <CardDescription>
+                    {teamMemberList.length
+                        ? 'Members who have been manually added to the team'
+                        : 'There are no team members in this team'}
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                {teamMemberList.length > 0 && (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>User</TableHead>
+                                <TableHead>Name</TableHead>
+                                {canUserManageTeam ? (
+                                    <>
+                                        <TableHead>Change Role</TableHead>
+                                        <TableHead>Actions</TableHead>
+                                    </>
+                                ) : (
+                                    <TableHead>Role</TableHead>
+                                )}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {teamMemberList.map((member) => (
+                                <TableRow key={member.id}>
+                                    <TableCell>{member.rowNo}</TableCell>
+                                    <TableCell>{member.name}</TableCell>
                                     {canUserManageTeam ? (
                                         <>
-                                            <TableHead scope="col">Change Role</TableHead>
-                                            <TableHead scope="col">Actions</TableHead>
+                                            <TableCell className='w-1/3'>
+                                                <ChangeRole
+                                                    userId={member.userId}
+                                                    teamId={teamId}
+                                                    role={member.role}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <RemoveUserDialog
+                                                    isSameUser={member.userId === loggedInUser.id}
+                                                    teamId={teamId}
+                                                    userId={member.userId}
+                                                />
+                                            </TableCell>
                                         </>
                                     ) : (
-                                        <TableHead scope="col">Role</TableHead>
+                                        <TableCell>{member.role}</TableCell>
                                     )}
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {teamMemberList.map((member, index) => {
-                                    return (
-                                        <TableRow key={member.id}>
-                                            <TableCell>{member.rowNo}</TableCell>{' '}
-                                            <TableCell>{member.name}</TableCell>
-                                            {canUserManageTeam ? (
-                                                <>
-                                                    <TableCell>
-                                                        <ChangeRole
-                                                            userId={member.userId}
-                                                            teamId={teamId}
-                                                            role={member.role}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <RemoveUserDialog
-                                                            isSameUser={member.userId === loggedInUser.id}
-                                                            teamId={teamId}
-                                                            userId={member.userId}
-                                                        />
-                                                    </TableCell>
-                                                </>
-                                            ) : (
-                                                <TableCell>{member.role}</TableCell>
-                                            )}
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </ShadcnTable>
-                    </div>
-                ) : null}
-            </div>
-
-            {canUserManageTeam ? (
-                <Suspense fallback={<T.P>Loading...</T.P>}>
-                    <AddUserToTeam organizationId={organizationId} teamId={teamId} />
-                </Suspense>
-            ) : null}
-        </div>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
+            </CardContent>
+            {canUserManageTeam && (
+                <CardFooter>
+                    <Suspense fallback={<T.P>Loading...</T.P>}>
+                        <AddUserToTeam organizationId={organizationId} teamId={teamId} />
+                    </Suspense>
+                </CardFooter>
+            )}
+        </Card>
     );
 }

@@ -40,7 +40,7 @@ export function ProjectTeamMemberRoleSelect({
                 onChange(value);
             }}
         >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-3/4">
                 <SelectValue placeholder="Select a role" />
             </SelectTrigger>
             <SelectContent>

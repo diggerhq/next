@@ -36,6 +36,7 @@ export const InviteOrganizationMemberDialog = ({
           variant="default"
           data-testid="invite-user-button"
           size="default"
+          className="w-fit"
         >
           <UserPlus className="mr-2 w-5 h-5" />
           Invite user

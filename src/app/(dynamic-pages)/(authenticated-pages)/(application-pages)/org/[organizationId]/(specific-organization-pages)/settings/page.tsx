@@ -65,7 +65,7 @@ export default async function EditOrganizationPage({
   const { organizationId } = organizationParamSchema.parse(params);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8 max-w-4xl">
       <Suspense fallback={<SettingsFormSkeleton />}>
         <EditOrganization organizationId={organizationId} />
       </Suspense>

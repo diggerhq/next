@@ -26,6 +26,7 @@ export function InviteUser({ organizationId }: { organizationId: string }) {
       errorMessage(error) {
         try {
           if (error instanceof Error) {
+            console.log(error.message);
             return String(error.message);
           }
           return `Failed to invite organization member ${String(error)}`;

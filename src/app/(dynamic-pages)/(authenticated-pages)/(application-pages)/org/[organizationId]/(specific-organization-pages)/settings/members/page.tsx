@@ -1,5 +1,5 @@
 import { T } from "@/components/ui/Typography";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table as ShadcnTable,
   TableBody,
@@ -52,15 +52,18 @@ async function TeamMembers({ organizationId }: { organizationId: string }) {
   );
 
   return (
-    <div className="space-y-4 max-w-4xl">
-      <div className="flex justify-between items-center">
-        <T.H3 className="mt-0">Team Members</T.H3>
-        {isOrganizationAdmin ? (
-          <InviteUser organizationId={organizationId} />
-        ) : null}
-      </div>
+    <Card className="max-w-4xl">
+      <div className="flex flex-row justify-between items-center pr-6 w-full">
+        <CardHeader>
+          <CardTitle>Organization Members</CardTitle>
+          <CardDescription>
+            Manage your organization members here.
+          </CardDescription>
 
-      <Card>
+        </CardHeader> {isOrganizationAdmin ? (
+          <InviteUser organizationId={organizationId} />
+        ) : null}</div>
+      <CardContent className="px-6">
         <ShadcnTable data-testid="members-table">
           <TableHeader>
             <TableRow>
@@ -87,8 +90,8 @@ async function TeamMembers({ organizationId }: { organizationId: string }) {
             })}
           </TableBody>
         </ShadcnTable>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -117,9 +120,14 @@ async function TeamInvitations({ organizationId }: { organizationId: string }) {
   }
 
   return (
-    <div className="space-y-4 max-w-4xl">
-      <T.H3>Invitations</T.H3>
-      <div className="shadow-sm border rounded-lg overflow-hidden">
+    <Card className=" max-w-4xl">
+      <CardHeader>
+        <CardTitle>Invitations</CardTitle>
+        <CardDescription>
+          Manage your organization invitations here.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <ShadcnTable>
           <TableHeader>
             <TableRow>
@@ -157,8 +165,8 @@ async function TeamInvitations({ organizationId }: { organizationId: string }) {
             })}
           </TableBody>
         </ShadcnTable>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -169,7 +177,7 @@ export default async function OrganizationPage({
 }) {
   const { organizationId } = organizationParamSchema.parse(params);
   return (
-    <div className="space-y-12">
+    <div className="space-y-8">
       <Suspense fallback={<ProjectsTableLoadingFallback />}>
         <TeamMembers organizationId={organizationId} />
       </Suspense>

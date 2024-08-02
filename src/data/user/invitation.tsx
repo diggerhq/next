@@ -16,7 +16,6 @@ import {
   createAcceptedOrgInvitationNotification,
   createNotification,
 } from "./notifications";
-import { getOrganizationSlugByOrganizationId } from "./organizations";
 import { getUserProfile } from "./user";
 
 // This function allows an application admin with service_role
@@ -136,9 +135,12 @@ export async function createInvitationHandler({
     .eq("id", organizationId)
     .single();
 
+  console.log(organizationResponse);
+
   if (organizationResponse.error) {
     return { status: 'error', message: organizationResponse.error.message };
   }
+
 
   const inviteeUserDetails = await setupInviteeUserDetails(email);
   // check if already invited
@@ -149,6 +151,8 @@ export async function createInvitationHandler({
     .eq("inviter_user_id", user.id)
     .eq("status", "active")
     .eq("organization_id", organizationId);
+
+  console.log(existingInvitationResponse);
 
   if (existingInvitationResponse.error) {
     return { status: 'error', message: existingInvitationResponse.error.message };
@@ -238,9 +242,12 @@ export async function acceptInvitationAction(
     .select("*")
     .single();
 
+  console.log(invitationResponse);
+
   if (invitationResponse.error) {
     return { status: 'error', message: invitationResponse.error.message };
   }
+
 
   const userProfile = await getUserProfile(user.id);
 
@@ -252,9 +259,12 @@ export async function acceptInvitationAction(
     },
   );
 
+
+
+
   revalidatePath("/", "layout");
-  const organizationSlug = await getOrganizationSlugByOrganizationId(invitationResponse.data.organization_id);
-  return { status: 'success', data: organizationSlug };
+
+  return { status: 'success', data: invitationResponse.data.organization_id };
 }
 
 export async function declineInvitationAction(invitationId: string): Promise<SAPayload> {

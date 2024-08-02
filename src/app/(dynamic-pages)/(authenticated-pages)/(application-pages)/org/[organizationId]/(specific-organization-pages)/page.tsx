@@ -3,14 +3,19 @@ import { Search } from "@/components/Search";
 import { TeamsCardList } from "@/components/Teams/TeamsCardList";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getOrganizationTitle } from "@/data/user/organizations";
-import { getAllProjectsInOrganization } from "@/data/user/projects";
+import { Separator } from "@/components/ui/separator";
+import { T } from "@/components/ui/Typography";
+import { getLoggedInUserOrganizationRole, getOrganizationTitle } from "@/data/user/organizations";
+import { getAllProjectsInOrganization, getProjectsForUser } from "@/data/user/projects";
 import { getSlimTeamById, getTeams } from "@/data/user/teams";
+import { Tables } from "@/lib/database.types";
+import { Enum } from "@/types";
+import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import {
   organizationParamSchema,
   projectsfilterSchema
 } from "@/utils/zod-schemas/params";
-import { Layers, Plus } from "lucide-react";
+import { Layers, Plus, Settings } from "lucide-react";
 import type { Metadata } from 'next';
 import Link from "next/link";
 import { Suspense } from "react";
@@ -23,24 +28,46 @@ import TeamsLoadingFallback from "./TeamsLoadingFallback";
 async function Projects({
   organizationId,
   filters,
+  userId,
+  userRole,
 }: {
   organizationId: string;
   filters: z.infer<typeof projectsfilterSchema>;
+  userId: string;
+  userRole: Enum<'organization_member_role'>;
 }) {
-  const projects = await getAllProjectsInOrganization({
-    organizationId,
-    ...filters,
-  });
+  let projects: Tables<'projects'>[];
+
+  if (userRole === 'admin') {
+    projects = await getAllProjectsInOrganization({
+      organizationId,
+      ...filters,
+    });
+  } else {
+    projects = await getProjectsForUser({
+      userId,
+      userRole,
+      organizationId,
+      ...filters,
+    });
+  }
+
   const projectWithTeamNames = await Promise.all(projects.map(async (project) => {
     if (project.team_id) {
-      const team = await getSlimTeamById(project.team_id);
-      const projectWithTeamName = { ...project, teamName: team.name };
-      return projectWithTeamName;
+      try {
+        const team = await getSlimTeamById(project.team_id);
+        return { ...project, teamName: team?.name || 'Unknown Team' };
+      } catch (error) {
+        console.error(`Error fetching team for project ${project.id}:`, error);
+        return { ...project };
+      }
     }
     return project;
   }));
+
   return <ProjectsCardList projects={projectWithTeamNames} />;
 }
+
 async function Teams({
   organizationId,
   filters,
@@ -65,38 +92,60 @@ export type DashboardProps = {
 async function Dashboard({ params, searchParams }: DashboardProps) {
   const { organizationId } = organizationParamSchema.parse(params);
   const validatedSearchParams = projectsfilterSchema.parse(searchParams);
+  const { id: userId } = await serverGetLoggedInUser();
+  const userRole = await getLoggedInUserOrganizationRole(organizationId);
 
   return (
     <DashboardClientWrapper>
+      <div className="flex justify-between gap-4 w-full">
+        <T.H2>Dashboard</T.H2>
+        <Link href={`/org/${organizationId}/settings`}>
+          <Button className="w-fit" variant="outline">
+            <Settings className="mr-2 h-4 w-4" />
+            Organization Settings
+          </Button>
+        </Link>
+      </div>
       <Card >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
-          <CardTitle className="text-3xl font-bold tracking-tight">Dashboard</CardTitle>
-          <div className="flex space-x-4">
-            <Link href={`/org/${organizationId}/projects/create`}>
-              <Button variant="default" size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Project
-              </Button>
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold tracking-tight">Recent Projects</h2>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              Recent Projects
+            </CardTitle>
             <div className="flex items-center space-x-4">
-              <Search className="w-[200px]" placeholder="Search projects" />
+              <div className="flex items-center space-x-4">
+                <Search placeholder="Search projects" />
+                {/* <MultiSelect
+                  options={userTeams.map(team => ({ label: team.name, value: team.id }))}
+                  placeholder="Filter by teams"
+                /> */}
+              </div>
               <Button variant="secondary" size="sm" asChild>
                 <Link href={`/org/${organizationId}/projects`}>
                   <Layers className="mr-2 h-4 w-4" />
                   View all projects
                 </Link>
               </Button>
+              <Separator orientation="vertical" className="h-6" />
+              <div className="flex space-x-4">
+                <Link href={`/org/${organizationId}/projects/create`}>
+                  <Button variant="default" size="sm">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Project
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
+        </CardHeader>
+        <CardContent>
+
           <Suspense fallback={<ProjectsLoadingFallback quantity={3} />}>
             <Projects
               organizationId={organizationId}
               filters={validatedSearchParams}
+              userId={userId}
+              userRole={userRole}
             />
             {validatedSearchParams.query && (
               <p className="mt-4 text-sm text-muted-foreground">
@@ -143,7 +192,6 @@ async function Dashboard({ params, searchParams }: DashboardProps) {
 export async function generateMetadata({ params }: DashboardProps): Promise<Metadata> {
   const { organizationId } = organizationParamSchema.parse(params);
   const title = await getOrganizationTitle(organizationId);
-  console.log('Organization title', title);
 
   return {
     title: `Dashboard | ${title}`,

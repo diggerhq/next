@@ -61,7 +61,7 @@ export default function CreateProjectForm({ organizationId, repositories, teams 
             terraformDir: "",
             managedState: true,
             labels: [],
-            teamId: null,
+            teamId: teams[0]?.id || null,
         },
     });
 

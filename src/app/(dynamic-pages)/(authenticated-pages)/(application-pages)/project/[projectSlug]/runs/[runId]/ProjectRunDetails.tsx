@@ -4,6 +4,7 @@ import { T } from "@/components/ui/Typography";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { approveRun, rejectRun } from "@/data/user/runs";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
@@ -12,7 +13,7 @@ import { supabaseUserClientComponentClient } from "@/supabase-clients/user/supab
 import { Table } from "@/types";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle2, Clock, GitPullRequest, LinkIcon, Loader2, Play, XCircle } from 'lucide-react';
+import { CheckCircle2, GitPullRequest, LinkIcon, Loader2, Play, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
@@ -152,7 +153,7 @@ export const ProjectRunDetails: React.FC<{
             async () => await rejectRun(run.id, loggedInUser.id),
             {
                 loadingMessage: 'Rejecting run...',
-                successMessage: 'Run rejected successfully',
+                successMessage: 'Run discarded',
                 errorMessage: 'Failed to reject run',
                 onSuccess: () => {
                     router.refresh();
@@ -165,6 +166,13 @@ export const ProjectRunDetails: React.FC<{
         const [workflowRunUrl, setWorkflowRunUrl] = useState(initialWorkflowRunUrl);
         const [applyTerraformOutput, setApplyTerraformOutput] = useState(initialApplyTerraformOutput);
         const [applyWorkflowRunUrl, setApplyWorkflowRunUrl] = useState(initialApplyWorkflowRunUrl);
+
+        const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+        const handleForceDiscard = () => {
+            rejectMutation();
+            setIsDialogOpen(false);
+        };
 
 
         useEffect(() => {
@@ -345,11 +353,41 @@ export const ProjectRunDetails: React.FC<{
                         </motion.div>
                     )}
                     <div className="flex items-center border-t pt-4 justify-between">
-                        <div className="flex items-center space-x-2">
-                            <Clock />
-                            <p className="text-sm">Total Duration</p>
-                        </div>
-                        <p className="text-sm text-[var(--muted-foreground)]">4s</p>
+                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant='outline'
+                                    className="w-full border-destructive text-destructive hover:bg-destructive/15 hover:text-destructive"
+                                    disabled={run.status === ToTitleCase('discarded')}
+                                >
+                                    Force discard
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Confirm Force Discard</DialogTitle>
+                                    <DialogDescription>
+                                        Are you sure you want to force discard this run? This action cannot be undone.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={handleForceDiscard}
+                                        disabled={isRejecting}
+                                    >
+                                        {isRejecting ? (
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        ) : (
+                                            'Force Discard'
+                                        )}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </motion.div>
                 <motion.div

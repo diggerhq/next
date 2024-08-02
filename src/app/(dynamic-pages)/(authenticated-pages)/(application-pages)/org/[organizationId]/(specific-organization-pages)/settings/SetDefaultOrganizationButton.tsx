@@ -29,7 +29,7 @@ export function SetDefaultOrganizationButton({
     },
   );
   return (
-    <Button aria-disabled={isLoading} onClick={() => mutate()}>
+    <Button aria-disabled={isLoading} className='w-fit' onClick={() => mutate()}>
       {isLoading ? 'Updating...' : 'Set as default'}
     </Button>
   );

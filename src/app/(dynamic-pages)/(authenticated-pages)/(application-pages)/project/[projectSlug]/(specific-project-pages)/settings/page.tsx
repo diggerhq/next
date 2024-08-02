@@ -7,8 +7,7 @@ import ProjectSettings from '../ProjectSettings';
 
 export default async function ProjectSettingsPage({ params }: { params: unknown }) {
   const { projectSlug } = projectSlugParamSchema.parse(params);
-  const [projectData, project, repository] = await Promise.all([
-    getSlimProjectBySlug(projectSlug),
+  const [project, repository] = await Promise.all([
     getProjectById((await getSlimProjectBySlug(projectSlug)).id),
     getRepoDetails((await getProjectById((await getSlimProjectBySlug(projectSlug)).id)).repo_id)
   ]);
