@@ -2,11 +2,7 @@
 'use server';
 
 import { EnvVar } from '@/types/userTypes';
-import {
-  deleteEnvVar,
-  getAllEnvVars,
-  storeEncryptedEnvVar,
-} from '../admin/encryption';
+import { deleteEnvVar, getAllEnvVars, storeEnvVar } from '../admin/env-vars';
 
 export async function tfvarsOnUpdate(
   oldName: string,
@@ -18,7 +14,7 @@ export async function tfvarsOnUpdate(
   if (oldName !== newName) {
     await deleteEnvVar(projectId, oldName);
   }
-  await storeEncryptedEnvVar(projectId, newName, value, isSecret);
+  await storeEnvVar(projectId, newName, value, isSecret);
   const vars = await getAllEnvVars(projectId);
   return vars.map((v) => ({ ...v, updated_at: new Date().toISOString() }));
 }
