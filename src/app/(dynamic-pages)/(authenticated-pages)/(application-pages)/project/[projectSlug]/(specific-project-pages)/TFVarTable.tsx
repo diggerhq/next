@@ -13,7 +13,7 @@ import { getProjectPublicKey } from "@/data/admin/env-vars";
 import { tfvarsOnBulkUpdate, tfvarsOnDelete, tfvarsOnUpdate } from "@/data/user/tfvars";
 import { EnvVar } from "@/types/userTypes";
 import { motion } from 'framer-motion';
-import { Copy, Edit, LockKeyhole, Plus, Save, Trash, Unlock } from 'lucide-react';
+import { AlertTriangle, Copy, Edit, LockKeyhole, Plus, Save, Trash, Unlock } from 'lucide-react';
 import moment from 'moment';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -334,6 +334,14 @@ export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
                             {isLoading ? 'Adding...' : 'Add Variable'}
                         </Button>
                     </div>
+                    {!canCreateSecrets && (<div className="mt-4 flex justify-start">
+                        <span className="flex items-center text-orange-400">
+                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            <em className="text-sm italic">
+                                To enable secrets creation, configure Secrets Key in your Organisation Settings
+                            </em>
+                        </span>
+                    </div>)}
                 </Card>
             )}
 
