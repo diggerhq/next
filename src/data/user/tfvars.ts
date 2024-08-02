@@ -10,11 +10,12 @@ export async function tfvarsOnUpdate(
   value: string,
   isSecret: boolean,
   projectId: string,
+  orgId: string,
 ): Promise<EnvVar[]> {
   if (oldName !== newName) {
     await deleteEnvVar(projectId, oldName);
   }
-  await storeEnvVar(projectId, newName, value, isSecret);
+  await storeEnvVar(projectId, orgId, newName, value, isSecret);
   const vars = await getAllEnvVars(projectId);
   return vars.map((v) => ({ ...v, updated_at: new Date().toISOString() }));
 }
@@ -31,6 +32,7 @@ export async function tfvarsOnDelete(
 export async function tfvarsOnBulkUpdate(
   vars: EnvVar[],
   projectId: string,
+  orgId: string,
 ): Promise<EnvVar[]> {
   const currentVars = await getAllEnvVars(projectId);
   const currentVarsMap = Object.fromEntries(
@@ -50,6 +52,7 @@ export async function tfvarsOnBulkUpdate(
           newVar.value,
           currentVar.is_secret,
           projectId,
+          orgId,
         );
       }
     } else {
@@ -59,6 +62,7 @@ export async function tfvarsOnBulkUpdate(
         newVar.value,
         false,
         projectId,
+        orgId,
       );
     }
   }

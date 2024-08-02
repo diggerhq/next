@@ -6,9 +6,8 @@ import { constants, publicEncrypt } from 'crypto';
 
 export async function encryptSecretWithPublicKey(
   text: string,
-  projectId: string,
+  publicKey: string,
 ): Promise<string> {
-  const publicKey = await getProjectPublicKey(projectId);
   if (!publicKey) {
     console.error('No secrets key in the org');
     throw new Error('No secrets key in the org');
@@ -25,35 +24,38 @@ export async function encryptSecretWithPublicKey(
   return encrypted.toString('base64');
 }
 
-export async function getProjectPublicKey(
-  projectId: string,
+export async function getOrganizationPublicKey(
+  orgId: string,
 ): Promise<string | null> {
-  const { data: orgData } = await supabaseAdminClient
-    .from('projects')
-    .select('organization_id')
-    .eq('id', projectId)
-    .single();
   const { data: publicKeyData } = await supabaseAdminClient
     .from('organizations')
     .select('public_key')
-    .eq('id', orgData?.organization_id || '')
+    .eq('id', orgId)
     .single();
   if (publicKeyData?.public_key) {
     return publicKeyData.public_key;
-  } else {
-    return null;
   }
+  return null;
 }
 
 export async function storeEnvVar(
   projectId: string,
+  orgId: string,
   name: string,
   value: string,
   isSecret: boolean,
 ) {
-  const storedValue = isSecret
-    ? await encryptSecretWithPublicKey(value, projectId)
-    : value; // non-secret values stored in plain text
+  const publicKey = await getOrganizationPublicKey(orgId);
+
+  let storedValue;
+  if (isSecret) {
+    if (!publicKey) {
+      throw new Error('Cannot encrypt secret - no public key');
+    }
+    storedValue = encryptSecretWithPublicKey(value, publicKey);
+  } else {
+    storedValue = value;
+  }
 
   const { data, error } = await supabaseAdminClient.from('env_vars').upsert(
     {

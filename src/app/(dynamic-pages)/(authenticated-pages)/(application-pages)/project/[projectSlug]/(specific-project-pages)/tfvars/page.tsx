@@ -1,5 +1,5 @@
 // page.tsx
-import { getAllEnvVars } from "@/data/admin/env-vars";
+import { getAllEnvVars, getOrganizationPublicKey } from "@/data/admin/env-vars";
 import { getSlimProjectBySlug } from "@/data/user/projects";
 import { projectSlugParamSchema } from "@/utils/zod-schemas/params";
 import type { Metadata } from "next";
@@ -20,13 +20,17 @@ export async function generateMetadata({
 export default async function TFVarsPage({ params }: { params: unknown }) {
     const { projectSlug } = projectSlugParamSchema.parse(params);
     const project = await getSlimProjectBySlug(projectSlug);
-
-    const envVars = await getAllEnvVars(project.id);
+    const [envVars, publicKey] = await Promise.all([
+        getAllEnvVars(project.id),
+        getOrganizationPublicKey(project.organization_id)
+    ]);
 
     return (
         <div className="flex flex-col space-y-4 max-w-5xl mt-2">
             <TFVarsDetails
                 projectId={project.id}
+                orgId={project.organization_id}
+                isAllowedSecrets={Boolean(publicKey)}
                 initialEnvVars={envVars}
             />
         </div>

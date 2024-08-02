@@ -27,7 +27,7 @@ export const getSlimProjectBySlug = async (projectSlug: string) => {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const { data, error } = await supabaseClient
     .from("projects")
-    .select("id, slug, name")
+    .select("id, slug, name, organization_id")
     .eq("slug", projectSlug)
     .single();
   if (error) {

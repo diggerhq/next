@@ -10,10 +10,12 @@ import TFVarTable from "./TFVarTable";
 
 type TFVarsDetailsProps = {
     projectId: string;
+    orgId: string;
+    isAllowedSecrets: boolean;
     initialEnvVars: EnvVar[];
 }
 
-export default function TFVarsDetails({ projectId, initialEnvVars }: TFVarsDetailsProps) {
+export default function TFVarsDetails({ projectId, orgId, isAllowedSecrets, initialEnvVars }: TFVarsDetailsProps) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -29,6 +31,8 @@ export default function TFVarsDetails({ projectId, initialEnvVars }: TFVarsDetai
                 <CardContent>
                     <TFVarTable
                         projectId={projectId}
+                        orgId={orgId}
+                        isAllowedSecrets={isAllowedSecrets}
                         envVars={initialEnvVars}
                     />
                 </CardContent>

@@ -9,20 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { getProjectPublicKey } from "@/data/admin/env-vars";
 import { tfvarsOnBulkUpdate, tfvarsOnDelete, tfvarsOnUpdate } from "@/data/user/tfvars";
 import { EnvVar } from "@/types/userTypes";
 import { motion } from 'framer-motion';
 import { AlertTriangle, Copy, Edit, LockKeyhole, Plus, Save, Trash, Unlock } from 'lucide-react';
 import moment from 'moment';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
-
-type TFVarTableProps = {
-    envVars: EnvVar[];
-    projectId: string;
-};
 
 const EmptyState: React.FC<{ onAddVariable: () => void }> = ({ onAddVariable }) => {
     return (
@@ -51,23 +45,21 @@ const EmptyState: React.FC<{ onAddVariable: () => void }> = ({ onAddVariable }) 
     );
 };
 
-export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
+type TFVarTableProps = {
+    envVars: EnvVar[];
+    projectId: string;
+    orgId: string;
+    isAllowedSecrets: boolean;
+};
+
+export default function TFVarTable({ projectId, orgId, isAllowedSecrets, envVars }: TFVarTableProps) {
     const [editingVar, setEditingVar] = useState<{ originalName: string, currentVar: EnvVar } | null>(null);
     const [newVar, setNewVar] = useState<Omit<EnvVar, 'updated_at'>>({ name: '', value: '', is_secret: false });
     const [bulkEditMode, setBulkEditMode] = useState(false);
     const [bulkEditValue, setBulkEditValue] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
     const [showAddForm, setShowAddForm] = useState(false);
-    const [canCreateSecrets, setCanCreateSecrets] = useState(true);
     const router = useRouter();
-
-    useEffect(() => {
-        getProjectPublicKey(projectId).then(key => {
-            if (!key) {
-                setCanCreateSecrets(false);
-            }
-        })
-    });
 
     const handleEdit = (envVar: EnvVar) => {
         setEditingVar({
@@ -93,7 +85,8 @@ export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
                     editingVar.currentVar.name,
                     editingVar.currentVar.value,
                     editingVar.currentVar.is_secret,
-                    projectId
+                    projectId,
+                    orgId,
                 );
                 toast.success('Variable updated successfully');
                 setEditingVar(null);
@@ -114,7 +107,7 @@ export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
             }
             setIsLoading(true);
             try {
-                await tfvarsOnUpdate(newVar.name, newVar.name, newVar.value, newVar.is_secret, projectId);
+                await tfvarsOnUpdate(newVar.name, newVar.name, newVar.value, newVar.is_secret, projectId, orgId);
                 toast.success('New variable added successfully');
                 setNewVar({ name: '', value: '', is_secret: false });
                 setShowAddForm(false);
@@ -151,7 +144,7 @@ export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
                 }
 
                 setIsLoading(true);
-                await tfvarsOnBulkUpdate(parsedVars, projectId);
+                await tfvarsOnBulkUpdate(parsedVars, projectId, orgId);
                 toast.success('Bulk update successful');
                 setBulkEditMode(false);
                 router.refresh();
@@ -323,7 +316,7 @@ export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="plain_text">Plain Text</SelectItem>
-                                    <SelectItem value="secret" disabled={!canCreateSecrets}>Secret</SelectItem>
+                                    <SelectItem value="secret" disabled={!isAllowedSecrets}>Secret</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -334,7 +327,7 @@ export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
                             {isLoading ? 'Adding...' : 'Add Variable'}
                         </Button>
                     </div>
-                    {!canCreateSecrets && (<div className="mt-4 flex justify-start">
+                    {!isAllowedSecrets && (<div className="mt-4 flex justify-start">
                         <span className="flex items-center text-orange-400">
                             <AlertTriangle className="h-4 w-4 mr-2" />
                             <em className="text-sm italic">
