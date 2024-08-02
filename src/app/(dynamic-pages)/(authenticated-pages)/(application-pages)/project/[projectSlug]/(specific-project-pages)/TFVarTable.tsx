@@ -305,14 +305,14 @@ export default function TFVarTable({ projectId, envVars }: TFVarTableProps) {
                         <div>
                             <Label htmlFor="varType">Variable Type</Label>
                             <Select
-                                value={newVar.is_secret ? "secret" : "default"}
+                                value={newVar.is_secret ? "secret" : "plain_text"}
                                 onValueChange={(value) => setNewVar({ ...newVar, is_secret: value === "secret" })}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="default">Default</SelectItem>
+                                    <SelectItem value="plain_text">Plain Text</SelectItem>
                                     <SelectItem value="secret">Secret</SelectItem>
                                 </SelectContent>
                             </Select>
