@@ -12,8 +12,8 @@ export async function generateMetadata({
     const project = await getSlimProjectBySlug(projectSlug);
 
     return {
-        title: `TFVars | ${project.name}`,
-        description: `Manage Terraform variables for ${project.name}`,
+        title: `Variables | ${project.name}`,
+        description: `Manage variables for ${project.name}`,
     };
 }
 

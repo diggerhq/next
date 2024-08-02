@@ -23,8 +23,8 @@ export default function TFVarsDetails({ projectId, initialEnvVars }: TFVarsDetai
         >
             <Card className="w-full">
                 <CardHeader>
-                    <CardTitle>Terraform Variables</CardTitle>
-                    <CardDescription>Manage Terraform variables for project</CardDescription>
+                    <CardTitle>Variables</CardTitle>
+                    <CardDescription>Manage variables for project. They will be exposed in the job as environment variables.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <TFVarTable
