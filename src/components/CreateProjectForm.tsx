@@ -233,9 +233,9 @@ export default function CreateProjectForm({ organizationId, repositories, teams 
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <CardHeader className="flex flex-col">
-                        <CardTitle className="text-lg">Select a Team</CardTitle>
-                        <CardDescription className="text-sm text-muted-foreground">Choose the team for your project</CardDescription>
+                    <CardHeader className="flex flex-col space-y-0">
+                        <CardTitle className="text-lg mb-0">Select a Team</CardTitle>
+                        <CardDescription className="text-sm text-muted-foreground mt-0">Choose the team for your project</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {teams.length > 0 ? (
