@@ -21,6 +21,7 @@ interface SecretsKeyManagerProps {
 export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair, onDeletePublicKey }: SecretsKeyManagerProps) {
     const [publicKey, setPublicKey] = useState<string | null>(initialPublicKey);
     const [privateKey, setPrivateKey] = useState<string | null>(null);
+    const [isPrivateKeyCopied, setIsPrivateKeyCopied] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -30,6 +31,7 @@ export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair
             const { publicKey: newPublicKey, privateKey: newPrivateKey } = await onCreateKeyPair();
             setPublicKey(newPublicKey);
             setPrivateKey(newPrivateKey);
+            setIsPrivateKeyCopied(false);
         } catch (error) {
             console.error('Failed to create key pair:', error);
             toast.error('Failed to create key pair. Please try again.');
@@ -44,6 +46,7 @@ export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair
             await onDeletePublicKey();
             setPublicKey(null);
             setPrivateKey(null);
+            setIsPrivateKeyCopied(false);
             toast.success('Public key has been deleted.');
         } catch (error) {
             console.error('Failed to delete public key:', error);
@@ -53,9 +56,12 @@ export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair
         }
     };
 
-    const copyToClipboard = (text: string) => {
-        navigator.clipboard.writeText(text);
-        toast.success('The key has been copied to your clipboard.');
+    const copyPrivateKeyToClipboard = () => {
+        if (privateKey) {
+            navigator.clipboard.writeText(privateKey);
+            toast.success('The private key has been copied to your clipboard.');
+            setIsPrivateKeyCopied(true);
+        }
     };
 
     return (
@@ -88,7 +94,10 @@ export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair
                                         variant="outline"
                                         size="icon"
                                         className="ml-2"
-                                        onClick={() => copyToClipboard(publicKey)}
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(publicKey);
+                                            toast.success('Public key copied to clipboard.');
+                                        }}
                                     >
                                         <Copy className="h-4 w-4" />
                                     </Button>
@@ -102,17 +111,19 @@ export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair
                                         <div className="flex items-center">
                                             <Input
                                                 readOnly
-                                                value={privateKey}
+                                                value={isPrivateKeyCopied ? '•'.repeat(100) : privateKey}
                                                 className="font-mono text-sm"
                                             />
-                                            <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="ml-2"
-                                                onClick={() => copyToClipboard(privateKey)}
-                                            >
-                                                <Copy className="h-4 w-4" />
-                                            </Button>
+                                            {!isPrivateKeyCopied && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="ml-2"
+                                                    onClick={copyPrivateKeyToClipboard}
+                                                >
+                                                    <Copy className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </div>
                                     </AlertDescription>
                                 </Alert>
