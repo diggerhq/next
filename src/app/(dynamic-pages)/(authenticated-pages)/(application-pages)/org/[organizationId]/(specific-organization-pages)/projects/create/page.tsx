@@ -11,10 +11,15 @@ export const metadata: Metadata = {
 
 export default async function CreateProjectPage({
     params,
+    searchParams,
 }: {
     params: unknown;
+    searchParams: { [key: string]: string | string[] | undefined };
+
 }) {
     const { organizationId } = organizationParamSchema.parse(params);
+    const teamId = searchParams.teamId ? Number(searchParams.teamId) : undefined;
+
     const [repositories, fullTeams] = await Promise.all([
         getOrganizationRepos(organizationId),
         getTeamsInOrganization(organizationId)
@@ -24,7 +29,7 @@ export default async function CreateProjectPage({
 
     return (
         <div className="w-full mt-1">
-            <CreateProjectForm organizationId={organizationId} repositories={repositories} teams={teams} />
+            <CreateProjectForm organizationId={organizationId} repositories={repositories} teams={teams} teamId={teamId} />
         </div>
     );
 }

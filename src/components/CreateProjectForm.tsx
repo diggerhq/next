@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createProjectAction } from "@/data/user/projects";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
 import { generateSlug } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { motion } from "framer-motion";
-import { AlertCircle, Github, Users } from "lucide-react";
+import { AlertCircle, Briefcase, Github, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from 'react';
@@ -48,12 +48,13 @@ type CreateProjectFormProps = {
     organizationId: string;
     repositories: Repository[];
     teams: Team[];
+    teamId: number | undefined;
 };
 
-export default function CreateProjectForm({ organizationId, repositories, teams }: CreateProjectFormProps) {
+export default function CreateProjectForm({ organizationId, repositories, teams, teamId }: CreateProjectFormProps) {
     const router = useRouter();
 
-    const { control, handleSubmit, formState: { errors } } = useForm<CreateProjectFormData>({
+    const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm<CreateProjectFormData>({
         resolver: zodResolver(createProjectFormSchema),
         defaultValues: {
             name: "",
@@ -61,7 +62,7 @@ export default function CreateProjectForm({ organizationId, repositories, teams 
             terraformDir: "",
             managedState: true,
             labels: [],
-            teamId: teams[0]?.id || null,
+            teamId: teamId || null,
         },
     });
 
@@ -236,7 +237,7 @@ export default function CreateProjectForm({ organizationId, repositories, teams 
                     >
                         <CardHeader className="flex flex-col space-y-0">
                             <CardTitle className="text-lg mb-0">Select a Team</CardTitle>
-                            <CardDescription className="text-sm text-muted-foreground mt-0">Choose the team for your project</CardDescription>
+                            <CardDescription className="text-sm text-muted-foreground mt-0">Choose the team for your project or create it at the organization level</CardDescription>
                         </CardHeader>
                         <CardContent>
 
@@ -245,19 +246,37 @@ export default function CreateProjectForm({ organizationId, repositories, teams 
                                 control={control}
                                 render={({ field }) => (
                                     <div className="relative">
-                                        <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString() || ""}>
+                                        <Select onValueChange={(value) => {
+                                            if (value === 'null') {
+                                                field.onChange(null);
+                                            } else {
+                                                field.onChange(parseInt(value));
+                                            }
+                                        }} value={field.value?.toString() || "null"}
+
+                                        >
                                             <SelectTrigger className={`w-full ${errors.teamId ? 'border-destructive' : ''}`}>
                                                 <SelectValue placeholder="Select a team" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {teams.map((team) => (
-                                                    <SelectItem key={team.id} value={team.id.toString()}>
-                                                        <div className="flex items-center">
-                                                            <Users className="mr-2 h-4 w-4" />
-                                                            <span>{team.name}</span>
-                                                        </div>
-                                                    </SelectItem>
-                                                ))}
+                                                <SelectItem value="null">
+                                                    <div className="flex items-center">
+                                                        <Briefcase className="mr-2 h-4 w-4" />
+                                                        <span>Create at organization level</span>
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectSeparator />
+                                                <SelectGroup>
+                                                    <SelectLabel className='ml-0'>My teams</SelectLabel>
+                                                    {teams.map((team) => (
+                                                        <SelectItem key={team.id} value={team.id.toString()}>
+                                                            <div className="flex items-center">
+                                                                <Users className="mr-2 h-4 w-4" />
+                                                                <span>{team.name}</span>
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectGroup>
                                             </SelectContent>
                                         </Select>
                                         {errors.teamId && (

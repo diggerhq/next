@@ -53,7 +53,7 @@ export default async function TeamPage({
                     )}
                 </div>
                 <div className="flex space-x-4">
-                    <Link href={`/org/${organizationId}/projects/create`}>
+                    <Link href={`/org/${organizationId}/projects/create?teamId=${teamId}`}>
                         <Button variant="default" size="sm">
                             <Plus className="mr-2 h-4 w-4" />
                             Create Project
