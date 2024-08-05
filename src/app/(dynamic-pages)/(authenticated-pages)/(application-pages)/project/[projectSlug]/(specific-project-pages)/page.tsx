@@ -25,7 +25,6 @@ export default async function ProjectPage({ params }: { params: unknown }) {
   const { projectSlug } = projectSlugParamSchema.parse(params);
   const slimProject = await getSlimProjectBySlug(projectSlug);
 
-
   return (
     <div className="flex flex-col space-y-4 max-w-5xl mt-2">
       <AllRunsDetails projectId={slimProject.id} projectSlug={projectSlug} />

@@ -10,10 +10,12 @@ import TFVarTable from "./TFVarTable";
 
 type TFVarsDetailsProps = {
     projectId: string;
+    orgId: string;
+    isAllowedSecrets: boolean;
     initialEnvVars: EnvVar[];
 }
 
-export default function TFVarsDetails({ projectId, initialEnvVars }: TFVarsDetailsProps) {
+export default function TFVarsDetails({ projectId, orgId, isAllowedSecrets, initialEnvVars }: TFVarsDetailsProps) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -23,12 +25,14 @@ export default function TFVarsDetails({ projectId, initialEnvVars }: TFVarsDetai
         >
             <Card className="w-full">
                 <CardHeader>
-                    <CardTitle>Terraform Variables</CardTitle>
-                    <CardDescription>Manage Terraform variables for project</CardDescription>
+                    <CardTitle>Variables</CardTitle>
+                    <CardDescription>Manage variables for project. They will be exposed in the job as environment variables.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <TFVarTable
                         projectId={projectId}
+                        orgId={orgId}
+                        isAllowedSecrets={isAllowedSecrets}
                         envVars={initialEnvVars}
                     />
                 </CardContent>
