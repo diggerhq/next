@@ -227,18 +227,19 @@ export default function CreateProjectForm({ organizationId, repositories, teams 
                         )}
                     </CardContent>
                 </MotionCard>
-                <MotionCard
-                    className="mb-6"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                >
-                    <CardHeader className="flex flex-col space-y-0">
-                        <CardTitle className="text-lg mb-0">Select a Team</CardTitle>
-                        <CardDescription className="text-sm text-muted-foreground mt-0">Choose the team for your project</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {teams.length > 0 ? (
+                {teams.length !== 0 && (
+                    <MotionCard
+                        className="mb-6"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <CardHeader className="flex flex-col space-y-0">
+                            <CardTitle className="text-lg mb-0">Select a Team</CardTitle>
+                            <CardDescription className="text-sm text-muted-foreground mt-0">Choose the team for your project</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+
                             <Controller
                                 name="teamId"
                                 control={control}
@@ -268,19 +269,9 @@ export default function CreateProjectForm({ organizationId, repositories, teams 
                                     </div>
                                 )}
                             />
-                        ) : (
-                            <div className="text-center py-8">
-                                <div className="bg-muted/50 rounded-full p-4 inline-block">
-                                    <Users className="mx-auto size-8 text-muted-foreground" />
-                                </div>
-                                <T.H4 className="mb-1 mt-4">No Teams Found</T.H4>
-                                <T.P className="text-muted-foreground mb-4">
-                                    It looks like there are no teams available.
-                                </T.P>
-                            </div>
-                        )}
-                    </CardContent>
-                </MotionCard>
+                        </CardContent>
+                    </MotionCard>
+                )}
 
                 <MotionCard
                     className="mb-6"
