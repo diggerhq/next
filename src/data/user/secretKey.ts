@@ -25,13 +25,6 @@ export async function getPublicKey(
   return data?.public_key || null;
 }
 
-function stripKeyHeaders(key: string): string {
-  return key
-    .replace(/-----BEGIN (PUBLIC|PRIVATE) KEY-----/, '')
-    .replace(/-----END (PUBLIC|PRIVATE) KEY-----/, '')
-    .replace(/\n/g, '');
-}
-
 export async function createKeyPair(
   organizationId: string,
 ): Promise<SAPayload<{ publicKey: string; privateKey: string }>> {
@@ -51,14 +44,10 @@ export async function createKeyPair(
       },
     });
 
-    // Strip headers and footers
-    const strippedPublicKey = stripKeyHeaders(publicKey);
-    const strippedPrivateKey = stripKeyHeaders(privateKey);
-
-    // Save stripped public key to the database
+    // Save public key with headers to the database
     const { error } = await supabase
       .from('organizations')
-      .update({ public_key: strippedPublicKey })
+      .update({ public_key: publicKey })
       .eq('id', organizationId);
 
     if (error) throw error;
@@ -67,7 +56,7 @@ export async function createKeyPair(
 
     return {
       status: 'success',
-      data: { publicKey: strippedPublicKey, privateKey: strippedPrivateKey },
+      data: { publicKey, privateKey },
     };
   } catch (error) {
     console.error('Error creating key pair:', error);
