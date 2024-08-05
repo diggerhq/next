@@ -27,15 +27,18 @@ export async function encryptSecretWithPublicKey(
 export async function getOrganizationPublicKey(
   orgId: string,
 ): Promise<string | null> {
-  const { data: publicKeyData } = await supabaseAdminClient
+  const { data: publicKeyData, error } = await supabaseAdminClient
     .from('organizations')
     .select('public_key')
     .eq('id', orgId)
     .single();
-  if (publicKeyData?.public_key) {
-    return publicKeyData.public_key;
+
+  if (error) {
+    console.error('Error fetching public key:', error);
+    throw error;
   }
-  return null;
+
+  return publicKeyData?.public_key || null;
 }
 
 export async function storeEnvVar(
@@ -45,14 +48,13 @@ export async function storeEnvVar(
   value: string,
   isSecret: boolean,
 ) {
-  const publicKey = await getOrganizationPublicKey(orgId);
-
   let storedValue;
   if (isSecret) {
+    const publicKey = await getOrganizationPublicKey(orgId);
     if (!publicKey) {
       throw new Error('Cannot encrypt secret - no public key');
     }
-    storedValue = encryptSecretWithPublicKey(value, publicKey);
+    storedValue = await encryptSecretWithPublicKey(value, publicKey);
   } else {
     storedValue = value;
   }
@@ -71,10 +73,10 @@ export async function storeEnvVar(
   );
 
   if (error) {
-    console.error('Encryption: Error storing variable:', error);
+    console.error('Error storing variable:', error);
     throw error;
   }
-  console.log('Encryption: Variable stored successfully');
+  console.log('Variable stored successfully:', { name, isSecret });
   return data;
 }
 export async function getEnvVar(projectId: string, name: string) {
