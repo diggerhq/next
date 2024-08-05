@@ -162,6 +162,42 @@ export const createTeamAction = async (
     data,
   };
 };
+export const editTeamAction = async (
+  teamId: number,
+  organizationId: string,
+  name: string,
+): Promise<
+  SAPayload<{
+    created_at: string | null;
+    id: number;
+    name: string;
+    organization_id: string;
+  }>
+> => {
+  const supabaseClient = createSupabaseUserServerComponentClient();
+  const user = await serverGetLoggedInUser();
+
+  const { data, error } = await supabaseClient
+    .from('teams')
+    .update({
+      name,
+    })
+    .eq('id', teamId)
+    .eq('organization_id', organizationId)
+    .select('*')
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  revalidatePath(`/org/${organizationId}/settings/teams`);
+
+  return {
+    status: 'success',
+    data,
+  };
+};
 
 export async function getOrganizationOfTeam(teamId: number) {
   const supabaseClient = createSupabaseUserServerComponentClient();

@@ -62,13 +62,6 @@ export function EditOrganizationForm({
     mutate(values);
   }
 
-  function onReset() {
-    form.reset({
-      organizationTitle: initialTitle,
-      organizationSlug: initialSlug,
-    });
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -100,22 +93,6 @@ export function EditOrganizationForm({
                     </FormControl>
                     <FormDescription>
                       This is the title that will be displayed on the organization page.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="organizationSlug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Organization Slug</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This is the slug that will be displayed in the URL.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

@@ -18,7 +18,12 @@ export default async function OrganizationSettingsLayout({
       icon: <SquarePen />,
     },
     {
-      label: 'Organization Members',
+      label: 'Teams',
+      href: `/org/${organizationId}/settings/teams`,
+      icon: <UsersRound />,
+    },
+    {
+      label: 'Members',
       href: `/org/${organizationId}/settings/members`,
       icon: <UsersRound />,
     },
