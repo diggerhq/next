@@ -1,4 +1,5 @@
 "use server";
+import { ProjectListType } from "@/app/(dynamic-pages)/(authenticated-pages)/(application-pages)/org/[organizationId]/(specific-organization-pages)/projects/ProjectsWithPagination";
 import { CommentList } from "@/components/Projects/CommentList";
 import type { Tables } from "@/lib/database.types";
 import { supabaseAdminClient } from "@/supabase-clients/admin/supabaseAdminClient";
@@ -9,6 +10,7 @@ import { normalizeComment } from "@/utils/comments";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
+import { getRepoDetails } from "./repos";
 
 export async function getSlimProjectById(projectId: string) {
   const supabaseClient = createSupabaseUserServerComponentClient();
@@ -242,48 +244,6 @@ export const markProjectAsCompletedAction = async (projectId: string): Promise<S
   return { status: 'success', data };
 };
 
-// export async function getProjectsForUser(userId: string, organizationId: string): Promise<Tables<'projects'>[]> {
-//   const supabase = createSupabaseUserServerComponentClient();
-
-//   // First, get the user's role in the organization
-//   const { data: userRole } = await supabase
-//     .from('organization_members')
-//     .select('member_role')
-//     .eq('organization_id', organizationId)
-//     .eq('member_id', userId)
-//     .single();
-
-//   if (!userRole) {
-//     throw new Error('User not found in organization');
-//   }
-
-//   let query = supabase
-//     .from('projects')
-//     .select('*')
-//     .eq('organization_id', organizationId);
-
-//   if (userRole.member_role === 'admin') {
-//     // Admins can see all projects
-//     const { data, error } = await query;
-//     if (error) throw error;
-//     return data;
-//   } else {
-//     // Regular members can see organization-level projects and projects from their teams
-//     const { data: userTeams } = await supabase
-//       .from('team_members')
-//       .select('team_id')
-//       .eq('user_id', userId);
-
-//     const teamIds = userTeams?.map(team => team.team_id) || [];
-
-//     const { data, error } = await query
-//       .or(`team_id.is.null,team_id.in.(${teamIds.join(',')})`);
-
-//     if (error) throw error;
-//     return data;
-//   }
-// }
-
 export async function getProjectsForUser({
   userId,
   userRole,
@@ -327,6 +287,71 @@ export async function getProjectsForUser({
 
   if (error) throw error;
   return data || [];
+}
+
+export async function getProjectsListForUser({
+  userId,
+  userRole,
+  organizationId,
+  query = '',
+  teamIds = [],
+}: {
+  userId: string;
+  userRole: Enum<'organization_member_role'>;
+  organizationId: string;
+  query?: string;
+  teamIds?: number[];
+}): Promise<ProjectListType[]> {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  let supabaseQuery = supabase
+    .from('projects')
+    .select('name, slug, latest_action_on, created_at, repo_id')
+    .eq('organization_id', organizationId)
+    .ilike('name', `%${query}%`);
+
+  if (userRole !== 'admin' || userId !== 'owner') {
+    // For non-admin users, get their team memberships
+    const { data: userTeams } = await supabase
+      .from('team_members')
+      .select('team_id')
+      .eq('user_id', userId);
+
+    const userTeamIds = userTeams?.map(team => team.team_id) || [];
+
+    // Filter by user's teams and organization-level projects
+    supabaseQuery = supabaseQuery.or(`team_id.is.null,team_id.in.(${userTeamIds.join(',')})`);
+  }
+
+  // Apply team filter if provided
+  if (teamIds.length > 0) {
+    supabaseQuery = supabaseQuery.in('team_id', teamIds);
+  }
+
+  const { data, error } = await supabaseQuery.order('latest_action_on', {
+    ascending: false,
+  });
+
+  if (error) {
+    console.error("Error fetching projects:", error);
+    return [];
+  }
+
+  if (!data) return [];
+
+  // Fetch repo details for each project
+  const projectsWithRepoDetails = await Promise.all(
+    data.map(async (project) => {
+      const repoDetails = await getRepoDetails(project.repo_id);
+      const { repo_id, ...projectWithoutRepoId } = project;
+      return {
+        ...projectWithoutRepoId,
+        repo_full_name: repoDetails?.repo_full_name || null,
+      };
+    })
+  );
+
+  return projectsWithRepoDetails;
 }
 
 export async function getProjectsCountForUser({
@@ -423,6 +448,9 @@ export const getAllProjectsInOrganization = async ({
   return data || [];
 };
 
+
+
+
 export const getOrganizationLevelProjects = async ({
   organizationId,
   query = "",
@@ -458,6 +486,7 @@ export const getOrganizationLevelProjects = async ({
 
   return data || [];
 };
+
 
 export const getProjects = async ({
   organizationId,
@@ -503,6 +532,113 @@ export const getProjects = async ({
   console.log('projects data', data);
 
   return data || [];
+};
+
+export const getAllProjectsListInOrganization = async ({
+  organizationId,
+  query = "",
+  page = 1,
+  limit = 20,
+}: {
+  query?: string;
+  page?: number;
+  organizationId: string;
+  limit?: number;
+}) => {
+  const zeroIndexedPage = page - 1;
+  const supabase = createSupabaseUserServerComponentClient();
+  let supabaseQuery = supabase
+    .from("projects")
+    .select("name, slug, latest_action_on, created_at, repo_id")
+    .eq("organization_id", organizationId)
+    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
+
+  if (query) {
+    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
+  }
+
+  const { data, error } = await supabaseQuery.order("latest_action_on", {
+    ascending: false,
+  });
+
+  if (error) {
+    console.error("Error fetching projects:", error);
+    return [];
+  }
+
+  if (!data) return [];
+
+  // Fetch repo details for each project
+  const projectsWithRepoDetails = await Promise.all(
+    data.map(async (project) => {
+      const repoDetails = await getRepoDetails(project.repo_id);
+      const { repo_id, ...projectWithoutRepoId } = project;
+      return {
+        ...projectWithoutRepoId,
+        repo_full_name: repoDetails?.repo_full_name || null,
+      };
+    })
+  );
+
+  return projectsWithRepoDetails;
+};
+
+export const getProjectsList = async ({
+  organizationId,
+  teamId,
+  query = "",
+  page = 1,
+  limit = 5,
+}: {
+  query?: string;
+  page?: number;
+  organizationId: string;
+  teamId: number | null;
+  limit?: number;
+}) => {
+  const zeroIndexedPage = page - 1;
+  const supabase = createSupabaseUserServerComponentClient();
+  let supabaseQuery = supabase
+    .from("projects")
+    .select("name, slug, latest_action_on, created_at, repo_id")
+    .eq("organization_id", organizationId)
+    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
+
+  // Add team filter
+  if (teamId !== null) {
+    supabaseQuery = supabaseQuery.eq('team_id', teamId);
+  } else {
+    supabaseQuery = supabaseQuery.is('team_id', null);
+  }
+
+  if (query) {
+    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
+  }
+
+  const { data, error } = await supabaseQuery.order("latest_action_on", {
+    ascending: false,
+  });
+
+  if (error) {
+    console.error("Error fetching projects:", error);
+    return [];
+  }
+
+  if (!data) return [];
+
+  // Fetch repo details for each project
+  const projectsWithRepoDetails: ProjectListType[] = await Promise.all(
+    data.map(async (project) => {
+      const repoDetails = await getRepoDetails(project.repo_id);
+      const { repo_id, ...projectWithoutRepoId } = project;
+      return {
+        ...projectWithoutRepoId,
+        repo_full_name: repoDetails?.repo_full_name || null,
+      };
+    })
+  );
+
+  return projectsWithRepoDetails;
 };
 
 export const getProjectsTotalCount = async ({

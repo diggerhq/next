@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getRepoDetails } from '@/data/user/repos';
 import type { Tables } from '@/lib/database.types';
 import {
   flexRender,
@@ -24,32 +23,18 @@ import {
 import { GitBranch } from 'lucide-react';
 import moment from 'moment';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { ProjectListType } from './ProjectsWithPagination';
 
 type ProjectWithRepo = Tables<'projects'> & { repoFullName: string | null };
 
 type Props = {
-  projects: Tables<'projects'>[];
+  projects: ProjectListType[];
 };
 
 export function OrganizationProjectsTable({ projects }: Props) {
-  const [projectsWithRepos, setProjectsWithRepos] = useState<ProjectWithRepo[]>([]);
 
-  useEffect(() => {
-    const fetchRepoDetails = async () => {
-      const updatedProjects = await Promise.all(
-        projects.map(async (project) => {
-          const repoDetails = await getRepoDetails(project.repo_id);
-          return { ...project, repoFullName: repoDetails?.repo_full_name ?? null };
-        })
-      );
-      setProjectsWithRepos(updatedProjects);
-    };
-
-    fetchRepoDetails();
-  }, [projects]);
-
-  const columns: ColumnDef<ProjectWithRepo>[] = [
+  const columns: ColumnDef<ProjectListType>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
@@ -79,8 +64,8 @@ export function OrganizationProjectsTable({ projects }: Props) {
         <div className="flex items-center bg-muted/50 p-1 rounded-md border w-fit px-2">
           <GitBranch className="mr-1 h-4 w-4" />
           <span>
-            {row.original.repoFullName ? `${row.original.repoFullName.toLowerCase().replace(/\s+/g, '-').replace(/[A-Z]/g, (letter) => letter.toLowerCase())}` : ''}
-            {row.original.repoFullName && ((row.getValue('terraform_working_dir') as string) || '') ? '/' : ''}
+            {row.original.repo_full_name ? `${row.original.repo_full_name.toLowerCase().replace(/\s+/g, '-').replace(/[A-Z]/g, (letter) => letter.toLowerCase())}` : ''}
+            {row.original.repo_full_name && ((row.getValue('terraform_working_dir') as string) || '') ? '/' : ''}
             {((row.getValue('terraform_working_dir') as string) || '').replace(/\s+/g, '-').replace(/[A-Z]/g, (letter) => letter.toLowerCase())}
           </span>
         </div>
@@ -90,7 +75,7 @@ export function OrganizationProjectsTable({ projects }: Props) {
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const table = useReactTable({
-    data: projectsWithRepos,
+    data: projects,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),

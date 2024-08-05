@@ -1,9 +1,17 @@
 import { Pagination } from "@/components/Pagination";
 import { getLoggedInUserOrganizationRole } from "@/data/user/organizations";
-import { getAllProjectsInOrganization, getProjects, getProjectsCountForUser, getProjectsForUser, getProjectsTotalCount } from "@/data/user/projects";
+import { getAllProjectsListInOrganization, getProjectsCountForUser, getProjectsList, getProjectsListForUser, getProjectsTotalCount } from "@/data/user/projects";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import { projectsfilterSchema } from "@/utils/zod-schemas/params";
 import { OrganizationProjectsTable } from "./OrganizationProjectsTable";
+
+export type ProjectListType = {
+    name: string;
+    latest_action_on: string | null;
+    created_at: string;
+    repo_full_name: string | null;
+    slug: string;
+}
 
 export async function UserProjectsWithPagination({
     organizationId,
@@ -15,7 +23,7 @@ export async function UserProjectsWithPagination({
         getLoggedInUserOrganizationRole(organizationId)
     ]);
     const [projects, totalPages] = await Promise.all([
-        getProjectsForUser({ ...filters, organizationId, userRole, userId }),
+        getProjectsListForUser({ ...filters, organizationId, userRole, userId }),
         getProjectsCountForUser({ ...filters, organizationId, userId }),
     ]);
 
@@ -33,10 +41,9 @@ export async function AllProjectsTableWithPagination({
 }: { organizationId: string; searchParams: unknown }) {
     const filters = projectsfilterSchema.parse(searchParams);
     const [projects, totalPages] = await Promise.all([
-        getAllProjectsInOrganization({ ...filters, organizationId }),
+        getAllProjectsListInOrganization({ ...filters, organizationId }),
         getProjectsTotalCount({ ...filters, organizationId }),
     ]);
-
     return (
         <>
             <OrganizationProjectsTable projects={projects} />
@@ -53,7 +60,7 @@ export async function ProjectsTableWithPagination({
 }: { organizationId: string; teamId: number | null; searchParams: unknown }) {
     const filters = projectsfilterSchema.parse(searchParams);
     const [projects, totalPages] = await Promise.all([
-        getProjects({ ...filters, organizationId, teamId }),
+        getProjectsList({ ...filters, organizationId, teamId }),
         getProjectsTotalCount({ ...filters, organizationId }),
     ]);
 
