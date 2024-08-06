@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
-import { Copy, Trash2 } from 'lucide-react';
+import { Copy, ShieldAlert, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -80,6 +80,15 @@ export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
+                    <Alert variant="default" className="mb-4">
+                        <ShieldAlert className="h-4 w-4" />
+                        <AlertTitle>Security Notice</AlertTitle>
+                        <AlertDescription>
+                            We prioritize your data security. We do not have access to your encrypted data.
+                            If you lose your private key, you'll need to recreate your secrets.
+                            Please ensure you store your private key securely.
+                        </AlertDescription>
+                    </Alert>
                     {publicKey ? (
                         <div className="space-y-4">
                             <div>
@@ -104,10 +113,10 @@ export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair
                                 </div>
                             </div>
                             {privateKey && (
-                                <Alert className='bg-muted/50'>
+                                <Alert variant="destructive" className='bg-muted/50'>
                                     <AlertTitle>Private Key (ONLY SHOWN ONCE)</AlertTitle>
                                     <AlertDescription>
-                                        <p className="mb-2">Save this in your GitHub Action Secrets (org level):</p>
+                                        <p className="mb-2">Save this in your GitHub Action Secrets (org level). You will not be able to retrieve it later:</p>
                                         <div className="flex items-center">
                                             <Input
                                                 readOnly
@@ -149,6 +158,7 @@ export function SecretsKeyManager({ publicKey: initialPublicKey, onCreateKeyPair
                                     <DialogTitle>Are you absolutely sure?</DialogTitle>
                                     <DialogDescription>
                                         This action cannot be undone. You will lose all your secrets without the possibility to recover them.
+                                        You will need to recreate your secrets if you proceed.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <DialogFooter>

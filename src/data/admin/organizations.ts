@@ -46,6 +46,15 @@ export async function getPaginatedOrganizationList({
   return data;
 }
 
+export async function getProjectIdsOfOrganization(organizationId: string) {
+  const { data, error } = await supabaseAdminClient
+    .from('projects')
+    .select('id')
+    .eq('organization_id', organizationId);
+  if (error) throw error;
+  return data.map((project) => project.id);
+}
+
 export async function getSlimOrganizationsOfUser(userId: string) {
   const { data: organizations, error: organizationsError } =
     await supabaseAdminClient

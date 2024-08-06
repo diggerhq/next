@@ -146,3 +146,12 @@ export async function getAllEnvVars(projectId: string): Promise<EnvVar[]> {
     }),
   );
 }
+
+export async function deleteAllEnvVars(projectId: string) {
+  const { error } = await supabaseAdminClient
+    .from('env_vars')
+    .delete()
+    .eq('project_id', projectId);
+
+  if (error) throw error;
+}

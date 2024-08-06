@@ -38,6 +38,19 @@ export const getSlimProjectBySlug = async (projectSlug: string) => {
   return data;
 }
 
+export const getSlimProjectWithTeamIdBySlug = async (projectSlug: string) => {
+  const supabaseClient = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabaseClient
+    .from("projects")
+    .select("id, slug, name, organization_id, team_id")
+    .eq("slug", projectSlug)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return data;
+}
+
 export async function getProjectById(projectId: string) {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const { data, error } = await supabaseClient
