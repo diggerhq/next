@@ -315,13 +315,13 @@ export const ProjectRunDetails: React.FC<{
                         )}
 
                     </div>
-                    {['approved', 'pending_apply', 'running_apply', 'succeeded', 'failed'].includes(ToSnakeCase(run.status)) && (
+                    {['approved', 'pending_apply', 'running_apply', 'succeeded'].includes(ToSnakeCase(run.status)) && (
                         <T.Small className="flex items-center"><CheckCircle2 className="size-5 text-green-500 mr-2" /> Approved by: </T.Small>
                     )}
                     {run.status === ToTitleCase('discarded') && (
                         <T.Small className="flex items-center"><XCircle className="text-red-500 mr-2" /> Discarded by: </T.Small>
                     )}
-                    {!(["queued", "pending_plan", "running_plan", "pending_approval"].includes(ToSnakeCase(run.status))) && (
+                    {!(["queued", "pending_plan", "running_plan", "pending_approval", 'failed'].includes(ToSnakeCase(run.status))) && (
                         <motion.div
                             className="pt-4 mt-auto"
                             initial={{ opacity: 0, y: 50 }}
