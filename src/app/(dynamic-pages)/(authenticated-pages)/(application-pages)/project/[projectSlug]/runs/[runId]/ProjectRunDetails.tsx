@@ -117,6 +117,7 @@ function RenderContent({
 export const ProjectRunDetails: React.FC<{
     run: Table<'digger_runs'>,
     loggedInUser: Table<'user_profiles'>
+    approverUser: Table<'user_profiles'> | null
     isUserOrgAdmin: boolean
     tfOutput: string | null,
     workflowRunUrl: string | null,
@@ -125,7 +126,7 @@ export const ProjectRunDetails: React.FC<{
     fullRepoName: string | null
     planBatchId: string | null
     applyBatchId: string | null
-}> = ({ run: initialRun, loggedInUser, isUserOrgAdmin, tfOutput: initialTfOutput,
+}> = ({ run: initialRun, loggedInUser, approverUser, isUserOrgAdmin, tfOutput: initialTfOutput,
     workflowRunUrl: initialWorkflowRunUrl,
     applyTerraformOutput: initialApplyTerraformOutput,
     applyWorkflowRunUrl: initialApplyWorkflowRunUrl,
@@ -315,13 +316,13 @@ export const ProjectRunDetails: React.FC<{
                         )}
 
                     </div>
-                    {['approved', 'pending_apply', 'running_apply', 'succeeded'].includes(ToSnakeCase(run.status)) && (
+                    {run.is_approved === true && (
                         <T.Small className="flex items-center"><CheckCircle2 className="size-5 text-green-500 mr-2" /> Approved by: </T.Small>
                     )}
-                    {run.status === ToTitleCase('discarded') && (
+                    {run.is_approved === false && (
                         <T.Small className="flex items-center"><XCircle className="text-red-500 mr-2" /> Discarded by: </T.Small>
                     )}
-                    {!(["queued", "pending_plan", "running_plan", "pending_approval", 'failed'].includes(ToSnakeCase(run.status))) && (
+                    {run.is_approved !== null && (
                         <motion.div
                             className="pt-4 mt-auto"
                             initial={{ opacity: 0, y: 50 }}
@@ -329,22 +330,22 @@ export const ProjectRunDetails: React.FC<{
                             transition={{ duration: 0.5, delay: 0.2 }}
                         >
                             <div className="flex items-center mb-4">
-                                {loggedInUser.avatar_url ? (
+                                {approverUser?.avatar_url ? (
                                     <Image
-                                        src={loggedInUser.avatar_url}
-                                        alt={loggedInUser.full_name || 'User Avatar'}
+                                        src={approverUser.avatar_url}
+                                        alt={approverUser.full_name || 'User Avatar'}
                                         width={40}
                                         height={40}
                                         className="rounded-full mr-3"
                                     />
                                 ) : (
                                     <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center mr-3">
-                                        {loggedInUser.full_name?.charAt(0).toUpperCase() || 'A'}
+                                        {approverUser?.full_name?.charAt(0).toUpperCase() || 'A'}
                                     </div>
                                 )}
 
                                 <div>
-                                    <p className="font-medium">{loggedInUser.full_name}</p>
+                                    <p className="font-medium">{approverUser?.full_name}</p>
                                     <p className="text-sm text-muted-foreground">
                                         {isUserOrgAdmin ? 'Organization Admin' : 'Member'}
                                     </p>

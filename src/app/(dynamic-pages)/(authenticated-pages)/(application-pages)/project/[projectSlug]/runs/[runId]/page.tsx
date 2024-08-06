@@ -37,6 +37,7 @@ type ProjectRunDetailsProps = {
     fullRepoName: string | null
     planBatchId: string | null
     applyBatchId: string | null
+    approverUser: Table<'user_profiles'> | null
 }
 
 
@@ -65,8 +66,13 @@ export default async function RunDetailPage({
     const [project, userProfile, repoDetails] = await Promise.all([
         getSlimProjectById(project_id),
         getUserProfile(user.id),
-        getRepoDetails(run.repo_id)
+        getRepoDetails(run.repo_id),
     ]);
+
+    let approverUserProfile
+    if (run.approver_user_id) {
+        approverUserProfile = await getUserProfile(run.approver_user_id);
+    }
 
     // Fetch organization role and batch IDs in parallel
     const [organizationRole, planBatchId, applyBatchId] = await Promise.all([
@@ -101,6 +107,7 @@ export default async function RunDetailPage({
                 >
                     <DynamicProjectRunDetails run={run}
                         loggedInUser={userProfile}
+                        approverUser={approverUserProfile}
                         isUserOrgAdmin={isOrganizationAdmin}
                         tfOutput={planData.terraform_output}
                         workflowRunUrl={planData.workflow_run_url}
