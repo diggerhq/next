@@ -1,6 +1,7 @@
 // tfvars.ts
 'use server';
 
+import { SAPayload } from '@/types';
 import { EnvVar } from '@/types/userTypes';
 import { deleteEnvVar, getAllEnvVars, storeEnvVar } from '../admin/env-vars';
 
@@ -33,7 +34,7 @@ export async function tfvarsOnBulkUpdate(
   vars: EnvVar[],
   projectId: string,
   orgId: string,
-): Promise<EnvVar[]> {
+): Promise<SAPayload<EnvVar[]>> {
   const currentVars = await getAllEnvVars(projectId);
   const currentVarsMap = Object.fromEntries(
     currentVars.map((v) => [v.name, v]),
@@ -77,8 +78,11 @@ export async function tfvarsOnBulkUpdate(
   }
 
   const updatedVars = await getAllEnvVars(projectId);
-  return updatedVars.map((v) => ({
-    ...v,
-    updated_at: new Date().toISOString(),
-  }));
+  return {
+    status: 'success',
+    data: updatedVars.map((v) => ({
+      ...v,
+      updated_at: new Date().toISOString(),
+    })),
+  };
 }

@@ -7,6 +7,7 @@ export type UserRoles = {
 export type UserRole = UserRoles[keyof UserRoles];
 
 export type EnvVar = {
+  id: string;
   name: string;
   value: string;
   is_secret: boolean;

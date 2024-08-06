@@ -25,6 +25,7 @@ export default async function TFVarsPage({ params }: { params: unknown }) {
         getOrganizationPublicKey(project.organization_id)
     ]);
 
+
     return (
         <div className="flex flex-col space-y-4 max-w-5xl mt-2">
             <TFVarsDetails
