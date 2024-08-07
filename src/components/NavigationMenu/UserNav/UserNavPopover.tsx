@@ -46,7 +46,7 @@ export const UserNavPopover = ({
             />
           </div>
         </PopoverTrigger>
-        <PopoverContent sideOffset={8} align="end" className="w-[240px]">
+        <PopoverContent sideOffset={8} align="end" className="w-[240px] p-0 rounded-md overflow-hidden">
           <UserSidebarMenu
             userEmail={userEmail}
             userFullName={userFullname}

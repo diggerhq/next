@@ -1,4 +1,5 @@
 
+import { Separator } from '@/components/ui/separator';
 import { cn } from '@/utils/cn';
 import { Lock, LogOut, User } from 'lucide-react';
 import Image from 'next/image';
@@ -17,18 +18,18 @@ export function UserSidebarMenu({
   appAdminSidebarLink: ReactNode;
 }) {
   return (
-    <div className="dark:bg-black ">
+    <div className="bg-background">
       <div
-        className="grid items-start mt-1 gap-2 mb-2 overflow-hidden"
+        className="grid items-start gap-3 py-3 px-3 overflow-hidden"
         style={{
           gridTemplateColumns: 'min-content 1fr',
         }}
       >
-        <div className="h-[28px] mt-1 w-[28px] rounded-full border">
+        <div className="size-[32px] rounded-full border">
           <Image
             src={userAvatarUrl}
-            width={28}
-            height={28}
+            width={32}
+            height={32}
             placeholder="blur"
             blurDataURL={userAvatarUrl}
             quality={100}
@@ -41,7 +42,7 @@ export function UserSidebarMenu({
             }}
           />
         </div>
-        <div className="mb-1 overflow-hidden">
+        <div className="mb-1 -mt-0.5 overflow-hidden">
           <div className="text-sm font-medium text-gray-900 dark:text-white truncate w-full text-ellipsis">
             {userFullName}
           </div>
@@ -50,17 +51,19 @@ export function UserSidebarMenu({
           </div>
         </div>
       </div>
-      <div className="h-px bg-gray-200 dark:bg-gray-700  my-2" />
-      <Link
-        href="/settings"
-        className={cn(
-          'hover:bg-gray-100 hover:text-gray-900 text-gray-700 rounded-sm dark:text-gray-400 dark:hover:bg-gray-700/50',
-          'flex gap-2 items-center py-2 text-sm',
-        )}
-      >
-        <User className="text-lg" /> Account settings
-      </Link>
-      {/* <Link
+      <Separator />
+      <div className='space-y-1 px-2 py-2'>
+
+        <Link
+          href="/settings"
+          className={cn(
+            'hover:bg-muted rounded-sm',
+            'flex gap-2 px-2 items-center py-1.5 text-sm',
+          )}
+        >
+          <User className="size-4 text-foreground" /> Account settings
+        </Link>
+        {/* <Link
         href="/settings/developer"
         className={cn(
           'hover:bg-gray-100 hover:text-gray-900 text-gray-700 rounded-sm dark:text-gray-400 dark:hover:bg-gray-700/50',
@@ -69,19 +72,18 @@ export function UserSidebarMenu({
       >
         <Computer className="text-lg" /> Developer Settings
       </Link> */}
-      <Link
-        href="/settings/security"
-        className={cn(
-          'hover:bg-gray-100 hover:text-gray-900 text-gray-700 rounded-sm dark:text-gray-400 dark:hover:bg-gray-700/50',
-          'flex gap-2 items-center py-2 text-sm',
-        )}
-      >
-        <Lock className="text-lg" /> Security Settings
-      </Link>
+        <Link
+          href="/settings/security"
+          className={cn(
+            'hover:bg-muted rounded-sm',
+            'flex gap-2 px-2 items-center py-1.5 text-sm',
+          )}
+        >
+          <Lock className="size-4 text-foreground" /> Security Settings
+        </Link>
 
-      {/* {appAdminSidebarLink} */}
-      <div className="h-px bg-gray-200 dark:bg-gray-700  my-2" />
-      {/* <FeatureViewModal />
+        {/* {appAdminSidebarLink} */}
+        {/* <FeatureViewModal />
       <GiveFeedbackDialog>
         <div
           data-testid="feedback-link"
@@ -95,18 +97,24 @@ export function UserSidebarMenu({
         </div>
       </GiveFeedbackDialog> */}
 
-      {/* <div className="h-px bg-gray-200 dark:bg-gray-700  my-2" /> */}
-      <Link
-        href="/logout"
-        prefetch={false}
-        className={cn(
-          'hover:bg-gray-100 hover:text-gray-900 text-gray-700 rounded-sm dark:text-gray-400 dark:hover:bg-gray-700/50',
-          'flex gap-2 items-center py-2 text-sm',
-        )}
-      >
-        <LogOut className="text-lg" />
-        Log out
-      </Link>
+        {/* <div className="h-px bg-gray-200 dark:bg-gray-700  my-2" /> */}
+
+      </div>
+      <Separator />
+      <div className='px-2 py-2 pb-2'>
+        <Link
+          href="/logout"
+          prefetch={false}
+          className={cn(
+            'hover:bg-muted rounded-sm',
+            'flex gap-2 px-2 items-center py-1.5 text-sm',
+          )}
+        >
+          <LogOut className="size-4 text-foreground" />
+          Log out
+        </Link>
+      </div>
+
     </div>
   );
 }

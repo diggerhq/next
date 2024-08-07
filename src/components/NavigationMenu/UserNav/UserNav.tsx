@@ -1,3 +1,4 @@
+import { AppAdminSidebarLink } from '@/components/AppAdminSidebarLink';
 import { Notifications } from '@/components/NavigationMenu/Notifications';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { getUserProfile } from '@/data/user/user';
@@ -31,7 +32,7 @@ export async function UserNav() {
         appAdminSidebarLink={
           <Suspense>
             <div className="h-px bg-gray-200 dark:bg-gray-700  my-2" />
-            {/* <AppAdminSidebarLink /> */}
+            <AppAdminSidebarLink />
           </Suspense>
         }
       />
