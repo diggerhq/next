@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import { Camera } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '../Button';
+import { CardContent, CardFooter } from '../ui/card';
 import { Input } from '../ui/input';
-import { Separator } from '../ui/separator';
 import { T } from '../ui/Typography';
 const MotionImage = motion(Image);
 
@@ -18,6 +18,7 @@ export function UpdateAvatarAndNameBody({
   isUploading,
   profileAvatarUrl,
   profileFullname,
+  profileUserName,
   isNewAvatarImageLoading,
   setIsNewAvatarImageLoading,
   userEmail,
@@ -29,6 +30,7 @@ export function UpdateAvatarAndNameBody({
   isLoading: boolean;
   onFileUpload?: (file: File) => void;
   profileFullname: string | undefined;
+  profileUserName: string | undefined;
   isNewAvatarImageLoading: boolean;
   setIsNewAvatarImageLoading: (value: boolean) => void;
   userEmail: string | undefined;
@@ -41,107 +43,129 @@ export function UpdateAvatarAndNameBody({
     email: userEmail,
   });
   return (
+
     <form
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit(fullName);
       }}
-      className="flex gap-6 w-full"
+
     >
-      <div className='w-full'>
-        <div className='flex flex-row items-start gap-6'>
-          <div className="">
-            <div className="relative mt-1 group w-fit">
-              <Label
-                className="inline-block cursor-pointer w-fit"
-                htmlFor="file-input"
-              >
-                <MotionImage
-                  animate={{
-                    opacity: isNewAvatarImageLoading ? [0.5, 1, 0.5] : 1,
+      <CardContent className="flex flex-col gap-6 w-full">
+        <div className='w-full'>
+          <div className='flex flex-row items-start gap-6'>
+            <div className="">
+              <div className="relative mt-1 group w-fit">
+                <Label
+                  className="inline-block cursor-pointer w-fit"
+                  htmlFor="file-input"
+                >
+                  <MotionImage
+                    animate={{
+                      opacity: isNewAvatarImageLoading ? [0.5, 1, 0.5] : 1,
+                    }}
+                    transition={
+                      isNewAvatarImageLoading
+                        ? {
+                          duration: 1,
+                          repeat: Infinity,
+                          repeatType: 'reverse',
+                        }
+                        : undefined
+                    }
+                    onLoad={() => setIsNewAvatarImageLoading(false)}
+                    onError={() => setIsNewAvatarImageLoading(false)}
+                    width={72}
+                    height={80}
+                    className="rounded-full object-cover border-2 border-gray-200 transition-all duration-300 group-hover:border-primary"
+                    src={avatarURL}
+                    alt="Avatar"
+                  />
+                  <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Camera className="size-4 text-primary-foreground" />
+                  </div>
+                </Label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="file-input"
+                  className="hidden"
+                  accept="image/*"
+                  disabled={isUploading}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file && onFileUpload) {
+                      onFileUpload(file);
+                    }
                   }}
-                  transition={
-                    isNewAvatarImageLoading
-                      ? {
-                        duration: 1,
-                        repeat: Infinity,
-                        repeatType: 'reverse',
-                      }
-                      : undefined
-                  }
-                  onLoad={() => setIsNewAvatarImageLoading(false)}
-                  onError={() => setIsNewAvatarImageLoading(false)}
-                  width={72}
-                  height={80}
-                  className="rounded-full object-cover border-2 border-gray-200 transition-all duration-300 group-hover:border-primary"
-                  src={avatarURL}
-                  alt="Avatar"
                 />
-                <div className="absolute bottom-0 right-0 bg-primary rounded-full p-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <Camera className="size-4 text-primary-foreground" />
-                </div>
+              </div>
+            </div>
+            <div className="space-y-1 w-full">
+              <Label htmlFor="name">
+                Full name
               </Label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                id="file-input"
-                className="hidden"
-                accept="image/*"
-                disabled={isUploading}
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file && onFileUpload) {
-                    onFileUpload(file);
-                  }
-                }}
+              <Input
+                id="name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter your full name"
+                disabled={isLoading}
+                className='w-full'
+                required
               />
             </div>
           </div>
-          <div className="space-y-1 w-3/4">
-            <Label htmlFor="name">
-              Full name
-            </Label>
-            <Input
-              id="name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Enter your full name"
-              disabled={isLoading}
-              className='w-full'
-              required
-            />
-          </div>
         </div>
 
+        <div className='flex flex-col gap-4'>
+
+          <div className='w-full'>
+            <div className="space-y-1">
+              <Label htmlFor="name">
+                Username
+              </Label>
+              <Input
+                id="name"
+                value={profileUserName}
+                placeholder="Enter your user name"
+                disabled
+                className='mb-2 '
+              />
+              <T.Small className="mt-2 text-muted-foreground font-normal">
+                Username cannot be changed
+              </T.Small>
+            </div>
+          </div>
+          <div className='w-full'>
+            <div className="space-y-1 ">
+              <Label htmlFor="name">
+                Email
+              </Label>
+              <Input
+                id="name"
+                value={userEmail}
+                placeholder="Enter your user name"
+                disabled
+                className=' mb-2 '
+              />
+              <T.Small className="mt-2 text-muted-foreground font-normal">
+                Email cannot be changed
+              </T.Small>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter >
         <Button
           type="submit"
           disabled={isLoading}
-          className='mt-5 w-fit'
+          className=' w-full'
         >
-          {isLoading ? 'Updating...' : 'Update Profile'}
+          {isLoading ? 'Saving...' : 'Save Changes'}
         </Button>
-      </div>
-
-      <Separator orientation='vertical' className='h-[96px]' />
-
-      <div className='ml-4 w-full'>
-        <div className="space-y-1 w-3/4">
-          <Label htmlFor="name">
-            User name
-          </Label>
-          <Input
-            id="name"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder="Enter your user name"
-            disabled
-            className='w-full mb-2 '
-          />
-          <T.Small className="mt-2 text-muted-foreground font-normal">
-            Username cannot be changed
-          </T.Small>
-        </div>
-      </div>
+      </CardFooter>
     </form>
+
   );
 }

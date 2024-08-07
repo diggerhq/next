@@ -1,5 +1,5 @@
 'use client';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { UpdateAvatarAndNameBody } from '@/components/UpdateAvatarAndName';
 import {
   updateUserProfileNameAndAvatar,
@@ -95,30 +95,29 @@ export function AccountSettings({
 
   return (
     <div
-      className="space-y-6"
+      className="space-y-6 max-w-xl"
     >
       <Card>
         <CardHeader>
           <CardTitle>Account Settings</CardTitle>
           <CardDescription>Update your account settings here.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <UpdateAvatarAndNameBody
-            onSubmit={(fullName: string) => mutate({ fullName, avatarUrl })}
-            onFileUpload={(file: File) => upload(file)}
-            userId={userProfile.id}
-            userEmail={userEmail}
-            isNewAvatarImageLoading={isNewAvatarImageLoading}
-            setIsNewAvatarImageLoading={setIsNewAvatarImageLoading}
-            isUploading={isUploading}
-            isLoading={isLoading ?? isUploading}
-            profileAvatarUrl={avatarUrl}
-            profileFullname={userProfile.full_name ?? undefined}
-          />
-        </CardContent>
+        <UpdateAvatarAndNameBody
+          onSubmit={(fullName: string) => mutate({ fullName, avatarUrl })}
+          onFileUpload={(file: File) => upload(file)}
+          userId={userProfile.id}
+          userEmail={userEmail}
+          profileUserName={userProfile.user_name ?? undefined}
+          isNewAvatarImageLoading={isNewAvatarImageLoading}
+          setIsNewAvatarImageLoading={setIsNewAvatarImageLoading}
+          isUploading={isUploading}
+          isLoading={isLoading ?? isUploading}
+          profileAvatarUrl={avatarUrl}
+          profileFullname={userProfile.full_name ?? undefined}
+        />
       </Card>
 
-      <Card className='w-full  max-w-5xl border-destructive/50 bg-destructive/5'>
+      <Card className='w-full border-destructive/50 bg-destructive/5'>
         <CardHeader>
           <CardTitle>Danger Zone</CardTitle>
           <CardDescription>

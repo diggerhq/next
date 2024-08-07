@@ -63,7 +63,7 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
             <p className="text-sm text-destructive">{errors.organizationTitle.message}</p>
           )}
         </div>
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label htmlFor="organizationSlug">Organization Slug</Label>
           <Input
             id="organizationSlug"
@@ -73,7 +73,7 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
           {errors.organizationSlug && (
             <p className="text-sm text-destructive">{errors.organizationSlug.message}</p>
           )}
-        </div>
+        </div> */}
       </CardContent>
       <CardFooter>
         <Button

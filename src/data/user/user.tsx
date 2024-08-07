@@ -143,9 +143,11 @@ export const uploadPublicUserAvatar = async (
 export const updateUserProfileNameAndAvatar = async (
   {
     fullName,
+    userName,
     avatarUrl,
   }: {
     fullName?: string;
+    userName?: string;
     avatarUrl?: string;
   },
   {
@@ -161,6 +163,7 @@ export const updateUserProfileNameAndAvatar = async (
     .from("user_profiles")
     .update({
       full_name: fullName,
+      user_name: userName,
       avatar_url: avatarUrl,
     })
     .eq("id", user.id)

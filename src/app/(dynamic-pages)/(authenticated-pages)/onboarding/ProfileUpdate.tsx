@@ -22,6 +22,7 @@ export function ProfileUpdate({
   userEmail,
 }: ProfileUpdateProps) {
   const [fullName, setFullName] = useState(userProfile.full_name ?? "");
+  const [userName, setUserName] = useState(userProfile.user_name ?? userProfile.full_name ?? "");
   const [avatarUrl, setAvatarUrl] = useState(userProfile.avatar_url ?? undefined);
   const { toast } = useToast();
 
@@ -31,7 +32,7 @@ export function ProfileUpdate({
   });
 
   const updateProfileMutation = useMutation({
-    mutationFn: () => updateUserProfileNameAndAvatar({ fullName, avatarUrl }, { isOnboardingFlow: true }),
+    mutationFn: () => updateUserProfileNameAndAvatar({ fullName, userName, avatarUrl }, { isOnboardingFlow: true }),
     onSuccess: () => {
       toast({ title: "Profile updated!", description: "Your profile has been successfully updated." });
       onSuccess();
@@ -99,6 +100,16 @@ export function ProfileUpdate({
               </Button>
             </Label>
           </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="user-name">User Name</Label>
+          <Input
+            id="user-name"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            placeholder="Your user name"
+            disabled={updateProfileMutation.isLoading}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="full-name">Full Name</Label>
