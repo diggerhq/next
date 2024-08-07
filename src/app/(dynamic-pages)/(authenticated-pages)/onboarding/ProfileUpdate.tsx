@@ -2,10 +2,13 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { T } from "@/components/ui/Typography";
 import { useToast } from "@/components/ui/use-toast";
 import { updateUserProfileNameAndAvatar, uploadPublicUserAvatar } from "@/data/user/user";
+import { generateSlug } from "@/lib/utils";
 import type { Table } from "@/types";
 import { getUserAvatarUrl } from "@/utils/helpers";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import { useState } from "react";
@@ -22,7 +25,7 @@ export function ProfileUpdate({
   userEmail,
 }: ProfileUpdateProps) {
   const [fullName, setFullName] = useState(userProfile.full_name ?? "");
-  const [userName, setUserName] = useState(userProfile.user_name ?? userProfile.full_name ?? "");
+  const [userName, setUserName] = useState(userProfile.user_name ? userProfile.user_name : userProfile.full_name ? generateSlug(userProfile.full_name ?? "") : "");
   const [avatarUrl, setAvatarUrl] = useState(userProfile.avatar_url ?? undefined);
   const { toast } = useToast();
 
@@ -66,6 +69,12 @@ export function ProfileUpdate({
     }
   };
 
+  const handleFullNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFullName = e.target.value;
+    setFullName(newFullName);
+    setUserName(generateSlug(newFullName)); // Update userName whenever fullName changes
+  };
+
   return (
     <form onSubmit={(e) => {
       e.preventDefault();
@@ -102,24 +111,32 @@ export function ProfileUpdate({
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="user-name">User Name</Label>
-          <Input
-            id="user-name"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            placeholder="Your user name"
-            disabled={updateProfileMutation.isLoading}
-          />
-        </div>
-        <div className="space-y-2">
           <Label htmlFor="full-name">Full Name</Label>
           <Input
             id="full-name"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={handleFullNameChange}
             placeholder="Your full name"
             disabled={updateProfileMutation.isLoading}
           />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="user-name">User Name</Label>
+          <Input
+            id="user-name"
+            value={userName}
+            onChange={(e) => {
+              setUserName(e.target.value || generateSlug(fullName)); // Use sluggedFullName if userName is empty
+            }}
+            placeholder="Your user name"
+            disabled={updateProfileMutation.isLoading}
+          />
+          <div className="flex items-center gap-2">
+            <ExclamationTriangleIcon className="w-4 h-4 text-orange-600 dark:text-orange-300/75" />
+            <T.Small className=" text-orange-600 dark:text-orange-300/75 font-normal">
+              Username cannot be changed later.
+            </T.Small>
+          </div>
         </div>
       </CardContent>
       <CardFooter>
