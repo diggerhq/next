@@ -144,7 +144,7 @@ export function SignUp({
             <TabsContent value="password">
               <Card className="border-none shadow-none">
                 <CardHeader className="py-6 px-0">
-                  <CardTitle>Register to NextBase</CardTitle>
+                  <CardTitle>Register to Digger</CardTitle>
                   <CardDescription>
                     Create an account with your email and password
                   </CardDescription>
@@ -163,7 +163,7 @@ export function SignUp({
             <TabsContent value="magic-link">
               <Card className="border-none shadow-none">
                 <CardHeader className="py-6 px-0">
-                  <CardTitle>Register to NextBase</CardTitle>
+                  <CardTitle>Register to Digger</CardTitle>
                   <CardDescription>
                     Create an account with magic link we will send to your email
                   </CardDescription>
@@ -180,7 +180,7 @@ export function SignUp({
             <TabsContent value="social-login">
               <Card className="border-none shadow-none">
                 <CardHeader className="py-6 px-0">
-                  <CardTitle>Register to NextBase</CardTitle>
+                  <CardTitle>Register to Digger</CardTitle>
                   <CardDescription>
                     Register with your social account
                   </CardDescription>
