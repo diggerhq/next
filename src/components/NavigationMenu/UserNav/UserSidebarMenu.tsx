@@ -1,11 +1,9 @@
 
-import { GiveFeedbackDialog } from '@/app/(dynamic-pages)/(public-pages)/feedback/[feedbackId]/GiveFeedbackDialog';
 import { cn } from '@/utils/cn';
-import { Computer, Lock, LogOut, Mail, User } from 'lucide-react';
+import { Lock, LogOut, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { FeatureViewModal } from './FeatureViewModal';
 
 export function UserSidebarMenu({
   userEmail,
@@ -62,7 +60,7 @@ export function UserSidebarMenu({
       >
         <User className="text-lg" /> Account settings
       </Link>
-      <Link
+      {/* <Link
         href="/settings/developer"
         className={cn(
           'hover:bg-gray-100 hover:text-gray-900 text-gray-700 rounded-sm dark:text-gray-400 dark:hover:bg-gray-700/50',
@@ -70,7 +68,7 @@ export function UserSidebarMenu({
         )}
       >
         <Computer className="text-lg" /> Developer Settings
-      </Link>
+      </Link> */}
       <Link
         href="/settings/security"
         className={cn(
@@ -81,9 +79,9 @@ export function UserSidebarMenu({
         <Lock className="text-lg" /> Security Settings
       </Link>
 
-      {appAdminSidebarLink}
+      {/* {appAdminSidebarLink} */}
       <div className="h-px bg-gray-200 dark:bg-gray-700  my-2" />
-      <FeatureViewModal />
+      {/* <FeatureViewModal />
       <GiveFeedbackDialog>
         <div
           data-testid="feedback-link"
@@ -95,9 +93,9 @@ export function UserSidebarMenu({
           <Mail className="text-lg" />
           Feedback
         </div>
-      </GiveFeedbackDialog>
+      </GiveFeedbackDialog> */}
 
-      <div className="h-px bg-gray-200 dark:bg-gray-700  my-2" />
+      {/* <div className="h-px bg-gray-200 dark:bg-gray-700  my-2" /> */}
       <Link
         href="/logout"
         prefetch={false}

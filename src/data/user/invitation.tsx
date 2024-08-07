@@ -135,14 +135,12 @@ export async function createInvitationHandler({
     .eq("id", organizationId)
     .single();
 
-  console.log(organizationResponse);
-
   if (organizationResponse.error) {
     return { status: 'error', message: organizationResponse.error.message };
   }
 
-
   const inviteeUserDetails = await setupInviteeUserDetails(email);
+
   // check if already invited
   const existingInvitationResponse = await supabaseClient
     .from("organization_join_invitations")
@@ -151,8 +149,6 @@ export async function createInvitationHandler({
     .eq("inviter_user_id", user.id)
     .eq("status", "active")
     .eq("organization_id", organizationId);
-
-  console.log(existingInvitationResponse);
 
   if (existingInvitationResponse.error) {
     return { status: 'error', message: existingInvitationResponse.error.message };

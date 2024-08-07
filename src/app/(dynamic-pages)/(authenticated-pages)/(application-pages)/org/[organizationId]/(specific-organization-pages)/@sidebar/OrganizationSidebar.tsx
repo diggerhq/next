@@ -22,7 +22,7 @@ async function OrganizationSidebarInternal({
     <div
       className={cn(
         'flex flex-col h-full',
-        'lg:px-3 lg:py-4',
+        'lg:px-3 lg:py-2',
       )}
     >
 

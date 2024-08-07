@@ -170,11 +170,6 @@ export const ProjectRunDetails: React.FC<{
 
         const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-        const handleForceDiscard = () => {
-            rejectMutation();
-            setIsDialogOpen(false);
-        };
-
 
         useEffect(() => {
             const channel = supabaseUserClientComponentClient
@@ -377,7 +372,10 @@ export const ProjectRunDetails: React.FC<{
                                     </Button>
                                     <Button
                                         variant="destructive"
-                                        onClick={handleForceDiscard}
+                                        onClick={() => {
+                                            rejectMutation();
+                                            setIsDialogOpen(false);
+                                        }}
                                         disabled={isRejecting}
                                     >
                                         {isRejecting ? (

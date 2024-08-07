@@ -373,7 +373,7 @@ export const Notifications = ({ userId }: { userId: string }) => {
           <ScrollArea className="h-[400px]">
             <div className="flex flex-col mx-auto">
               {/* Add this line to include the test notifications */}
-              <TestNotifications />
+              {/* <TestNotifications /> */}
 
               {isLoading ? (
                 <Skeleton className="py-2 w-16 h-4 m-2" />

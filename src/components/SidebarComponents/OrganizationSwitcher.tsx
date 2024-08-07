@@ -48,11 +48,12 @@ export function OrganizationSwitcher({
     >
       <PopoverTrigger asChild className="w-fit">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           name="organization-switcher"
           role="combobox"
-          className="mx-0 px-2 py-5 border hover:border-neutral-700 dark:hover:border-gray-500 hover:bg-transparent rounded-sm font-normal text-gray-500 dark:text-gray-300 text-sm justify-between truncate w-full "
+          className=' justify-between w-full'
+        // className="mx-0 px-2 py-3 border hover:border-neutral-700 dark:hover:border-gray-500 hover:bg-transparent rounded-sm font-normal text-gray-500 dark:text-gray-300 text-sm justify-between truncate w-full "
         >
           <div className="flex items-center gap-1">
             <UsersRound className="mr-2 h-4 w-4 mt-0.5" />
@@ -64,7 +65,7 @@ export function OrganizationSwitcher({
       <PopoverContent
         side="bottom"
         align="end"
-        className="w-[238px] border -ml-1 my-2 rounded-lg p-0 "
+        className="w-[238px] border ml-3 my-2 rounded-lg p-0 shadow-xl "
       >
         <Command>
           <CommandList>

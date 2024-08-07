@@ -1,5 +1,5 @@
 'use client';
-import { PageHeading } from '@/components/PageHeading';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { UpdateAvatarAndNameBody } from '@/components/UpdateAvatarAndName';
 import {
   updateUserProfileNameAndAvatar,
@@ -94,37 +94,42 @@ export function AccountSettings({
   );
 
   return (
-    <div className="max-w-sm">
-      <div className="space-y-16">
-        <UpdateAvatarAndNameBody
-          onSubmit={(fullName: string) => {
-            mutate({
-              fullName,
-              avatarUrl,
-            });
-          }}
-          onFileUpload={(file: File) => {
-            upload(file);
-          }}
-          userId={userProfile.id}
-          userEmail={userEmail}
-          isNewAvatarImageLoading={isNewAvatarImageLoading}
-          setIsNewAvatarImageLoading={setIsNewAvatarImageLoading}
-          isUploading={isUploading}
-          isLoading={isLoading ?? isUploading}
-          profileAvatarUrl={avatarUrl ?? undefined}
-          profileFullname={userProfile.full_name ?? undefined}
-        />
-        <div className="space-y-2">
-          <PageHeading
-            title="Danger zone"
-            titleClassName="text-xl"
-            subTitleClassName="text-base -mt-1"
-            subTitle="Delete your account. This action is irreversible. All your data will be lost."
+    <div
+      className="space-y-6"
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Settings</CardTitle>
+          <CardDescription>Update your account settings here.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UpdateAvatarAndNameBody
+            onSubmit={(fullName: string) => mutate({ fullName, avatarUrl })}
+            onFileUpload={(file: File) => upload(file)}
+            userId={userProfile.id}
+            userEmail={userEmail}
+            isNewAvatarImageLoading={isNewAvatarImageLoading}
+            setIsNewAvatarImageLoading={setIsNewAvatarImageLoading}
+            isUploading={isUploading}
+            isLoading={isLoading ?? isUploading}
+            profileAvatarUrl={avatarUrl}
+            profileFullname={userProfile.full_name ?? undefined}
           />
+        </CardContent>
+      </Card>
+
+      <Card className='w-full  max-w-5xl border-destructive/50 bg-destructive/5'>
+        <CardHeader>
+          <CardTitle>Danger Zone</CardTitle>
+          <CardDescription>
+            Delete your account. This action is irreversible. All your data
+            will be lost.
+          </CardDescription>
+        </CardHeader>
+        <CardFooter>
           <ConfirmDeleteAccountDialog />
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

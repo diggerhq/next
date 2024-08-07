@@ -1,7 +1,7 @@
 'use client';
 import { PageHeading } from '@/components/PageHeading';
-import { TabsNavigation } from '@/components/TabsNavigation';
-import { Computer, Lock, User } from 'lucide-react';
+import { TabsNavigationV2 } from '@/components/TabsNavigation/TabsNavigation';
+import { Lock, User } from 'lucide-react';
 import { useMemo } from 'react';
 
 export default function UserSettingsClientLayout({
@@ -16,11 +16,11 @@ export default function UserSettingsClientLayout({
         href: `/settings`,
         icon: <User />,
       },
-      {
-        label: 'Developer Settings',
-        href: `/settings/developer`,
-        icon: <Computer />,
-      },
+      // {
+      //   label: 'Developer Settings',
+      //   href: `/settings/developer`,
+      //   icon: <Computer />,
+      // },
       {
         label: 'Security',
         href: `/settings/security`,
@@ -30,12 +30,12 @@ export default function UserSettingsClientLayout({
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-2">
       <PageHeading
         title="User Settings"
         subTitle="Manage your account and security settings here."
       />
-      <TabsNavigation tabs={tabs} />
+      <TabsNavigationV2 tabs={tabs} />
       {children}
     </div>
   );

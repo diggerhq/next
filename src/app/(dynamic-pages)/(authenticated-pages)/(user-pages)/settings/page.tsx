@@ -7,5 +7,9 @@ export default async function AccountSettingsPage() {
   const userProfile = await getUserProfile(user.id);
 
 
-  return <AccountSettings userProfile={userProfile} userEmail={user.email} />;
+  return (
+    <div className='flex flex-col space-y-4 max-w-5xl mt-2'>
+      <AccountSettings userProfile={userProfile} userEmail={user.email} />
+    </div>
+  );
 }

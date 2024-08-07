@@ -1,5 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { updatePasswordAction } from '@/data/user/security';
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
@@ -31,19 +32,18 @@ export const UpdatePassword = () => {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2 w-1/3">
         <Label htmlFor="email" className="text-muted-foreground">
           Password
         </Label>
         <div>
-          <input
+          <Input
             id="password"
             name="password"
             type="password"
             autoComplete="password"
             required
             {...passwordInput}
-            className="block w-full appearance-none rounded-md border bg-gray-50/10 dark:bg-gray-800/20 h-10 px-3 py-3 placeholder-muted-foreground shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm"
           />
         </div>
         <Button
@@ -53,7 +53,7 @@ export const UpdatePassword = () => {
             updatePassword();
           }}
           className={classNames(
-            'flex w-full justify-center rounded-lg border border-transparent py-3 text-white dark:text-black px-4 text-sm font-medium  shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2',
+            'flex w-fit justify-center rounded-lg border border-transparent py-3 text-white dark:text-black px-4 text-sm font-medium  shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2',
             isLoading
               ? 'bg-yellow-300 dark:bg-yellow-700 '
               : 'bg-black dark:bg-white hover:bg-gray-900 dark:hover:bg-gray-100  ',
