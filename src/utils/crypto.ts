@@ -1,19 +1,5 @@
 import crypto from 'crypto';
 
-//TODO remove old encryption
-export function encryptWithPublicKeyOld(text: string, publicKey: string) {
-  const buffer = Buffer.from(text, 'utf8');
-  const encrypted = crypto.publicEncrypt(
-    {
-      key: publicKey,
-      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-      oaepHash: 'sha256',
-    },
-    buffer,
-  );
-  return encrypted.toString('base64');
-}
-
 export function encryptWithPublicKey(
   data: string,
   publicKeyPEM: string,
