@@ -1,12 +1,19 @@
 import crypto from 'crypto';
 
-export function encryptWithPublicKey(text: string, publicKey: string) {
-  const buffer = Buffer.from(text, 'utf8');
+export function encryptWithPublicKey(
+  data: string,
+  publicKeyPEM: string,
+): string {
+  // Ensure the public key has the correct PEM format
+  const formattedPublicKey = publicKeyPEM.includes('-----BEGIN PUBLIC KEY-----')
+    ? publicKeyPEM
+    : `-----BEGIN PUBLIC KEY-----\n${publicKeyPEM}\n-----END PUBLIC KEY-----`;
+
+  const buffer = Buffer.from(data, 'utf8');
   const encrypted = crypto.publicEncrypt(
     {
-      key: publicKey,
-      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-      oaepHash: 'sha256',
+      key: formattedPublicKey,
+      padding: crypto.constants.RSA_PKCS1_PADDING,
     },
     buffer,
   );
