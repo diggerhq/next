@@ -314,7 +314,7 @@ export const ProjectRunDetails: React.FC<{
                     {run.is_approved === true && (
                         <T.Small className="flex items-center"><CheckCircle2 className="size-5 text-green-500 mr-2" /> Approved by: </T.Small>
                     )}
-                    {run.is_approved === false && (
+                    {run.status === ToTitleCase('discarded') && (
                         <T.Small className="flex items-center"><XCircle className="text-red-500 mr-2" /> Discarded by: </T.Small>
                     )}
                     {run.is_approved !== null && (
