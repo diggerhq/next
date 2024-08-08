@@ -317,7 +317,7 @@ export const ProjectRunDetails: React.FC<{
                     {run.status === ToTitleCase('discarded') && (
                         <T.Small className="flex items-center"><XCircle className="text-red-500 mr-2" /> Discarded by: </T.Small>
                     )}
-                    {run.is_approved !== null && (
+                    {run.is_approved !== null && approverUser?.user_name !== null && (
                         <motion.div
                             className="pt-4 mt-auto"
                             initial={{ opacity: 0, y: 50 }}
