@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: unknown }) {
     const organizationTitle = await getOrganizationTitle(organizationId);
 
     return {
-      title: `${organizationTitle} | Organization | Nextbase Ultimate`,
+      title: `${organizationTitle} | Organization | Digger`,
       description: 'Organization title',
     };
   } catch (error) {
