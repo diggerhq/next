@@ -2,8 +2,8 @@
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Nextbase Ultimate',
-  description: 'Nextbase Ultimate',
+  title: 'Digger',
+  description: 'Digger',
 };
 
 export default async function RootLayout({
