@@ -4,7 +4,7 @@ import { SidebarLink } from '@/components/SidebarLink';
 import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { getOrganizationOfTeam } from '@/data/user/teams';
 import { cn } from '@/utils/cn';
-import { Activity, FileText, GitCompare, Home, Layers, MessageCircle, Settings, Shield, Users } from 'lucide-react';
+import { FileText, Home, Layers, MessageCircle, Users } from 'lucide-react';
 import { Suspense } from 'react';
 
 async function TeamSidebarInternal({ organizationId }: { organizationId: string }) {
@@ -39,29 +39,9 @@ async function TeamSidebarInternal({ organizationId }: { organizationId: string 
                     icon={<Users className="size-4 text-foreground" />}
                 />
                 <SidebarLink
-                    label="Activity"
-                    href={`/org/${organizationId}/activity`}
-                    icon={<Activity className="size-4 text-foreground" />}
-                />
-                <SidebarLink
-                    label="Policies"
-                    href={`/org/${organizationId}/policies`}
-                    icon={<Shield className="size-4 text-foreground" />}
-                />
-                <SidebarLink
-                    label="Drift"
-                    href={`/org/${organizationId}/drift`}
-                    icon={<GitCompare className="size-4 text-foreground" />}
-                />
-                <SidebarLink
                     label="Docs"
                     href={`/org/${organizationId}/docs`}
                     icon={<FileText className="size-4 text-foreground" />}
-                />
-                <SidebarLink
-                    label="Admin"
-                    href={`/org/${organizationId}/admin`}
-                    icon={<Settings className="size-4 text-foreground" />}
                 />
                 <SidebarLink
                     label="Ask in Slack"

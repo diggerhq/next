@@ -5,7 +5,7 @@ import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { getSlimProjectById, getSlimProjectBySlug } from '@/data/user/projects';
 import { cn } from '@/utils/cn';
 import { projectSlugParamSchema } from '@/utils/zod-schemas/params';
-import { Activity, ArrowLeft, FileText, GitCompare, Layers, MessageCircle, Settings, Shield, Users } from 'lucide-react';
+import { ArrowLeft, FileText, Layers, MessageCircle, Users } from 'lucide-react';
 import { Suspense } from 'react';
 
 async function ProjectSidebarInternal({ projectId, projectSlug }: { projectId: string; projectSlug: string }) {
@@ -43,29 +43,9 @@ async function ProjectSidebarInternal({ projectId, projectSlug }: { projectId: s
           icon={<Users className="size-4 text-foreground" />}
         />
         <SidebarLink
-          label="Activity"
-          href={`/org/${organizationId}/activity`}
-          icon={<Activity className="size-4 text-foreground" />}
-        />
-        <SidebarLink
-          label="Policies"
-          href={`/org/${organizationId}/policies`}
-          icon={<Shield className="size-4 text-foreground" />}
-        />
-        <SidebarLink
-          label="Drift"
-          href={`/org/${organizationId}/drift`}
-          icon={<GitCompare className="size-4 text-foreground" />}
-        />
-        <SidebarLink
           label="Docs"
           href={`/org/${organizationId}/docs`}
           icon={<FileText className="size-4 text-foreground" />}
-        />
-        <SidebarLink
-          label="Admin"
-          href={`/org/${organizationId}/admin`}
-          icon={<Settings className="size-4 text-foreground" />}
         />
         <SidebarLink
           label="Ask in Slack"
