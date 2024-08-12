@@ -86,7 +86,7 @@ export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'
                                         <Activity className="h-8 w-8 text-gray-400" />
                                     </motion.div>
                                     <p className="mt-2 text-sm text-foreground">
-                                        Runs will appear here once they are initiated. Note you need to setup your repo with digger_workflow.yml to be able to trigger runs, for more information refer to the which includes example workflow file <Link href="https://docs.digger.dev/getting-started/github-actions-+-aws" className="text-blue-500 underline" >Docs quickstart</Link>
+                                        Runs will appear here once they are initiated. Note you need to setup your repo with digger_workflow.yml to be able to trigger runs, for more information refer to the which includes example workflow file <Link href="https://docs.digger.dev/team/getting-started/gha-aws" className="text-blue-500 underline" >Docs quickstart</Link>
                                     </p>
                                 </motion.div>
                             </TableCell>
