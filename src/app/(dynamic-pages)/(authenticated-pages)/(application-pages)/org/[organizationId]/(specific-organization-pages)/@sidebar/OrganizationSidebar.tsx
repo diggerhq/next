@@ -12,7 +12,7 @@ import { FreeTrialComponent } from '@/components/SubscriptionCards';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getIsStripeTestMode } from '@/utils/server/stripe-utils';
 import { differenceInDays } from 'date-fns';
-import { FileText, Home, Layers, MessageCircle, Users } from 'lucide-react';
+import { Activity, FileText, Home, Layers, MessageCircle, Users } from 'lucide-react';
 
 
 const isStripeTestMode = getIsStripeTestMode()
@@ -90,6 +90,11 @@ async function OrganizationSidebarInternal({
             label="Teams"
             href={`/org/${organizationId}/teams`}
             icon={<Users className="size-4 text-foreground" />}
+          />
+          <SidebarLink
+            label="Activity"
+            href={`/org/${organizationId}/activity`}
+            icon={<Activity className="size-4 text-foreground" />}
           />
           <SidebarLink
             label="Docs"

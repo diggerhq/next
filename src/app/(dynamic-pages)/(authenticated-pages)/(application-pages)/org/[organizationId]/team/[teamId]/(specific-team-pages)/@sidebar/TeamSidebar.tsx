@@ -4,7 +4,7 @@ import { SidebarLink } from '@/components/SidebarLink';
 import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { getOrganizationOfTeam } from '@/data/user/teams';
 import { cn } from '@/utils/cn';
-import { FileText, Home, Layers, MessageCircle, Users } from 'lucide-react';
+import { Activity, FileText, Home, Layers, MessageCircle, Users } from 'lucide-react';
 import { Suspense } from 'react';
 
 async function TeamSidebarInternal({ organizationId }: { organizationId: string }) {
@@ -37,6 +37,11 @@ async function TeamSidebarInternal({ organizationId }: { organizationId: string 
                     label="Teams"
                     href={`/org/${organizationId}/teams`}
                     icon={<Users className="size-4 text-foreground" />}
+                />
+                <SidebarLink
+                    label="Activity"
+                    href={`/org/${organizationId}/activity`}
+                    icon={<Activity className="size-4 text-foreground" />}
                 />
                 <SidebarLink
                     label="Docs"
