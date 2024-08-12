@@ -108,7 +108,7 @@ async function OrganizationSidebarInternal({
           />
           <SidebarLink
             label="Docs"
-            href={`/org/${organizationId}/docs`}
+            href={`https://docs.digger.dev/team/getting-started/gha-aws`}
             icon={<FileText className="size-4 text-foreground" />}
           />
           <SidebarLink
@@ -118,7 +118,7 @@ async function OrganizationSidebarInternal({
           />
           <SidebarLink
             label="Ask in Slack"
-            href="#"
+            href="https://bit.ly/diggercommunity"
             icon={<MessageCircle className="size-4 text-foreground" />}
           />
         </div>
