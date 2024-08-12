@@ -3,7 +3,6 @@
 import { InputTags } from "@/components/InputTags";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateProjectSettingsAction } from "@/data/user/projects";
@@ -96,27 +95,6 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                                 <Input id="repo" value={repositoryName || 'N/A'} disabled />
                             </motion.div>
                         </div>
-
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.15, delay: 0.3 }}
-                            className="flex items-center space-x-2"
-                        >
-                            <Controller
-                                name="managedState"
-                                control={control}
-                                render={({ field }) => (
-                                    <Checkbox
-                                        id="managedState"
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                        disabled
-                                    />
-                                )}
-                            />
-                            <Label htmlFor="managedState">Managed State</Label>
-                        </motion.div>
 
                         <motion.div
                             initial={{ opacity: 0 }}
