@@ -2,7 +2,7 @@
 import { PageHeading } from "@/components/PageHeading";
 import { T } from "@/components/ui/Typography";
 import { getLoggedInUserOrganizationRole } from "@/data/user/organizations";
-import { getSlimProjectById } from "@/data/user/projects";
+import { getProjectsIdsListForUser, getSlimProjectById } from "@/data/user/projects";
 import { getRepoDetails } from "@/data/user/repos";
 import { getBatchIdFromApplyStageId, getBatchIdFromPlanStageId, getOutputLogsAndWorkflowURLFromBatchId, getRunById, getTFOutputAndWorkflowURLFromBatchId } from "@/data/user/runs";
 import { getUserProfile } from "@/data/user/user";
@@ -13,6 +13,7 @@ import {
 } from "@/utils/zod-schemas/params";
 import type { Metadata } from "next";
 import dynamic from 'next/dynamic';
+import { redirect } from "next/navigation";
 import { ComponentType, Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -54,10 +55,12 @@ export default async function RunDetailPage({
 }: RunDetailPageProps) {
     const { runId } = runIdParamSchema.parse(params);
 
+
+
     // Fetch run and user data in parallel
     const [run, user] = await Promise.all([
         getRunById(runId),
-        serverGetLoggedInUser()
+        serverGetLoggedInUser(),
     ]);
 
     const project_id = run.project_id;
@@ -78,17 +81,26 @@ export default async function RunDetailPage({
     const [organizationRole, planBatchId, applyBatchId] = await Promise.all([
         getLoggedInUserOrganizationRole(project.organization_id),
         getBatchIdFromPlanStageId(run.plan_stage_id),
-        getBatchIdFromApplyStageId(run.apply_stage_id)
+        getBatchIdFromApplyStageId(run.apply_stage_id),
+
     ]);
 
     // Fetch terraform outputs and workflow URLs in parallel
-    const [planData, applyData] = await Promise.all([
+    const [planData, applyData, projectsIdsForUser] = await Promise.all([
         getTFOutputAndWorkflowURLFromBatchId(planBatchId),
-        getOutputLogsAndWorkflowURLFromBatchId(applyBatchId)
+        getOutputLogsAndWorkflowURLFromBatchId(applyBatchId),
+        getProjectsIdsListForUser({ userId: user.id, userRole: organizationRole, organizationId: project.organization_id })
     ]);
 
     const isOrganizationAdmin =
         organizationRole === "admin" || organizationRole === "owner";
+
+    if (!projectsIdsForUser.includes(project_id)) {
+        return (
+            redirect(`/org/${project.organization_id}`)
+        )
+    }
+
     return (
         <div className="flex flex-col space-y-4 w-full mt-8">
             <PageHeading

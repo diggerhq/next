@@ -353,6 +353,70 @@ export async function getProjectsListForUser({
 
   return projectsWithRepoDetails;
 }
+export async function getProjectsIdsListForUser({
+  userId,
+  userRole,
+  organizationId,
+  query = '',
+  teamIds = [],
+}: {
+  userId: string;
+  userRole: Enum<'organization_member_role'>;
+  organizationId: string;
+  query?: string;
+  teamIds?: number[];
+}): Promise<string[]> {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  let supabaseQuery = supabase
+    .from('projects')
+    .select('id,name, slug, latest_action_on, created_at, repo_id')
+    .eq('organization_id', organizationId)
+    .ilike('name', `%${query}%`);
+
+  if (userRole !== 'admin' || userId !== 'owner') {
+    // For non-admin users, get their team memberships
+    const { data: userTeams } = await supabase
+      .from('team_members')
+      .select('team_id')
+      .eq('user_id', userId);
+
+    const userTeamIds = userTeams?.map(team => team.team_id) || [];
+
+    // Filter by user's teams and organization-level projects
+    supabaseQuery = supabaseQuery.or(`team_id.is.null,team_id.in.(${userTeamIds.join(',')})`);
+  }
+
+  // Apply team filter if provided
+  if (teamIds.length > 0) {
+    supabaseQuery = supabaseQuery.in('team_id', teamIds);
+  }
+
+  const { data, error } = await supabaseQuery.order('latest_action_on', {
+    ascending: false,
+  });
+
+  if (error) {
+    console.error("Error fetching projects:", error);
+    return [];
+  }
+
+  if (!data) return [];
+
+  // Fetch repo details for each project
+  const projectsWithRepoDetails = await Promise.all(
+    data.map(async (project) => {
+      const repoDetails = await getRepoDetails(project.repo_id);
+      const { repo_id, ...projectWithoutRepoId } = project;
+      return {
+        ...projectWithoutRepoId,
+        repo_full_name: repoDetails?.repo_full_name || null,
+      };
+    })
+  );
+
+  return projectsWithRepoDetails.map(project => project.id);
+}
 
 export async function getProjectsCountForUser({
   userId,

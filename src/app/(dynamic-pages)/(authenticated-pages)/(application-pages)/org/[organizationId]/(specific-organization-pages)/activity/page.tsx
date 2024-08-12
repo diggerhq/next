@@ -1,8 +1,10 @@
 import { PageHeading } from "@/components/PageHeading";
 import { T } from "@/components/ui/Typography";
+import { getLoggedInUserOrganizationRole } from "@/data/user/organizations";
+import { getProjectsIdsListForUser } from "@/data/user/projects";
+import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import {
-    organizationParamSchema,
-    projectsfilterSchema
+    organizationParamSchema
 } from "@/utils/zod-schemas/params";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -10,8 +12,8 @@ import type { DashboardProps } from "../page";
 import AllActivityDetails from "./AllActivityDetails";
 
 export const metadata: Metadata = {
-    title: "Teams",
-    description: "You can create teams within your organization.",
+    title: "Activity",
+    description: "Activity in all projects of this organization",
 };
 
 export default async function Page({
@@ -19,23 +21,27 @@ export default async function Page({
     searchParams,
 }: DashboardProps) {
     const { organizationId } = organizationParamSchema.parse(params);
-    const filters = projectsfilterSchema.parse(searchParams);
+    const [{ id }, userRole, allowedProjectIdsForUser] = await Promise.all([
+        serverGetLoggedInUser(),
+        getLoggedInUserOrganizationRole(organizationId),
+        getProjectsIdsListForUser({ userId: (await serverGetLoggedInUser()).id, userRole: await getLoggedInUserOrganizationRole(organizationId), organizationId })
+    ]);
 
     return (
         <div className="flex flex-col space-y-4 max-w-5xl mt-8">
             <PageHeading
                 title="Activity"
-                subTitle="Organisational activity for all projects"
+                subTitle="Activity for all projects in this organization"
             />
 
             <Suspense
                 fallback={
                     <T.P className="text-muted-foreground my-6">
-                        Loading teams...
+                        Loading activity...
                     </T.P>
                 }
             >
-                <AllActivityDetails projectId="8c1e07ac-abaa-4258-b7ef-4c0ab1353b9c" projectSlug="testproj01" />
+                <AllActivityDetails organizationId={organizationId} allowedProjectIdsForUser={allowedProjectIdsForUser} />
             </Suspense>
         </div>
     );
