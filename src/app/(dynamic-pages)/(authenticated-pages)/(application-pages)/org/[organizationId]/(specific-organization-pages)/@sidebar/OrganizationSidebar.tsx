@@ -12,7 +12,7 @@ import { FreeTrialComponent } from '@/components/SubscriptionCards';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getIsStripeTestMode } from '@/utils/server/stripe-utils';
 import { differenceInDays } from 'date-fns';
-import { Activity, FileText, GitCompare, Home, Layers, MessageCircle, Settings, Shield, Users } from 'lucide-react';
+import { FileText, Home, Layers, MessageCircle, Users } from 'lucide-react';
 
 
 const isStripeTestMode = getIsStripeTestMode()
@@ -92,29 +92,9 @@ async function OrganizationSidebarInternal({
             icon={<Users className="size-4 text-foreground" />}
           />
           <SidebarLink
-            label="Activity"
-            href={`/org/${organizationId}/activity`}
-            icon={<Activity className="size-4 text-foreground" />}
-          />
-          <SidebarLink
-            label="Policies"
-            href={`/org/${organizationId}/policies`}
-            icon={<Shield className="size-4 text-foreground" />}
-          />
-          <SidebarLink
-            label="Drift"
-            href={`/org/${organizationId}/drift`}
-            icon={<GitCompare className="size-4 text-foreground" />}
-          />
-          <SidebarLink
             label="Docs"
             href={`https://docs.digger.dev/team/getting-started/gha-aws`}
             icon={<FileText className="size-4 text-foreground" />}
-          />
-          <SidebarLink
-            label="Admin"
-            href={`/org/${organizationId}/admin`}
-            icon={<Settings className="size-4 text-foreground" />}
           />
           <SidebarLink
             label="Ask in Slack"
