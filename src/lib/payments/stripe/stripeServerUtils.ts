@@ -21,7 +21,6 @@ export async function createCheckoutSessionAction({
   const user = await serverGetLoggedInUser();
 
   const organizationTitle = await getOrganizationTitle(organizationId);
-  const organizationSlug = await getOrganizationSlugByOrganizationId(organizationId);
 
   const customer = await createOrRetrieveCustomer({
     organizationId: organizationId,
@@ -32,7 +31,8 @@ export async function createCheckoutSessionAction({
   if (isTrial) {
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      billing_address_collection: 'required',
+      billing_address_collection: 'auto',
+      payment_method_collection: 'if_required',
       customer,
       line_items: [
         {
@@ -52,40 +52,40 @@ export async function createCheckoutSessionAction({
         metadata: {},
       },
       success_url: toSiteURL(
-        `/${organizationSlug}/settings/billing`,
+        `/org/${organizationId}/settings/billing`,
       ),
-      cancel_url: toSiteURL(`/${organizationSlug}/settings/billing`),
+      cancel_url: toSiteURL(`/org/${organizationId}/settings/billing`),
     });
 
     return stripeSession.id;
   }
-    const stripeSession = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      billing_address_collection: 'required',
-      customer,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      allow_promotion_codes: true,
-      subscription_data: {
-        trial_settings: {
-          end_behavior: {
-            missing_payment_method: 'cancel',
-          },
+  const stripeSession = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    billing_address_collection: 'required',
+    customer,
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+    mode: 'subscription',
+    allow_promotion_codes: true,
+    subscription_data: {
+      trial_settings: {
+        end_behavior: {
+          missing_payment_method: 'cancel',
         },
       },
-      metadata: {},
-      success_url: toSiteURL(
-        `/${organizationSlug}/settings/billing`,
-      ),
-      cancel_url: toSiteURL(`/${organizationSlug}/settings/billing`),
-    });
+    },
+    metadata: {},
+    success_url: toSiteURL(
+      `/org/${organizationId}/settings/billing`,
+    ),
+    cancel_url: toSiteURL(`/org/${organizationId}/settings/billing`),
+  });
 
-    return stripeSession.id;
+  return stripeSession.id;
 }
 
 export async function createCustomerPortalLinkAction(organizationId: string) {

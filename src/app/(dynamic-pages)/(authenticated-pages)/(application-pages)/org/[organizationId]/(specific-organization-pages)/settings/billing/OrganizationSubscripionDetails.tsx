@@ -7,9 +7,8 @@ import { cn } from '@/utils/cn';
 import { formatNormalizedSubscription } from '@/utils/formatNormalizedSubscription';
 import { Check, X } from 'lucide-react';
 import {
-  CreateSubscriptionButton,
   ManageSubscriptionButton,
-  StartFreeTrialButton,
+  StartFreeTrialButton
 } from './ActionButtons';
 
 function getProductsSortedByPrice(
@@ -143,10 +142,10 @@ async function ChoosePricingTable({
                           organizationId={organizationId}
                           priceId={priceId}
                         />
-                        <CreateSubscriptionButton
+                        {/* <CreateSubscriptionButton
                           organizationId={organizationId}
                           priceId={priceId}
-                        />
+                        /> */}
                       </>
                     ) : (
                       <T.P className="py-2 px-4 bg-primary-background dark:bg-dark-primary-background text-sm text-primary-text dark:text-dark-primary-text rounded-lg">
