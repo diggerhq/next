@@ -19,7 +19,6 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { InputTags } from "./InputTags";
 import { T } from "./ui/Typography";
-import { Checkbox } from "./ui/checkbox";
 
 const MotionCard = motion(Card);
 
@@ -345,20 +344,6 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            <div className="flex items-center space-x-2">
-                                <Controller
-                                    name="managedState"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Checkbox
-                                            id="managedState"
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
-                                    )}
-                                />
-                                <Label htmlFor="managedState">Managed State</Label>
-                            </div>
                             <div>
                                 <Label htmlFor="labels">Labels</Label>
                                 <Controller
