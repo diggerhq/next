@@ -1,25 +1,34 @@
 import { SidebarLink } from '@/components/SidebarLink';
-import { fetchSlimOrganizations, getNormalizedOrganizationSubscription, getOrganizationSlugByOrganizationId } from '@/data/user/organizations';
+import { fetchSlimOrganizations, getActiveProductsWithPrices, getLoggedInUserOrganizationRole, getNormalizedOrganizationSubscription, getOrganizationSlugByOrganizationId } from '@/data/user/organizations';
 import { cn } from '@/utils/cn';
 import { organizationParamSchema } from '@/utils/zod-schemas/params';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
+import { FreeTrialDialog } from '@/components/FreeTrialDialog';
 import { DesktopSidebarFallback } from '@/components/SidebarComponents/SidebarFallback';
 import { SwitcherAndToggle } from '@/components/SidebarComponents/SidebarLogo';
 import { FreeTrialComponent } from '@/components/SubscriptionCards';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getIsStripeTestMode } from '@/utils/server/stripe-utils';
 import { differenceInDays } from 'date-fns';
 import { Activity, FileText, GitCompare, Home, Layers, MessageCircle, Settings, Shield, Users } from 'lucide-react';
 
-async function OrganizationSubscription({
+
+const isStripeTestMode = getIsStripeTestMode()
+
+async function OrganizationSubscriptionSidebarCard({
   organizationId,
 }: {
   organizationId: string;
 }) {
-  const normalizedSubscription =
-    await getNormalizedOrganizationSubscription(organizationId);
+  const [normalizedSubscription, activeProducts, userRole] = await Promise.all([
+    getNormalizedOrganizationSubscription(organizationId),
+    getActiveProductsWithPrices(),
+    getLoggedInUserOrganizationRole(organizationId)
+  ]);
 
+  const isOrganizationAdmin = userRole === 'admin' || userRole === 'owner'
 
   switch (normalizedSubscription.type) {
     case 'trialing':
@@ -28,8 +37,17 @@ async function OrganizationSubscription({
         planName={normalizedSubscription.product.name ?? 'Digger Plan'}
         daysRemaining={differenceInDays(new Date(normalizedSubscription.trialEnd), new Date())}
       />
-    default:
+    case 'active':
       return null;
+    default:
+      return <>
+        <FreeTrialDialog
+          isOrganizationAdmin={isOrganizationAdmin}
+          organizationId={organizationId}
+          activeProducts={activeProducts}
+          defaultOpen={isStripeTestMode}
+        />
+      </>
   }
 
 }
@@ -107,7 +125,7 @@ async function OrganizationSidebarInternal({
       </div>
       <div>
         <Suspense fallback={<Skeleton className="h-10 w-full" />}>
-          <OrganizationSubscription organizationId={organizationId} />
+          <OrganizationSubscriptionSidebarCard organizationId={organizationId} />
         </Suspense>
       </div>
 

@@ -1,11 +1,11 @@
 'use server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { T } from '@/components/ui/Typography';
+import { DIGGER_FEATURES } from '@/constants';
 import { getActiveProductsWithPrices } from '@/data/user/organizations';
 import type { Enum, NormalizedSubscription, UnwrapPromise } from '@/types';
 import { cn } from '@/utils/cn';
 import { formatNormalizedSubscription } from '@/utils/formatNormalizedSubscription';
-import { Check, X } from 'lucide-react';
 import {
   ManageSubscriptionButton,
   StartFreeTrialButton
@@ -104,34 +104,18 @@ async function ChoosePricingTable({
                     </div>
 
                     <div className="px-5 pl-6 pt-0 mb-8">
-                      <ul className="font-medium text-muted-foreground">
-                        <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
-                          <Check className="text-green-600 w-6 h-6" />
-                          <T.P className="leading-6 ml-3">
-                            {product.description}
-                          </T.P>
-                        </li>
-                        <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
-                          <Check className="text-green-600 w-6 h-6" />
-                          <T.P className="leading-6 ml-3">A nice feature</T.P>
-                        </li>
-                        <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
-                          <Check className="text-green-600 w-6 h-6" />
-                          <T.P className="leading-6 ml-3">
-                            Another nice feature
-                          </T.P>
-                        </li>
-                        <li className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
-                          {product.price.unit_amount > 0 ? (
-                            <Check className="text-green-600 w-6 h-6" />
-                          ) : (
-                            <X className="text-red-500" />
-                          )}
-                          <T.P className="leading-6 ml-3">
-                            A premium feature
-                          </T.P>
-                        </li>
-                      </ul>
+                      {DIGGER_FEATURES.map((feature, index) => {
+                        const FeatureIcon = feature.icon;
+                        return (
+                          <li key={index} className="grid grid-cols-[24px,1fr] gap-0 text-md items-start mb-2">
+                            <FeatureIcon className="text-green-600 w-6 h-6" />
+                            <div>
+                              <T.P className="leading-6 ml-3 font-semibold">{feature.title}</T.P>
+                              <T.P className="text-sm text-muted-foreground ml-3">{feature.description}</T.P>
+                            </div>
+                          </li>
+                        );
+                      })}
                     </div>
                   </div>
 
