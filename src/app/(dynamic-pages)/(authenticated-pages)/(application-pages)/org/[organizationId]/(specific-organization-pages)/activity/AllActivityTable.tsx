@@ -33,7 +33,7 @@ export const AllActivityTable = ({ runs, allowedRunsForUser }: {
                     <TableHead className="text-left">Status</TableHead>
                     <TableHead className="text-left">Last updated</TableHead>
                     <TableHead className="text-left">Project ID</TableHead>
-                    <TableHead className="text-left">User</TableHead>
+                    <TableHead className="text-left">User name</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -68,7 +68,7 @@ export const AllActivityTable = ({ runs, allowedRunsForUser }: {
                                 </TableCell>
                                 <TableCell>{moment(run.updated_at).fromNow()}</TableCell>
                                 <TableCell>{run.project_name}</TableCell>
-                                <TableCell>{run.approver_user_name}</TableCell>
+                                <TableCell>{run.approver_user_name || "Unknown"}</TableCell>
                             </motion.tr>
                         ))
                     ) : (
