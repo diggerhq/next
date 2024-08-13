@@ -49,28 +49,18 @@ export const AllActivityTable = ({ runs, allowedRunsForUser }: {
                                 transition={{ duration: 0.3 }}
                             >
                                 <TableCell>
-                                    {allowedRunsForUser.includes(run.id) ? (
-                                        <Link href={`/project/${run.project_slug}/runs/${run.id}`} className="hover:underline cursor-pointer">
-                                            <span>
-                                                {run.id.length > 8 ? `${run.id.substring(0, 8)}...` : run.id}
-                                            </span>
-                                        </Link>
-                                    ) : (
+                                    <Link href={`/project/${run.project_slug}/runs/${run.id}`} className="hover:underline cursor-pointer">
                                         <span>
                                             {run.id.length > 8 ? `${run.id.substring(0, 8)}...` : run.id}
                                         </span>
-                                    )}
+                                    </Link>
                                 </TableCell>
-                                {allowedRunsForUser.includes(run.id) ?
-                                    <TableCell>
-                                        <Link href={`https://github.com/${run.repo_full_name}/commit/${run.commit_id}`}
-                                            className="hover:underline cursor-pointer">
-                                            {run.commit_id.substring(0, 8)}
-                                        </Link>
-                                    </TableCell>
-                                    :
-                                    <TableCell>{run.commit_id.substring(0, 8)}</TableCell>
-                                }
+                                <TableCell>
+                                    <Link href={`https://github.com/${run.repo_full_name}/commit/${run.commit_id}`}
+                                        className="hover:underline cursor-pointer">
+                                        {run.commit_id.substring(0, 8)}
+                                    </Link>
+                                </TableCell>
                                 <TableCell>
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[ToSnakeCase(run.status)] || ''}`}>
                                         {run.status.toUpperCase()}
