@@ -13,7 +13,6 @@ import {
 } from "@/utils/zod-schemas/params";
 import type { Metadata } from "next";
 import dynamic from 'next/dynamic';
-import { redirect } from "next/navigation";
 import { ComponentType, Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -94,13 +93,6 @@ export default async function RunDetailPage({
 
     const isOrganizationAdmin =
         organizationRole === "admin" || organizationRole === "owner";
-
-    if (!projectsIdsForUser.includes(project_id)) {
-        return (
-            redirect(`/org/${project.organization_id}`)
-        )
-    }
-
     return (
         <div className="flex flex-col space-y-4 w-full mt-8">
             <PageHeading
