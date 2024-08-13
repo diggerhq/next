@@ -136,7 +136,8 @@ export async function getAllRunsByOrganizationId(organizationId: string) {
       status,
       updated_at,
       project_id,
-      repo_id,
+      repo_id,  
+      repos(repo_full_name),
       approver_user_id,
       projects(name, slug)
     `,

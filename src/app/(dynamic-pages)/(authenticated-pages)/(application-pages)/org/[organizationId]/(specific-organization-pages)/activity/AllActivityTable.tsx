@@ -16,6 +16,7 @@ export const AllActivityTable = ({ runs, allowedRunsForUser }: {
         project_slug: string;
         project_name: string;
         repo_id: number;
+        repo_full_name: string;
         approver_user_name: string | null;
     }[]
     allowedRunsForUser: string[]
@@ -32,7 +33,7 @@ export const AllActivityTable = ({ runs, allowedRunsForUser }: {
                     <TableHead className="text-left">Commit ID</TableHead>
                     <TableHead className="text-left">Status</TableHead>
                     <TableHead className="text-left">Last updated</TableHead>
-                    <TableHead className="text-left">Project ID</TableHead>
+                    <TableHead className="text-left">Project name</TableHead>
                     <TableHead className="text-left">User name</TableHead>
                 </TableRow>
             </TableHeader>
@@ -60,7 +61,16 @@ export const AllActivityTable = ({ runs, allowedRunsForUser }: {
                                         </span>
                                     )}
                                 </TableCell>
-                                <TableCell>{run.commit_id}</TableCell>
+                                {allowedRunsForUser.includes(run.id) ?
+                                    <TableCell>
+                                        <Link href={`https://github.com/${run.repo_full_name}/commit/${run.commit_id}`}
+                                            className="hover:underline cursor-pointer">
+                                            {run.commit_id.substring(0, 8)}
+                                        </Link>
+                                    </TableCell>
+                                    :
+                                    <TableCell>{run.commit_id.substring(0, 8)}</TableCell>
+                                }
                                 <TableCell>
                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[ToSnakeCase(run.status)] || ''}`}>
                                         {run.status.toUpperCase()}

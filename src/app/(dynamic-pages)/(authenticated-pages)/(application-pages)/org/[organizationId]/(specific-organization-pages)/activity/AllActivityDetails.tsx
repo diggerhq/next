@@ -127,6 +127,7 @@ export default function AllActivityDetails({
                     >
                         <AllActivityTable runs={runs.map(run => ({
                             ...run,
+                            repo_full_name: run.repos?.repo_full_name || 'Unknown repository',
                             project_name: run.project_name || run.projects?.name || 'Unknown',
                             project_slug: run.projects?.slug || 'Unknown',
                         }))}
