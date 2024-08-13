@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import type { DashboardProps } from "../page";
-import { AllProjectsTableWithPagination } from "./ProjectsWithPagination";
+import { UserProjectsWithPagination } from "./ProjectsWithPagination";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -57,7 +57,7 @@ export default async function Page({
             </T.P>
           }
         >
-          <AllProjectsTableWithPagination
+          <UserProjectsWithPagination
             organizationId={organizationId}
             searchParams={searchParams}
           />

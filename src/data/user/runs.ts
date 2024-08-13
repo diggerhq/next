@@ -124,6 +124,52 @@ export async function getRunsByProjectId(projectId: string) {
   return data;
 }
 
+export async function getAllRunsByOrganizationId(organizationId: string) {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  const { data: runs, error } = await supabase
+    .from('digger_runs')
+    .select(
+      `
+      id,
+      commit_id,
+      status,
+      updated_at,
+      project_id,
+      repo_id,  
+      repos(repo_full_name),
+      approver_user_id,
+      projects(name, slug)
+    `,
+    )
+    .eq('projects.organization_id', organizationId)
+    .order('updated_at', { ascending: false });
+
+  if (error) throw error;
+
+  // Fetch user profiles for approvers
+  const approverIds = runs.map((run) => run.approver_user_id).filter(Boolean);
+  const { data: approvers, error: approversError } = await supabase
+    .from('user_profiles')
+    .select('id, user_name')
+    .in('id', approverIds);
+
+  if (approversError) throw approversError;
+
+  // Create a map of approver ids to user names
+  const approverMap = new Map(
+    approvers.map((approver) => [approver.id, approver.user_name]),
+  );
+
+  return runs.map((run) => ({
+    ...run,
+    project_name: run.projects?.name ?? null,
+    approver_user_name: run.approver_user_id
+      ? (approverMap.get(run.approver_user_id) ?? null)
+      : null,
+  }));
+}
+
 export async function requestRunApproval(
   runId: string,
 ): Promise<SAPayload<string>> {
