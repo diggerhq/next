@@ -62,11 +62,9 @@ export const AllActivityTable = ({ runs, allowedRunsForUser }: {
                                 </TableCell>
                                 <TableCell>{run.commit_id}</TableCell>
                                 <TableCell>
-                                    <Link href={`/project/${run.project_slug}/runs/${run.id}`} className="hover:underline cursor-pointer">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[ToSnakeCase(run.status)] || ''}`}>
-                                            {run.status.toUpperCase()}
-                                        </span>
-                                    </Link>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[ToSnakeCase(run.status)] || ''}`}>
+                                        {run.status.toUpperCase()}
+                                    </span>
                                 </TableCell>
                                 <TableCell>{moment(run.updated_at).fromNow()}</TableCell>
                                 <TableCell>{run.project_name}</TableCell>
