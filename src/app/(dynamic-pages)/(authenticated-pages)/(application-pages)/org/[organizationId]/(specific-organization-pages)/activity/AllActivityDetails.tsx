@@ -99,7 +99,8 @@ export default function AllActivityDetails({
         </Card>
     }
 
-    const filteredRuns = runs.filter(run => allowedProjectIdsForUser.includes(run.project_id));
+    // const filteredRuns = runs.filter(run => allowedProjectIdsForUser.includes(run.project_id));
+    const filteredRuns = runs;
 
     return (
         <motion.div
