@@ -34,7 +34,7 @@ export const AllActivityTable = ({ runs, allowedRunsForUser }: {
                     <TableHead className="text-left">Status</TableHead>
                     <TableHead className="text-left">Last updated</TableHead>
                     <TableHead className="text-left">Project name</TableHead>
-                    <TableHead className="text-left">User name</TableHead>
+                    <TableHead className="text-left">Approver</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
