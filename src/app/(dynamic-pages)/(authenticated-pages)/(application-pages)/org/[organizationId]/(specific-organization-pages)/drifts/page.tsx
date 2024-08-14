@@ -1,4 +1,5 @@
 import { PageHeading } from "@/components/PageHeading";
+import { Search } from "@/components/Search";
 import { T } from "@/components/ui/Typography";
 import {
   projectsfilterSchema,
@@ -27,6 +28,14 @@ export default async function DriftsPage({
         title="Drifts"
         subTitle="You can see the drifted projects within teams, or within your organization."
       />
+      <div className="md:w-1/3">
+        <Search placeholder="Search projects" />
+        {filters.query && (
+          <p className="text-sm ml-2 mt-4">
+            Searching for <span className="font-bold">{filters.query}</span>
+          </p>
+        )}
+      </div>
       {
         <Suspense
           fallback={
