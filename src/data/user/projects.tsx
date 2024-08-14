@@ -73,6 +73,8 @@ export const createProjectAction = async ({
   managedState,
   labels,
   teamId,
+  is_drift_detection_enabled,
+  drift_crontab,
 }: {
   organizationId: string;
   name: string;
@@ -82,6 +84,8 @@ export const createProjectAction = async ({
   managedState: boolean;
   labels: string[];
   teamId: number | null;
+  is_drift_detection_enabled: boolean;
+  drift_crontab: string;
 }): Promise<SAPayload<Tables<"projects">>> => {
   "use server";
   const supabaseClient = createSupabaseUserServerActionClient();
@@ -100,6 +104,8 @@ export const createProjectAction = async ({
       project_status: "draft",
       latest_action_on: new Date().toISOString(),
       labels,
+      is_drift_detection_enabled,
+      drift_crontab,
 
     })
     .select("*")
