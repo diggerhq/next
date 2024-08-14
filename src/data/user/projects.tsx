@@ -800,11 +800,15 @@ export async function updateProjectSettingsAction({
   terraformWorkingDir,
   labels,
   managedState,
+  is_drift_detection_enabled,
+  drift_crontab,
 }: {
   projectId: string;
   terraformWorkingDir: string;
   labels: string[];
   managedState: boolean;
+  is_drift_detection_enabled: boolean;
+  drift_crontab: string;
 }): Promise<SAPayload<unknown>> {
   const supabase = createSupabaseUserServerComponentClient();
 
@@ -815,6 +819,8 @@ export async function updateProjectSettingsAction({
         terraform_working_dir: terraformWorkingDir,
         labels,
         is_managing_state: managedState,
+        is_drift_detection_enabled: is_drift_detection_enabled,
+        drift_crontab: drift_crontab,
       })
       .eq('id', projectId)
       .select()
