@@ -34,3 +34,6 @@ export const ToSnakeCase = (str: string) => {
     .map((word) => word.toLowerCase())
     .join('_');
 };
+
+export const isLocalEnvironment =
+  process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost');

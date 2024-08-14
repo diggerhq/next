@@ -312,9 +312,71 @@ export async function getProjectsListForUser({
 
   let supabaseQuery = supabase
     .from('projects')
-    .select('name, slug, latest_action_on, created_at, repo_id')
+    .select('id,name, slug, latest_action_on, created_at, repo_id')
     .eq('organization_id', organizationId)
     .ilike('name', `%${query}%`);
+
+  if (userRole !== 'admin' || userId !== 'owner') {
+    // For non-admin users, get their team memberships
+    const { data: userTeams } = await supabase
+      .from('team_members')
+      .select('team_id')
+      .eq('user_id', userId);
+
+    const userTeamIds = userTeams?.map(team => team.team_id) || [];
+
+    // Filter by user's teams and organization-level projects
+    supabaseQuery = supabaseQuery.or(`team_id.is.null,team_id.in.(${userTeamIds.join(',')})`);
+  }
+
+  // Apply team filter if provided
+  if (teamIds.length > 0) {
+    supabaseQuery = supabaseQuery.in('team_id', teamIds);
+  }
+
+  const { data, error } = await supabaseQuery.order('latest_action_on', {
+    ascending: false,
+  });
+
+  if (error) {
+    console.error("Error fetching projects:", error);
+    return [];
+  }
+
+  if (!data) return [];
+
+  // Fetch repo details for each project
+  const projectsWithRepoDetails = await Promise.all(
+    data.map(async (project) => {
+      const repoDetails = await getRepoDetails(project.repo_id);
+      const { repo_id, ...projectWithoutRepoId } = project;
+      return {
+        ...projectWithoutRepoId,
+        repo_full_name: repoDetails?.repo_full_name || null,
+      };
+    })
+  );
+
+  return projectsWithRepoDetails;
+}
+
+export async function getSlimProjectsForUser({
+  userId,
+  userRole,
+  projectIds,
+  teamIds = [],
+}: {
+  userId: string;
+  userRole: Enum<'organization_member_role'>;
+  projectIds: string[];
+  teamIds?: number[];
+}): Promise<ProjectListType[]> {
+  const supabase = createSupabaseUserServerComponentClient();
+
+  let supabaseQuery = supabase
+    .from('projects')
+    .select('id,name, slug, latest_action_on, created_at, repo_id')
+    .in('id', projectIds);
 
   if (userRole !== 'admin' || userId !== 'owner') {
     // For non-admin users, get their team memberships
@@ -518,7 +580,43 @@ export const getAllProjectsInOrganization = async ({
   return data || [];
 };
 
+export const getAllProjectIdsInOrganization = async (organizationId: string) => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const supabaseQuery = supabase
+    .from("projects")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .order("created_at", { ascending: false });
 
+  const { data, error } = await supabaseQuery;
+
+  if (error) {
+    console.error("Error fetching project IDs:", error);
+    return [];
+  }
+
+  return data?.map(project => project.id) || [];
+};
+
+export const getProjectIdsInOrganization = async (organizationId: string, count: number) => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const supabaseQuery = supabase
+    .from("projects")
+    .select("id")
+    .eq("organization_id", organizationId);
+
+  const { data, error } = await supabaseQuery;
+
+  if (error) {
+    console.error("Error fetching project IDs:", error);
+    return [];
+  }
+
+  const projectIds = data?.map(project => project.id) || [];
+
+  // Shuffle the array and slice to get random project IDs
+  return projectIds.sort(() => Math.random() - 0.5).slice(0, count);
+};
 
 
 export const getOrganizationLevelProjects = async ({
@@ -619,7 +717,7 @@ export const getAllProjectsListInOrganization = async ({
   const supabase = createSupabaseUserServerComponentClient();
   let supabaseQuery = supabase
     .from("projects")
-    .select("name, slug, latest_action_on, created_at, repo_id")
+    .select("id,name, slug, latest_action_on, created_at, repo_id")
     .eq("organization_id", organizationId)
     .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
 
@@ -670,7 +768,7 @@ export const getProjectsList = async ({
   const supabase = createSupabaseUserServerComponentClient();
   let supabaseQuery = supabase
     .from("projects")
-    .select("name, slug, latest_action_on, created_at, repo_id")
+    .select("id,name, slug, latest_action_on, created_at, repo_id")
     .eq("organization_id", organizationId)
     .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
 

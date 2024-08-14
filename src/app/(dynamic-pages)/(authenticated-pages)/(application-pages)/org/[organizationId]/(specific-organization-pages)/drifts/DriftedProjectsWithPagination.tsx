@@ -1,32 +1,48 @@
 import { Pagination } from "@/components/Pagination";
 import { getLoggedInUserOrganizationRole } from "@/data/user/organizations";
-import { getAllProjectsListInOrganization, getProjectsCountForUser, getProjectsList, getProjectsListForUser, getProjectsTotalCount } from "@/data/user/projects";
+import { getAllProjectsListInOrganization, getProjectIdsInOrganization, getProjectsCountForUser, getProjectsList, getProjectsTotalCount, getSlimProjectsForUser } from "@/data/user/projects";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import { projectsfilterSchema } from "@/utils/zod-schemas/params";
-import { OrganizationProjectsTable } from "./OrganizationProjectsTable";
+import { OrganizationProjectsTable } from "../projects/OrganizationProjectsTable";
+import { DriftAlert, generateDummyDriftAlerts } from "./drift-alerts";
 
-export type ProjectListType = {
-    id: string;
-    name: string;
-    latest_action_on: string | null;
-    created_at: string;
-    repo_full_name: string | null;
-    slug: string;
-}
 
-export async function UserProjectsWithPagination({
+
+export async function UserDriftedProjectsWithPagination({
     organizationId,
     searchParams,
 }: { organizationId: string; searchParams: unknown }) {
     const filters = projectsfilterSchema.parse(searchParams);
+
+    const projectIdsForDriftAlerts = await getProjectIdsInOrganization(organizationId, 2);
+
+    // Once drift_alerts table is created, we will use that to fetch the alerts and check the count to be greater than 0
+    // For now, we are adding dummy alerts from dummyData.ts 
+
+    // using dummy data to get drifted project ids
+    // TODO: once drift_alerts table is created, we will use that to fetch the alerts and check the count to be greater than 0
+
+    const driftAlerts: DriftAlert[] = generateDummyDriftAlerts(projectIdsForDriftAlerts);
+
+    // get unique project ids from the drift alerts
+    const driftedProjectIds = Array.from(new Set(driftAlerts.map(alert => alert.project_id)));
+
     const [{ id: userId }, userRole] = await Promise.all([
         serverGetLoggedInUser(),
-        getLoggedInUserOrganizationRole(organizationId)
+        getLoggedInUserOrganizationRole(organizationId),
     ]);
+
+    // const [projects, totalPages] = await Promise.all([
+    //     getProjectsListForUser({ ...filters, organizationId, userRole, userId }),
+    //     getProjectsCountForUser({ ...filters, organizationId, userId }),
+    // ]);
+
     const [projects, totalPages] = await Promise.all([
-        getProjectsListForUser({ ...filters, organizationId, userRole, userId }),
+        getSlimProjectsForUser({ projectIds: driftedProjectIds, userRole, userId }),
         getProjectsCountForUser({ ...filters, organizationId, userId }),
     ]);
+
+
 
     return (
         <>

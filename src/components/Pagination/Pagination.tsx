@@ -109,10 +109,10 @@ function PaginationNumber({
     {
       'rounded-l-md': position === 'first' || position === 'single',
       'rounded-r-md': position === 'last' || position === 'single',
-      'z-10 bg-primary border-primary text-white': isActive,
-      'hover:bg-neutral-100 dark:hover:bg-neutral-800':
+      'z-10 bg-primary border-primary text-primary-foreground': isActive,
+      'hover:bg-muted':
         !isActive && position !== 'middle',
-      'text-neutral-300': position === 'middle',
+      'text-muted-foreground': position === 'middle',
     },
   );
 
