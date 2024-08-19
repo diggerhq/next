@@ -5,10 +5,13 @@ import {
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 // const matchAppAdmin = match('/app_admin_preview/(.*)?');
+import { authkitMiddleware } from '@workos-inc/authkit-nextjs';
 import { match } from 'path-to-regexp';
 import type { Database } from './lib/database.types';
 import { toSiteURL } from './utils/helpers';
 import { authUserMetadataSchema } from './utils/zod-schemas/authUserMetadata';
+
+const workosMiddleware = authkitMiddleware();
 
 const onboardingPaths = `/onboarding/(.*)?`;
 // Using a middleware to protect pages from unauthorized access
@@ -77,6 +80,11 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient<Database>({ req, res });
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
+
+  if (req.nextUrl.pathname.startsWith('/workos')) {
+    return workosMiddleware(req);
+  }
+
   if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
     return NextResponse.redirect(toSiteURL('/onboarding'));
   }
