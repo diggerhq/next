@@ -71,9 +71,3 @@ async function getOrganizationId(): Promise<string> {
 
   return orgs[0].organization_id;
 }
-
-/*
-
-1. click "install and authorize" in github
-2. 
-*/
