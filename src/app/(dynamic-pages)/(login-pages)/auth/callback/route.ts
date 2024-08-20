@@ -22,28 +22,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // HACK_ALERT!!!
-  // cookie is probably set on 'next.digger.dev' we have to change it to `.digger.dev`
-  const cookieKey = `sb-${process.env.SUPABASE_PROJECT_REF}-auth-token`;
-  const cookieStore = cookies();
-  const currentCookieValue = cookieStore.get(cookieKey)?.value;
-  // get domain of current reques
-  const domain = new URL(request.url).hostname;
-  if (
-    domain.includes('next.digger.dev') &&
-    currentCookieValue &&
-    !isDevelopment
-  ) {
-    // set cookie to .digger.dev
-    cookieStore.set(cookieKey, currentCookieValue, {
-      domain: '.digger.dev',
-      secure: true,
-      path: '/',
-      sameSite: 'lax',
-      httpOnly: true,
-    });
-  }
-
   let redirectTo = new URL('/dashboard', requestUrl.origin);
 
   if (next) {
