@@ -1,6 +1,5 @@
 import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
 import { toSiteURL } from '@/utils/helpers';
-import retry from 'async-retry';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Use the environment variable for the callback URL
@@ -27,7 +26,7 @@ export async function GET(request: NextRequest) {
       'Trying to get org id for the following installation ID:',
       installationId,
     );
-    const organizationId = await getOrganizationId(installationId);
+    const organizationId = await getOrganizationId();
     const response = await fetch(
       `${AUTH_SERVICE_URL}?${searchParams.toString()}`,
       {
@@ -50,32 +49,31 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function getOrganizationId(installationId: string): Promise<string> {
+async function getOrganizationId(): Promise<string> {
   const supabase = createSupabaseUserRouteHandlerClient();
-  return retry(
-    async (bail) => {
-      const { data, error } = await supabase
-        .from('github_app_installation_links')
-        .select('organization_id')
-        .eq('github_installation_id', installationId)
-        .single();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  if (error || !user?.id) {
+    console.error('Failed to get current user', error);
+    throw error;
+  }
+  const { data: orgs, error: errOrg } = await supabase
+    .from('organization_members')
+    .select('*')
+    .eq('member_id', user.id);
 
-      if (error) {
-        if (error.code === '404') bail(new Error('Organization not found'));
-        throw error;
-      }
+  if (errOrg || !orgs[0]) {
+    console.error('Failed to get org');
+    throw error;
+  }
 
-      if (!data?.organization_id) {
-        throw new Error('Organization ID not found');
-      }
-
-      return data.organization_id;
-    },
-    {
-      retries: 2,
-      onRetry: (error, attempt) => {
-        console.log(`Attempt ${attempt} failed. Retrying...`);
-      },
-    },
-  );
+  return orgs[0].organization_id;
 }
+
+/*
+
+1. click "install and authorize" in github
+2. 
+*/
