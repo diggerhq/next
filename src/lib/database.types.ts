@@ -32,6 +32,29 @@ export type Database = {
           },
         ]
       }
+      billing_bypass_organizations: {
+        Row: {
+          created_at: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_bypass_organizations_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chats: {
         Row: {
           created_at: string
@@ -1193,6 +1216,7 @@ export type Database = {
           description: string | null
           id: string
           image: string | null
+          is_visible_in_ui: boolean
           metadata: Json | null
           name: string | null
         }
@@ -1201,6 +1225,7 @@ export type Database = {
           description?: string | null
           id: string
           image?: string | null
+          is_visible_in_ui?: boolean
           metadata?: Json | null
           name?: string | null
         }
@@ -1209,6 +1234,7 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          is_visible_in_ui?: boolean
           metadata?: Json | null
           name?: string | null
         }

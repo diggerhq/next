@@ -14,6 +14,13 @@ export function formatNormalizedSubscription(
   const threeDaysFromNow = moment().add(3, 'days');
   let description = '';
   switch (subscription.type) {
+    case 'bypassed_enterprise_organization':
+      return {
+        title: 'Enterprise (Demo) Plan',
+        sidenote: '',
+        description:
+          'This organization is using the enterprise (demo) plan. Contact application administrator to modify subscription details.',
+      };
     case 'no-subscription':
       return {
         title: '',

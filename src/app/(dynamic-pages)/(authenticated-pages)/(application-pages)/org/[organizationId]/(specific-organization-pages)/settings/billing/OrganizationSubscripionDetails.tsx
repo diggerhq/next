@@ -159,9 +159,24 @@ export async function OrganizationSubscripionDetails({
   const isOrganizationAdmin =
     organizationRole === 'admin' || organizationRole === 'owner';
 
+
+
   const subscriptionDetails = formatNormalizedSubscription(
     normalizedSubscription,
   );
+
+  if (normalizedSubscription.type === 'bypassed_enterprise_organization') {
+    return <Card>
+      <CardHeader>
+        <CardTitle>
+          Subscription
+        </CardTitle>
+        <CardDescription>
+          This organization is using the enterprise (demo) plan. Contact application administrator to modify subscription details.
+        </CardDescription>
+      </CardHeader>
+    </Card>;
+  }
 
   if (
     !subscriptionDetails.title ||

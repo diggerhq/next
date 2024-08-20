@@ -2,8 +2,7 @@
 
 import {
   getLoggedInUserOrganizationRole,
-  getNormalizedOrganizationSubscription,
-  getSlimOrganizationById,
+  getSlimOrganizationById
 } from '@/data/user/organizations';
 import { getSlimProjectById } from '@/data/user/projects';
 import { getLoggedInUserTeamRole, getSlimTeamById } from '@/data/user/teams';
@@ -19,7 +18,6 @@ async function fetchData(projectId: string) {
       projectByIdData.team_id
         ? getLoggedInUserTeamRole(projectByIdData.team_id)
         : null,
-      getNormalizedOrganizationSubscription(projectByIdData.organization_id),
     ]);
 
   return {

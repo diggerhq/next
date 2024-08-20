@@ -27,6 +27,8 @@ async function OrganizationSubscriptionSidebarCard({
   const isOrganizationAdmin = userRole === 'admin' || userRole === 'owner'
 
   switch (normalizedSubscription.type) {
+    case 'bypassed_enterprise_organization':
+      return null;
     case 'trialing':
       return <FreeTrialComponent
         organizationId={organizationId}

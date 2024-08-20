@@ -313,11 +313,34 @@ export const getNormalizedOrganizationSubscription = async (
   organizationId: string,
 ): Promise<NormalizedSubscription> => {
   const supabase = createSupabaseUserServerComponentClient();
-  const { data: subscriptions, error } = await supabase
-    .from('subscriptions')
-    .select('*, prices(*, products(*))')
-    .eq('organization_id', organizationId)
-    .in('status', ['trialing', 'active']);
+  const [organizationSubscriptionsResponse, byOrganizationsResponse] =
+    await Promise.all([
+      supabase
+        .from('subscriptions')
+        .select('*, prices(*, products(*))')
+        .eq('organization_id', organizationId)
+        .in('status', ['trialing', 'active']),
+      supabase
+        .from('billing_bypass_organizations')
+        .select('*')
+        .eq('id', organizationId)
+        .single(),
+    ]);
+
+  const { data: bypassOrganizations, error: bypassOrganizationsError } =
+    byOrganizationsResponse;
+
+  if (bypassOrganizationsError) {
+    // ignore this is the likely case.
+  }
+
+  if (bypassOrganizations) {
+    return {
+      type: 'bypassed_enterprise_organization',
+    };
+  }
+
+  const { data: subscriptions, error } = organizationSubscriptionsResponse;
 
   if (error) {
     throw error;
@@ -385,6 +408,7 @@ export const getActiveProductsWithPrices = async () => {
     .select('*, prices(*)')
     .eq('active', true)
     .eq('prices.active', true)
+    .eq('is_visible_in_ui', true)
     .order('unit_amount', { foreignTable: 'prices' });
 
   if (error) {
