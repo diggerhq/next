@@ -11,7 +11,7 @@ import { SwitcherAndToggle } from '@/components/SidebarComponents/SidebarLogo';
 import { FreeTrialComponent } from '@/components/SubscriptionCards';
 import { Skeleton } from '@/components/ui/skeleton';
 import { differenceInDays } from 'date-fns';
-import { Activity, FileText, Home, Layers, MessageCircle, Users } from 'lucide-react';
+import { Activity, FileText, FlagIcon, Home, Layers, MessageCircle, Users } from 'lucide-react';
 
 async function OrganizationSubscriptionSidebarCard({
   organizationId,
@@ -81,6 +81,11 @@ async function OrganizationSidebarInternal({
             label="Projects"
             href={`/org/${organizationId}/projects`}
             icon={<Layers className="size-4 text-foreground" />}
+          />
+          <SidebarLink
+            label="Drift"
+            href={`/org/${organizationId}/drift`}
+            icon={<FlagIcon className="size-4 text-foreground" />}
           />
           <SidebarLink
             label="Teams"

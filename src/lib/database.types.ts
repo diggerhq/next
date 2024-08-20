@@ -1275,7 +1275,9 @@ export type Database = {
           configuration_yaml: string | null
           created_at: string
           deleted_at: string | null
+          drift_crontab: string | null
           id: string
+          is_drift_detection_enabled: boolean | null
           is_generated: boolean | null
           is_in_main_branch: boolean | null
           is_managing_state: boolean | null
@@ -1295,7 +1297,9 @@ export type Database = {
           configuration_yaml?: string | null
           created_at?: string
           deleted_at?: string | null
+          drift_crontab?: string | null
           id?: string
+          is_drift_detection_enabled?: boolean | null
           is_generated?: boolean | null
           is_in_main_branch?: boolean | null
           is_managing_state?: boolean | null
@@ -1315,7 +1319,9 @@ export type Database = {
           configuration_yaml?: string | null
           created_at?: string
           deleted_at?: string | null
+          drift_crontab?: string | null
           id?: string
+          is_drift_detection_enabled?: boolean | null
           is_generated?: boolean | null
           is_in_main_branch?: boolean | null
           is_managing_state?: boolean | null

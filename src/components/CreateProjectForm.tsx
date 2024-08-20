@@ -19,6 +19,7 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { InputTags } from "./InputTags";
 import { T } from "./ui/Typography";
+import { Switch } from "./ui/switch";
 
 const MotionCard = motion(Card);
 
@@ -29,6 +30,8 @@ const createProjectFormSchema = z.object({
     labels: z.array(z.string()),
     managedState: z.boolean().default(true),
     teamId: z.number().int().positive().nullable(),
+    is_drift_detection_enabled: z.boolean().default(false),
+    drift_crontab: z.string().optional(),
 });
 
 type CreateProjectFormData = z.infer<typeof createProjectFormSchema>;
@@ -62,6 +65,8 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
             managedState: true,
             labels: [],
             teamId: teamId || null,
+            is_drift_detection_enabled: false,
+            drift_crontab: '',
         },
     });
 
@@ -77,6 +82,8 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                 managedState: data.managedState,
                 terraformWorkingDir: data.terraformDir,
                 labels: data.labels,
+                is_drift_detection_enabled: data.is_drift_detection_enabled,
+                drift_crontab: data.drift_crontab || '',
             });
         },
         {
@@ -360,6 +367,54 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                                     )}
                                 />
                             </div>
+                        </div>
+                    </CardContent>
+                </MotionCard>
+
+                <MotionCard
+                    className="mb-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                >
+                    <CardHeader>
+                        <div className="flex flex-col">
+                            <CardTitle className="text-lg">Drift Detection</CardTitle>
+                            <CardDescription className="text-sm text-muted-foreground">Configure drift detection settings</CardDescription>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <div className="flex items-center space-x-2">
+                                <Controller
+                                    name="is_drift_detection_enabled"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            id="is_drift_detection_enabled"
+                                        />
+                                    )}
+                                />
+                                <Label htmlFor="is_drift_detection_enabled">Enable Drift Detection</Label>
+                            </div>
+                            {watch('is_drift_detection_enabled') && (
+                                <div>
+                                    <Label htmlFor="drift_crontab">Drift Detection Schedule (Crontab)</Label>
+                                    <Controller
+                                        name="drift_crontab"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Input
+                                                id="drift_crontab"
+                                                placeholder="Enter crontab schedule (e.g., 0 0 * * *)"
+                                                {...field}
+                                            />
+                                        )}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </MotionCard>

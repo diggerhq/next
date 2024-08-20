@@ -6,6 +6,7 @@ import { projectsfilterSchema } from "@/utils/zod-schemas/params";
 import { OrganizationProjectsTable } from "./OrganizationProjectsTable";
 
 export type ProjectListType = {
+    id: string;
     name: string;
     latest_action_on: string | null;
     created_at: string;

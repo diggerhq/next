@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { updateProjectSettingsAction } from "@/data/user/projects";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
 import { Tables } from "@/lib/database.types";
@@ -21,6 +22,8 @@ type ProjectSettingsFormData = {
     terraformWorkingDir: string;
     labels: string[];
     managedState: boolean;
+    is_drift_detection_enabled: boolean;
+    drift_crontab: string;
 };
 
 export default function ProjectSettings({ project, repositoryName }: ProjectSettingsProps) {
@@ -31,6 +34,8 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
             terraformWorkingDir: project.terraform_working_dir || '',
             labels: project.labels || [],
             managedState: project.is_managing_state || false,
+            is_drift_detection_enabled: project.is_drift_detection_enabled || false,
+            drift_crontab: project.drift_crontab || '',
         },
     });
 
@@ -41,6 +46,8 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                 terraformWorkingDir: data.terraformWorkingDir,
                 labels: data.labels,
                 managedState: data.managedState,
+                is_drift_detection_enabled: data.is_drift_detection_enabled,
+                drift_crontab: data.drift_crontab,
             });
             return result;
         },
@@ -131,6 +138,34 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                                 )}
                             />
                         </motion.div>
+
+
+                        {/* Drift Detection */}
+                        <div className="flex items-center gap-2">
+                            <Label htmlFor="is_drift_detection_enabled">Drift Detection</Label>
+                            <Controller
+                                name="is_drift_detection_enabled"
+                                control={control}
+                                render={({ field }) => (
+                                    <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                )}
+                            />
+                        </div>
+
+                        {/* Input to set the drift detection crontab */}
+                        <div>
+                            <Label htmlFor="drift_crontab">Drift Detection Crontab</Label>
+                            <Controller
+                                name="drift_crontab"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input id="drift_crontab" {...field} />
+                                )}
+                            />
+                        </div>
 
                         <motion.div
                             initial={{ opacity: 0 }}
