@@ -3,7 +3,7 @@ import { toSiteURL } from '@/utils/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Use the environment variable for the callback URL
-const AUTH_SERVICE_URL = process.env.GITHUB_CALLBACK_URL;
+const AUTH_SERVICE_URL = process.env.GITHUB_PROXY_CALLBACK_URL;
 const DIGGER_WEBHOOK_SECRET = process.env.DIGGER_WEBHOOK_SECRET;
 
 if (!AUTH_SERVICE_URL) {
