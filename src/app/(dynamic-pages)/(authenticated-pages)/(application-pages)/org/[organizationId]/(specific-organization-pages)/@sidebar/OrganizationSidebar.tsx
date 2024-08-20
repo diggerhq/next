@@ -41,7 +41,7 @@ async function OrganizationSubscriptionSidebarCard({
           isOrganizationAdmin={isOrganizationAdmin}
           organizationId={organizationId}
           activeProducts={activeProducts}
-          defaultOpen={true}
+          defaultOpen={false}
         />
       </>
   }

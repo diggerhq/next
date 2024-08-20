@@ -39,7 +39,7 @@ type FreeTrialDialogProps = {
   isOrganizationAdmin: boolean,
   defaultOpen?: boolean
 }
-export function FreeTrialDialog({ organizationId, activeProducts, isOrganizationAdmin, defaultOpen = true }: FreeTrialDialogProps) {
+export function FreeTrialDialog({ organizationId, activeProducts, isOrganizationAdmin, defaultOpen = false }: FreeTrialDialogProps) {
   // this should be true
   const [open, setOpen] = useState(defaultOpen)
   // supabase cannot sort by foreign table, so we do it here
