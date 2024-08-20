@@ -37,10 +37,11 @@ type FreeTrialDialogProps = {
   organizationId: string
   activeProducts: UnwrapPromise<ReturnType<typeof getActiveProductsWithPrices>>
   isOrganizationAdmin: boolean,
+  defaultOpen?: boolean
 }
-export function FreeTrialDialog({ organizationId, activeProducts, isOrganizationAdmin }: FreeTrialDialogProps) {
+export function FreeTrialDialog({ organizationId, activeProducts, isOrganizationAdmin, defaultOpen = true }: FreeTrialDialogProps) {
   // this should be true
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(defaultOpen)
   // supabase cannot sort by foreign table, so we do it here
   const productsSortedByPrice = getProductsSortedByPrice(activeProducts);
 
