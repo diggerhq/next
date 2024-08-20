@@ -25,8 +25,7 @@ export default async function DriftsPage({
   return (
     <div className="flex flex-col space-y-4 max-w-5xl mt-8">
       <PageHeading
-        title="Drifts"
-        subTitle="You can see the drifted projects within teams, or within your organization."
+        title="Drifted projects (alpha)"
       />
       <div className="md:w-1/3">
         <Search placeholder="Search projects" />
