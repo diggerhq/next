@@ -39,12 +39,11 @@ type FreeTrialDialogProps = {
   isOrganizationAdmin: boolean,
   defaultOpen?: boolean
 }
-export function FreeTrialDialog({ organizationId, activeProducts, isOrganizationAdmin, defaultOpen = false }: FreeTrialDialogProps) {
+export function FreeTrialDialog({ organizationId, activeProducts, isOrganizationAdmin, defaultOpen = true }: FreeTrialDialogProps) {
   // this should be true
   const [open, setOpen] = useState(defaultOpen)
   // supabase cannot sort by foreign table, so we do it here
   const productsSortedByPrice = getProductsSortedByPrice(activeProducts);
-
 
   const { mutate, isLoading } = useSAToastMutation(
     async (priceId: string) => {
@@ -62,24 +61,42 @@ export function FreeTrialDialog({ organizationId, activeProducts, isOrganization
     }
   )
 
+  const getCardWidth = () => {
+    const count = productsSortedByPrice.length
+    if (count === 1) return 'w-full'
+    if (count === 2) return 'md:w-1/2'
+    if (count === 3) return 'lg:w-1/3'
+    return 'md:w-80 lg:w-96' // Fixed width for overflow cases
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[900px]">
-        <DialogHeader>
-          <DialogTitle>Start Your Free Trial</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-sm sm:max-w-3xl md:max-w-2xl lg:max-w-7xl">
+        <DialogHeader className="w-full">
+          <DialogTitle className="w-full text-left">Start Your Free Trial</DialogTitle>
+          <DialogDescription className="w-full text-left">
             Your organization doesn't have an active subscription. Choose a plan to start your free trial.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-auto gap-4">
+        <div className={`
+          flex flex-col sm:flex-row
+          overflow-y-auto sm:overflow-x-auto
+          h-[70vh] sm:h-auto
+          ${productsSortedByPrice.length <= 3 ? 'lg:justify-between lg:overflow-x-hidden' : 'lg:overflow-x-auto'}
+        `}>
           {productsSortedByPrice.map((product) => (
-            <Card key={product.id}>
+            <Card key={product.id} className={`
+              flex-shrink-0 w-full
+              ${getCardWidth()}
+              mb-4 sm:mb-0 sm:mr-4
+              flex flex-col
+            `}>
               <CardHeader>
                 <CardTitle>{product.name}</CardTitle>
                 <CardDescription>{product.priceString} per {product.price?.interval}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
+              <CardContent className="flex-grow flex flex-col">
+                <ul className="space-y-2 flex-grow overflow-y-auto">
                   {DIGGER_FEATURES.map((feature, index) => {
                     const FeatureIcon = feature.icon
                     return (
@@ -115,7 +132,6 @@ export function FreeTrialDialog({ organizationId, activeProducts, isOrganization
             </Card>
           ))}
         </div>
-
       </DialogContent>
     </Dialog>
   )
