@@ -10,12 +10,8 @@ import { DesktopSidebarFallback } from '@/components/SidebarComponents/SidebarFa
 import { SwitcherAndToggle } from '@/components/SidebarComponents/SidebarLogo';
 import { FreeTrialComponent } from '@/components/SubscriptionCards';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getIsStripeTestMode } from '@/utils/server/stripe-utils';
 import { differenceInDays } from 'date-fns';
 import { Activity, FileText, Home, Layers, MessageCircle, Users } from 'lucide-react';
-
-
-const isStripeTestMode = getIsStripeTestMode()
 
 async function OrganizationSubscriptionSidebarCard({
   organizationId,
@@ -45,7 +41,6 @@ async function OrganizationSubscriptionSidebarCard({
           isOrganizationAdmin={isOrganizationAdmin}
           organizationId={organizationId}
           activeProducts={activeProducts}
-          defaultOpen={isStripeTestMode}
         />
       </>
   }
