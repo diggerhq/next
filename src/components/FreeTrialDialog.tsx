@@ -69,6 +69,7 @@ export function FreeTrialDialog({ organizationId, activeProducts, isOrganization
           <DialogTitle className="w-full text-left">Start Your Free Trial</DialogTitle>
           <DialogDescription className="w-full text-left">
             Your organization doesn't have an active subscription. Choose a plan to start your free trial.
+            <strong>No credit card required.</strong>
           </DialogDescription>
         </DialogHeader>
         <div className={`
