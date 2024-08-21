@@ -8,6 +8,7 @@ import { getActiveProductsWithPrices } from '@/data/user/organizations'
 import { useSAToastMutation } from '@/hooks/useSAToastMutation'
 import { createTrialSubSuccessCB } from '@/lib/payments/paymentGatewayUtils'
 import { startTrial } from '@/lib/payments/paymentUtilsServer'
+import { getPricingCardWidth } from "@/lib/utils"
 import type { UnwrapPromise } from '@/types'
 import { useState } from 'react'
 
@@ -61,14 +62,6 @@ export function FreeTrialDialog({ organizationId, activeProducts, isOrganization
     }
   )
 
-  const getCardWidth = () => {
-    const count = productsSortedByPrice.length
-    if (count === 1) return 'w-full'
-    if (count === 2) return 'md:w-1/2'
-    if (count === 3) return 'lg:w-1/3'
-    return 'md:w-80 lg:w-96' // Fixed width for overflow cases
-  }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-sm sm:max-w-3xl md:max-w-2xl lg:max-w-7xl">
@@ -87,7 +80,7 @@ export function FreeTrialDialog({ organizationId, activeProducts, isOrganization
           {productsSortedByPrice.map((product) => (
             <Card key={product.id} className={`
               flex-shrink-0 w-full
-              ${getCardWidth()}
+              ${getPricingCardWidth(productsSortedByPrice.length)}
               mb-4 sm:mb-0 sm:mr-4
               flex flex-col
             `}>
