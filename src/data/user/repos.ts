@@ -23,7 +23,8 @@ export async function getOrganizationRepos(organizationId: string) {
   const { data, error } = await supabaseClient
     .from('repos')
     .select('id, repo_full_name')
-    .eq('organization_id', organizationId);
+    .eq('organization_id', organizationId)
+    .is('deleted_at', null);
 
   if (error) {
     throw error;
