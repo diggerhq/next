@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  CreditCard,
   LayoutDashboard,
   MessageCircle,
   Shield,
@@ -86,5 +87,10 @@ export const DIGGER_FEATURES: DiggerFeature[] = [
     icon: MessageCircle,
     title: 'Slack & GitHub Issues integration for Drift detection',
     description: 'Forward Drift Notifications to Slack and to GitHub Issues',
+  },
+  {
+    icon: CreditCard,
+    title: 'No Credit Card Required',
+    description: 'Start your trial without entering any card details',
   },
 ];
