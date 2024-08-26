@@ -1,6 +1,7 @@
 "use client";
 import { statusColors } from '@/app/(dynamic-pages)/(authenticated-pages)/(application-pages)/project/[projectSlug]/(specific-project-pages)/AllRunsTable';
 import { T } from '@/components/ui/Typography';
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import {
   Table,
@@ -78,9 +79,9 @@ export function OrganizationImpactProjectsTable({ projects, projectsWithRunIds }
         const status = 'Pending Apply'
         const snakeCaseStatus = ToSnakeCase(status);
         return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[snakeCaseStatus] || ''}`}>
+          <Badge className={`${statusColors[snakeCaseStatus]} pointer-events-none`}>
             {status.toUpperCase()}
-          </span>
+          </Badge>
         );
       },
     },
