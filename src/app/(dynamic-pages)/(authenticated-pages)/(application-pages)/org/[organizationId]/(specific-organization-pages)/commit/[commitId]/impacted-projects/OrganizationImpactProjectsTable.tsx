@@ -21,7 +21,6 @@ import {
   type ColumnDef,
   type SortingState,
 } from '@tanstack/react-table';
-import { GitBranch } from 'lucide-react';
 import moment from 'moment';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -35,6 +34,8 @@ type Props = {
 };
 
 export function OrganizationImpactProjectsTable({ projects, projectsWithRunIds }: Props) {
+
+  let similarity = true;
 
   const columns: ColumnDef<ProjectListType>[] = [
     {
@@ -70,23 +71,9 @@ export function OrganizationImpactProjectsTable({ projects, projectsWithRunIds }
       },
     },
     {
-      accessorKey: 'by',
-      header: 'By',
-      cell: ({ row }) => row.getValue('by') || 'unknown',
-    },
-    {
-      accessorKey: 'terraform_working_dir',
-      header: 'Configuration Source / Working Directory',
-      cell: ({ row }) => (
-        <div className="flex items-center bg-muted/50 p-1 rounded-md border w-fit px-2">
-          <GitBranch className="mr-1 h-4 w-4" />
-          <span>
-            {row.original.repo_full_name ? `${row.original.repo_full_name.toLowerCase().replace(/\s+/g, '-').replace(/[A-Z]/g, (letter) => letter.toLowerCase())}` : ''}
-            {row.original.repo_full_name && ((row.getValue('terraform_working_dir') as string) || '') ? '/' : ''}
-            {((row.getValue('terraform_working_dir') as string) || '').replace(/\s+/g, '-').replace(/[A-Z]/g, (letter) => letter.toLowerCase())}
-          </span>
-        </div>
-      ),
+      accessorKey: 'similarity',
+      header: 'Similarity',
+      cell: () => similarity ? 'Yes' : 'No',
     },
   ];
 

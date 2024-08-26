@@ -7,7 +7,6 @@ import { FolderIcon } from 'lucide-react';
 import { useState } from 'react';
 import { ProjectListType } from '../../../projects/ProjectsWithPagination';
 import { OrganizationImpactProjectsTable } from './OrganizationImpactProjectsTable';
-import { OrganizationProjectsTableWithSimilarity } from './OrganizationProjectsTableWithSimilarity';
 
 type ImpactedProjectsDisplayProps = {
     projects: ProjectListType[]; // Replace 'any' with your actual project type
@@ -59,7 +58,7 @@ export function ImpactedProjectsDisplay({
                             <FolderIcon className="mr-2 h-5 w-5" />
                             Group: {group.name}
                         </T.H4>
-                        <OrganizationProjectsTableWithSimilarity projects={group.projects} groupNames={[group.name]} projectsWithRunIds={projectsWithRunIds} />
+                        <OrganizationImpactProjectsTable projects={group.projects} projectsWithRunIds={projectsWithRunIds} />
                     </div>
                 ))}
             </div>
