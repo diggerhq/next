@@ -1,4 +1,5 @@
 "use client";
+import { statusColors } from '@/app/(dynamic-pages)/(authenticated-pages)/(application-pages)/project/[projectSlug]/(specific-project-pages)/AllRunsTable';
 import { T } from '@/components/ui/Typography';
 import { Card } from '@/components/ui/card';
 import {
@@ -10,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { Tables } from '@/lib/database.types';
-import { getRandomRunId } from '@/lib/utils';
+import { getRandomRunId, ToSnakeCase } from '@/lib/utils';
 import {
   flexRender,
   getCoreRowModel,
@@ -68,6 +69,19 @@ export function OrganizationImpactProjectsTable({ projects, projectsWithRunIds }
       cell: ({ row }) => {
         const date = moment(row.getValue('latest_action_on') as string);
         return date.format('MMM DD YYYY, HH:mm [hrs]');
+      },
+    },
+    {
+      accessorKey: 'run_status',
+      header: 'Run Status',
+      cell: ({ row }) => {
+        const status = 'Pending Apply'
+        const snakeCaseStatus = ToSnakeCase(status);
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[snakeCaseStatus] || ''}`}>
+            {status.toUpperCase()}
+          </span>
+        );
       },
     },
     {
