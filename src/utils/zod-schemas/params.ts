@@ -9,6 +9,11 @@ export const teamParamSchema = z.object({
   organizationId: z.string().uuid(),
 });
 
+export const commitParamSchema = z.object({
+  commitId: z.string(),
+  organizationId: z.string().uuid(),
+});
+
 export const organizationSlugParamSchema = z.object({
   organizationSlug: z.string(),
 });

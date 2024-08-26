@@ -5,9 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DIGGER_FEATURES } from '@/constants'
 import { getActiveProductsWithPrices } from '@/data/user/organizations'
-import { useSAToastMutation } from '@/hooks/useSAToastMutation'
-import { createTrialSubSuccessCB } from '@/lib/payments/paymentGatewayUtils'
-import { startTrial } from '@/lib/payments/paymentUtilsServer'
+import { useSAToastMutation } from "@/hooks/useSAToastMutation"
+import { createTrialSubSuccessCB } from "@/lib/payments/paymentGatewayUtils"
+import { startTrial } from "@/lib/payments/paymentUtilsServer"
 import { getPricingCardWidth } from "@/lib/utils"
 import type { UnwrapPromise } from '@/types'
 import { useState } from 'react'
@@ -69,7 +69,6 @@ export function FreeTrialDialog({ organizationId, activeProducts, isOrganization
           <DialogTitle className="w-full text-left">Start Your Free Trial</DialogTitle>
           <DialogDescription className="w-full text-left">
             Your organization doesn't have an active subscription. Choose a plan to start your free trial.
-            <strong>No credit card required.</strong>
           </DialogDescription>
         </DialogHeader>
         <div className={`
@@ -106,13 +105,16 @@ export function FreeTrialDialog({ organizationId, activeProducts, isOrganization
                 </ul>
                 {
                   isOrganizationAdmin ? (
-                    <Button
-                      className="mt-4 w-full"
-                      onClick={() => mutate(product.price?.id ?? '')}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? 'Starting...' : 'Start Free Trial'}
-                    </Button>
+                    <div className="flex flex-col items-center w-full">
+                      <Button
+                        className="mt-4 w-full"
+                        onClick={() => mutate(product.price?.id ?? '')}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Starting...' : 'Start Free Trial'}
+                      </Button>
+                      <p className="mt-4 text-sm text-muted-foreground">No credit card required.</p>
+                    </div>
                   ) : (
                     <Button
                       className="mt-4 w-full"

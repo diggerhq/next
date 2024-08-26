@@ -124,6 +124,18 @@ export async function getRunsByProjectId(projectId: string) {
   return data;
 }
 
+export async function getRunsIdsByProjectId(projectId: string) {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('digger_runs')
+    .select('id')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getAllRunsByOrganizationId(organizationId: string) {
   const supabase = createSupabaseUserServerComponentClient();
 

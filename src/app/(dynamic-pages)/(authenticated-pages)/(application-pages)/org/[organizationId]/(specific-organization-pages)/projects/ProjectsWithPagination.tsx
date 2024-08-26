@@ -17,7 +17,10 @@ export type ProjectListType = {
 export async function UserProjectsWithPagination({
     organizationId,
     searchParams,
-}: { organizationId: string; searchParams: unknown }) {
+}: {
+    organizationId: string;
+    searchParams: unknown;
+}) {
     const filters = projectsfilterSchema.parse(searchParams);
     const [{ id: userId }, userRole] = await Promise.all([
         serverGetLoggedInUser(),

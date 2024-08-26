@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { approveRun, rejectRun } from "@/data/user/runs";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
-import { ToSnakeCase, ToTitleCase } from "@/lib/utils";
+import { cn, ToSnakeCase, ToTitleCase } from "@/lib/utils";
 import { supabaseUserClientComponentClient } from "@/supabase-clients/user/supabaseUserClientComponentClient";
 import { Table } from "@/types";
 import { DotFilledIcon } from "@radix-ui/react-icons";
@@ -126,13 +126,15 @@ export const ProjectRunDetails: React.FC<{
     fullRepoName: string | null
     planBatchId: string | null
     applyBatchId: string | null
+    organizationId: string | null
 }> = ({ run: initialRun, loggedInUser, approverUser, isUserOrgAdmin, tfOutput: initialTfOutput,
     workflowRunUrl: initialWorkflowRunUrl,
     applyTerraformOutput: initialApplyTerraformOutput,
     applyWorkflowRunUrl: initialApplyWorkflowRunUrl,
     fullRepoName,
     planBatchId,
-    applyBatchId
+    applyBatchId,
+    organizationId
 }) => {
         const router = useRouter();
         const [activeStage, setActiveStage] = useState<'plan' | 'apply'>('plan');
@@ -239,16 +241,30 @@ export const ProjectRunDetails: React.FC<{
                     <CardContent className="bg-muted/50 pt-4 border rounded-lg overflow-hidden">
                         <h2 className="text-lg font-semibold mb-4">Run Details</h2>
                         <div className="space-y-2">
-                            <DetailItem label="Triggered at" value={new Date(run.created_at).toLocaleString()} />
-                            <DetailItem label="Project" value={run.project_name || 'N/A'} />
-                            <DetailItem label="Commit" value={run.commit_id.substring(0, 8)} link={`https://github.com/${fullRepoName}/commit/${run.commit_id}`} />
-                            <DetailItem label="Trigger type" value={run.triggertype} />
+                            <DetailItem label="Triggered at" value={new Date(run.created_at).toLocaleString()} className="w-full" />
+                            <DetailItem label="Project" value={run.project_name || 'N/A'} className="w-full" />
+                            <div className="flex items-center gap-2 w-full">
+                                <DetailItem label="Commit" value={run.commit_id.substring(0, 8)} link={`https://github.com/${fullRepoName}/commit/${run.commit_id}`} className="w-fit" />
+                                <TooltipProvider>
+                                    <Tooltip delayDuration={0}>
+                                        <TooltipTrigger asChild>
+                                            <Link href={`/org/${organizationId}/commit/${run.commit_id}/impacted-projects`} >
+                                                <LinkIcon className="size-4 text-muted-foreground hover:text-foreground cursor-pointer" />
+                                            </Link>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="flex items-center gap-4">
+                                            See impacted projects
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+                            <DetailItem label="Trigger type" value={run.triggertype} className="w-full" />
                             <DetailItem label="Status" value={
                                 <Badge className={`${statusColors[ToSnakeCase(run.status)]} pointer-events-none`}>
                                     {run.status.toUpperCase()}
                                 </Badge>
-                            } />
-                            {run.pr_number && <DetailItem label="PR Number" value={run.pr_number.toString()} />}
+                            } className="w-full" />
+                            {run.pr_number && <DetailItem label="PR Number" value={run.pr_number.toString()} className="w-full" />}
                         </div>
                     </CardContent>
 
@@ -444,8 +460,8 @@ const RunStageSidebarItem: React.FC<{
     </motion.div>
 );
 
-const DetailItem: React.FC<{ label: string, value: string | React.ReactNode, link?: string }> = ({ label, value, link }) => (
-    <div className="flex items-center space-x-2 w-full">
+const DetailItem: React.FC<{ label: string, value: string | React.ReactNode, link?: string, className?: string }> = ({ label, value, link, className }) => (
+    <div className={cn("flex items-center space-x-2", className)}>
         <p className="text-sm text-[var(--muted-foreground)]">{label}:</p>
         {link ? (
             <Link href={link} className="text-sm text-blue-500 hover:underline" target="_blank">{typeof value === 'string' ? value : value}</Link>

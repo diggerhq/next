@@ -42,5 +42,9 @@ export const getPricingCardWidth = (count: number) => {
   return 'md:w-80 lg:w-96'; // Fixed width for overflow cases
 };
 
+export const getRandomRunId = (runIds: string[]) => {
+  return runIds[Math.floor(Math.random() * runIds.length)];
+};
+
 export const isLocalEnvironment =
   process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost');

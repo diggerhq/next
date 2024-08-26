@@ -34,7 +34,7 @@ export default async function DriftsPage({
             Searching for <span className="font-bold">{filters.query}</span>
           </p>
         )}
-      </div>
+      </div>;
       {
         <Suspense
           fallback={

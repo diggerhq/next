@@ -38,6 +38,7 @@ type ProjectRunDetailsProps = {
     planBatchId: string | null
     applyBatchId: string | null
     approverUser: Table<'user_profiles'> | null
+    organizationId: string
 }
 
 
@@ -120,6 +121,7 @@ export default async function RunDetailPage({
                         fullRepoName={repoDetails.repo_full_name}
                         planBatchId={planBatchId}
                         applyBatchId={applyBatchId}
+                        organizationId={project.organization_id}
                     />
                 </Suspense>
             }
