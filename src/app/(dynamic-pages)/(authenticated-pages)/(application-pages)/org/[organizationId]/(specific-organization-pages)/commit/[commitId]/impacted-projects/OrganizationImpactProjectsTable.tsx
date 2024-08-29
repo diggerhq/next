@@ -76,7 +76,7 @@ export function OrganizationImpactProjectsTable({ projects, projectsWithRunIds }
       accessorKey: 'run_status',
       header: 'Run Status',
       cell: ({ row }) => {
-        const status = 'Pending Apply'
+        const status = 'Pending Approval'
         const snakeCaseStatus = ToSnakeCase(status);
         return (
           <Badge className={`${statusColors[snakeCaseStatus]} pointer-events-none`}>

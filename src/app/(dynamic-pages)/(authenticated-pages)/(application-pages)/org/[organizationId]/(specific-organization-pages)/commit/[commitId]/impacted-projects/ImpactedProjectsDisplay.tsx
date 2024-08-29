@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { T } from '@/components/ui/Typography';
@@ -42,14 +43,27 @@ export function ImpactedProjectsDisplay({
 
     return (
         <div className="space-y-4 transition-all duration-300 ease-in-out">
+
             <div className="flex items-center space-x-2">
-                <Label htmlFor="group-toggle">Group by module folders</Label>
-                <Switch
-                    id="group-toggle"
-                    checked={isGrouped}
-                    onCheckedChange={setIsGrouped}
-                />
+                <Button
+                    style={{
+                        background: '#0e6402',
+                        color: '#fff',
+                        borderRadius: '10px 10px',
+                    }}
+
+                >Approve all runs</Button>
+
+                <div className="flex items-center space-x-2">
+                    <Label htmlFor="group-toggle">Group by module folders</Label>
+                    <Switch
+                        id="group-toggle"
+                        checked={isGrouped}
+                        onCheckedChange={setIsGrouped}
+                    />
+                </div>
             </div>
+
 
             <div className={`transition-opacity duration-300 ${isGrouped ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'}`}>
                 {groupedProjects.map((group) => (
