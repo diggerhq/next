@@ -8,6 +8,7 @@ import { createSupabaseUserServerComponentClient } from "@/supabase-clients/user
 import type { CommentWithUser, Enum, SAPayload } from "@/types";
 import { normalizeComment } from "@/utils/comments";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 import { getRepoDetails } from "./repos";
@@ -70,6 +71,7 @@ export const createProjectAction = async ({
   slug,
   repoId,
   terraformWorkingDir,
+  branch,
   managedState,
   labels,
   teamId,
@@ -81,6 +83,7 @@ export const createProjectAction = async ({
   slug: string;
   repoId: number;
   terraformWorkingDir: string;
+  branch: string;
   managedState: boolean;
   labels: string[];
   teamId: number | null;
@@ -98,6 +101,7 @@ export const createProjectAction = async ({
       team_id: teamId,
       repo_id: repoId,
       terraform_working_dir: terraformWorkingDir,
+      branch: branch,
       is_managing_state: managedState,
       is_in_main_branch: true,
       is_generated: true,
@@ -106,7 +110,6 @@ export const createProjectAction = async ({
       labels,
       is_drift_detection_enabled,
       drift_crontab,
-
     })
     .select("*")
     .single();
@@ -893,6 +896,28 @@ export const getProjectsForUserTotalCount = async ({
 // data/user/projects.ts
 
 
+async function createCronJob(schedule: string, supabase: SupabaseClient,) {
+  const { data, error } = await supabase.rpc('cron_schedule', {
+    job_name: 'invoke-function-every-half-minute',
+    schedule,
+    function_code: `
+      select
+        net.http_post(
+            url:='https://project-ref.supabase.co/functions/v1/function-name',
+            headers:='{"Content-Type": "application/json", "Authorization": "Bearer YOUR_ANON_KEY"}'::jsonb,
+            body:=concat('{"time": "', now(), '"}')::jsonb
+        ) as request_id;
+    `
+  })
+
+  if (error) {
+    console.error('Error creating cron job:', error)
+  } else {
+    console.log('Cron job created successfully:', data)
+  }
+}
+
+
 export async function updateProjectSettingsAction({
   projectId,
   terraformWorkingDir,
@@ -925,6 +950,8 @@ export async function updateProjectSettingsAction({
       .single();
 
     if (error) throw error;
+
+    await createCronJob(drift_crontab, supabase);
 
     return { status: 'success', data };
   } catch (error) {

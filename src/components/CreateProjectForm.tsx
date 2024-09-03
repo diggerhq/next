@@ -27,6 +27,7 @@ const createProjectFormSchema = z.object({
     name: z.string().min(1, "Project name is required"),
     repository: z.number().int().positive("Please select a repository"),
     terraformDir: z.string().min(1, "Terraform working directory is required"),
+    branch: z.string().min(1, "Branch is required"),
     labels: z.array(z.string()),
     managedState: z.boolean().default(true),
     teamId: z.number().int().positive().nullable(),
@@ -83,6 +84,7 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                 repoId: data.repository,
                 managedState: data.managedState,
                 terraformWorkingDir: data.terraformDir,
+                branch: data.branch,
                 labels: data.labels,
                 is_drift_detection_enabled: data.is_drift_detection_enabled,
                 drift_crontab: data.drift_crontab || '',
@@ -308,8 +310,8 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                 >
                     <CardHeader>
                         <div className="flex flex-col">
-                            <CardTitle className="text-lg ">Terraform Configuration</CardTitle>
-                            <CardDescription className="text-sm text-muted-foreground">Specify the working directory for Terraform</CardDescription>
+                            <CardTitle className="text-lg ">Configuration</CardTitle>
+                            <CardDescription className="text-sm text-muted-foreground">Specify branch and working directory for Terraform</CardDescription>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -322,7 +324,7 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                                     <div className="relative">
                                         <Input
                                             id="terraformDir"
-                                            placeholder="Enter directory path"
+                                            placeholder="e.g. ./"
                                             className={`mt-1 ${errors.terraformDir ? 'border-destructive' : ''}`}
                                             {...field}
                                         />
@@ -330,6 +332,27 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                                             <div className="flex items-center mt-1 text-destructive">
                                                 <AlertCircle className="h-4 w-4 mr-1" />
                                                 <span className="text-sm">{errors.terraformDir.message}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            />
+                            <Label htmlFor="branch">Branch</Label>
+                            <Controller
+                                name="branch"
+                                control={control}
+                                render={({ field }) => (
+                                    <div className="relative">
+                                        <Input
+                                            id="branch"
+                                            placeholder="if not specified, main branch will be used"
+                                            className={`mt-1 ${errors.branch ? 'border-destructive' : ''}`}
+                                            {...field}
+                                        />
+                                        {errors.branch && (
+                                            <div className="flex items-center mt-1 text-destructive">
+                                                <AlertCircle className="h-4 w-4 mr-1" />
+                                                <span className="text-sm">{errors.branch.message}</span>
                                             </div>
                                         )}
                                     </div>
