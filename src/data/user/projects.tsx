@@ -11,6 +11,7 @@ import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 import { getRepoDetails } from "./repos";
+import { alterJob, getExistingJob, scheduleJob, unscheduleJob } from "./scheduling";
 
 export async function getSlimProjectById(projectId: string) {
   const supabaseClient = createSupabaseUserServerComponentClient();
@@ -126,8 +127,26 @@ export const createProjectAction = async ({
     revalidatePath(`/org/[organizationId]/projects/`, "layout");
   }
 
+  // schedule drift detection
 
+  const jobName = `drift_detection_${project.id}`;
+  const endpoint = process.env.NEXT_PUBLIC_DRIFT_ENDPOINT;
+  if (!endpoint) {
+    console.error('NEXT_PUBLIC_DRIFT_ENDPOINT environment variable not defined');
+  }
+  const jobCommand = `SELECT http_post('${endpoint}', '{"project_id": ${project.id}}');`;
 
+  try {
+    if (is_drift_detection_enabled) {
+      await scheduleJob(supabaseClient, jobName, drift_crontab, jobCommand);
+    }
+  } catch (error) {
+    console.error('Error in handleProjectUpdate:', error);
+    return {
+      status: 'error',
+      message: error.message,
+    };
+  }
 
   return {
     status: 'success',
@@ -925,6 +944,27 @@ export async function updateProjectSettingsAction({
       .single();
 
     if (error) throw error;
+
+    // schedule drift detection
+
+    const jobName = `drift_detection_${projectId}`;
+    const endpoint = process.env.NEXT_PUBLIC_DRIFT_ENDPOINT;
+    if (!endpoint) {
+      console.error('NEXT_PUBLIC_DRIFT_ENDPOINT environment variable not defined');
+    }
+    const jobCommand = `SELECT http_post('${endpoint}', '{"project_id": ${projectId}}');`;
+
+    const existingJobId = await getExistingJob(supabase, jobName);
+
+    if (is_drift_detection_enabled) {
+      if (existingJobId) {
+        await alterJob(supabase, existingJobId, drift_crontab, jobCommand);
+      } else {
+        await scheduleJob(supabase, jobName, drift_crontab, jobCommand);
+      }
+    } else if (existingJobId) {
+      await unscheduleJob(supabase, existingJobId);
+    }
 
     return { status: 'success', data };
   } catch (error) {
