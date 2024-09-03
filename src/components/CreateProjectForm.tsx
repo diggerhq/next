@@ -56,6 +56,8 @@ type CreateProjectFormProps = {
 export default function CreateProjectForm({ organizationId, repositories, teams, teamId }: CreateProjectFormProps) {
     const router = useRouter();
 
+    const githubAppSlug = process.env.NEXT_PUBLIC_GITHUB_APP_SLUG;
+
     const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm<CreateProjectFormData>({
         resolver: zodResolver(createProjectFormSchema),
         defaultValues: {
@@ -173,7 +175,7 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                             <CardDescription className="text-sm text-muted-foreground">Choose the repository for your project</CardDescription>
                         </div>
                         <Link
-                            href={`https://github.com/apps/digger-cloud-next/installations/select_target?organization_id=${organizationId}`}
+                            href={`https://github.com/apps/${githubAppSlug}/installations/select_target?organization_id=${organizationId}`}
                             onClick={(e) => e.stopPropagation()}
                             target="_blank"
                             rel="noopener noreferrer"
