@@ -70,6 +70,7 @@ export const createProjectAction = async ({
   slug,
   repoId,
   terraformWorkingDir,
+  branch,
   managedState,
   labels,
   teamId,
@@ -81,6 +82,7 @@ export const createProjectAction = async ({
   slug: string;
   repoId: number;
   terraformWorkingDir: string;
+  branch: string;
   managedState: boolean;
   labels: string[];
   teamId: number | null;
@@ -98,6 +100,7 @@ export const createProjectAction = async ({
       team_id: teamId,
       repo_id: repoId,
       terraform_working_dir: terraformWorkingDir,
+      branch: branch,
       is_managing_state: managedState,
       is_in_main_branch: true,
       is_generated: true,
@@ -106,7 +109,6 @@ export const createProjectAction = async ({
       labels,
       is_drift_detection_enabled,
       drift_crontab,
-
     })
     .select("*")
     .single();
