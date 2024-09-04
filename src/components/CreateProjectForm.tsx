@@ -27,7 +27,7 @@ const createProjectFormSchema = z.object({
     name: z.string().min(1, "Project name is required"),
     repository: z.number().int().positive("Please select a repository"),
     terraformDir: z.string().min(1, "Terraform working directory is required"),
-    branch: z.string().optional(),
+    branch: z.string().min(1, "Branch is required").default("main"),
     labels: z.array(z.string()),
     managedState: z.boolean().default(true),
     teamId: z.number().int().positive().nullable(),

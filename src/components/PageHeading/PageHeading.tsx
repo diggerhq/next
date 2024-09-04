@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 type PageHeadingProps = {
   title: string;
-  subTitle?: string;
+  subTitle?: React.ReactNode;
   actions?: React.ReactNode;
   titleHref?: string;
   titleClassName?: string;
