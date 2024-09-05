@@ -277,6 +277,7 @@ export type Database = {
           digger_job_id: string
           digger_job_summary_id: string | null
           id: string
+          is_drift_job: boolean | null
           job_spec: string | null
           plan_footprint: string | null
           pr_comment_url: string | null
@@ -295,6 +296,7 @@ export type Database = {
           digger_job_id: string
           digger_job_summary_id?: string | null
           id?: string
+          is_drift_job?: boolean | null
           job_spec?: string | null
           plan_footprint?: string | null
           pr_comment_url?: string | null
@@ -313,6 +315,7 @@ export type Database = {
           digger_job_id?: string
           digger_job_summary_id?: string | null
           id?: string
+          is_drift_job?: boolean | null
           job_spec?: string | null
           plan_footprint?: string | null
           pr_comment_url?: string | null
@@ -1310,6 +1313,7 @@ export type Database = {
           is_managing_state: boolean | null
           labels: string[] | null
           latest_action_on: string | null
+          latest_drift_output: string | null
           name: string
           organization_id: string
           project_status: Database["public"]["Enums"]["project_status"]
@@ -1333,6 +1337,7 @@ export type Database = {
           is_managing_state?: boolean | null
           labels?: string[] | null
           latest_action_on?: string | null
+          latest_drift_output?: string | null
           name: string
           organization_id: string
           project_status?: Database["public"]["Enums"]["project_status"]
@@ -1356,6 +1361,7 @@ export type Database = {
           is_managing_state?: boolean | null
           labels?: string[] | null
           latest_action_on?: string | null
+          latest_drift_output?: string | null
           name?: string
           organization_id?: string
           project_status?: Database["public"]["Enums"]["project_status"]
