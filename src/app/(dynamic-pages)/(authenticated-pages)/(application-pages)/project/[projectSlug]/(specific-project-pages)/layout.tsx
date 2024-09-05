@@ -1,10 +1,10 @@
 import { PageHeading } from "@/components/PageHeading";
 import { TabsNavigationV2 } from "@/components/TabsNavigation/TabsNavigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { getProjectTitleById, getSlimProjectBySlug } from "@/data/user/projects";
-import { isLocalEnvironment } from "@/lib/utils";
+import { getProjectById, getProjectTitleById, getSlimProjectBySlug } from "@/data/user/projects";
 import { projectSlugParamSchema } from "@/utils/zod-schemas/params";
-import { AlertCircleIcon, GitBranch } from "lucide-react";
+import { AlertCircleIcon, ExternalLink, GitBranch } from "lucide-react";
+import Link from "next/link";
 import { Suspense } from "react";
 
 
@@ -20,11 +20,13 @@ async function ProjectPageHeading({ projectId, branch }: { projectId: string, br
 
 export default async function ProjectPagesLayout({ params, children }: { params: unknown, children: React.ReactNode }) {
   const { projectSlug } = projectSlugParamSchema.parse(params);
-  const project = await getSlimProjectBySlug(projectSlug);
+
+  //TODO figure out a better way to access drift, without fetching twice
+  const projectId = (await getSlimProjectBySlug(projectSlug)).id;
+  const project = await getProjectById(projectId);
 
 
 
-  // fetch the drift alerts
   const tabs = [
     {
       label: 'Runs',
@@ -38,17 +40,21 @@ export default async function ProjectPagesLayout({ params, children }: { params:
       label: 'Settings',
       href: `/project/${projectSlug}/settings`,
     },
+    {
+      label: 'Drift',
+      href: `/project/${projectSlug}/drift`,
+    },
   ];
   return <>
     <div className="flex flex-col">
-      {isLocalEnvironment && (
+      {project.latest_drift_output && (
         <Alert variant="default" className="mb-6 max-w-5xl border-orange-500/50 text-orange-700 dark:border-orange-300/50 dark:text-orange-300 [&>svg]:text-orange-600 dark:[&>svg]:text-orange-400 bg-orange-50 dark:bg-orange-900/10">
           <AlertCircleIcon className="h-4 w-4" />
           <AlertTitle>
             Drift Detected
           </AlertTitle>
           <AlertDescription>
-            Changes have been detected in your infrastructure that differ from your Terraform configuration. Please review and reconcile these differences.
+            Changes have been detected in your infrastructure that differ from your Terraform configuration. <Link href={`/project/${projectSlug}/drift`} className="inline-flex items-center underline underline-offset-2">Review the differences<ExternalLink size={14} className="ml-1 inline-block align-text-bottom" /></Link>
           </AlertDescription>
         </Alert>
       )}
