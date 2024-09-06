@@ -951,3 +951,9 @@ export async function deleteProject(projectId: string): Promise<SAPayload<unknow
 
   return { status: 'success', data };
 }
+
+export async function triggerApplyAction({ projectId }: { projectId: string }): Promise<SAPayload<unknown>> {
+  const user = await serverGetLoggedInUser();
+  return { status: 'error', message: 'not implemented' };
+  //TODO implement
+}
