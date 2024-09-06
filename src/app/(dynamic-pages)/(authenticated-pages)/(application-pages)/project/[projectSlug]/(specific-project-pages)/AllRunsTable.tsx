@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tables } from "@/lib/database.types";
+import { RunWithUser } from "@/data/user/runs";
 import { ToSnakeCase } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Activity } from "lucide-react";
@@ -21,12 +21,6 @@ export const statusColors: StatusColor = {
     succeeded: 'bg-green-200/50 text-green-800 dark:bg-green-900/50 dark:text-green-200',
     failed: 'bg-red-200/50 text-red-800 dark:bg-red-900/50 dark:text-red-200',
     discarded: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200',
-};
-
-type RunWithUser = Tables<'digger_runs'> & {
-    user_profiles: {
-        full_name: string | null;
-    };
 };
 
 export const AllRunsTable = ({ runs, projectSlug }: { runs: RunWithUser[], projectSlug: string }) => {

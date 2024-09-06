@@ -1,5 +1,6 @@
 'use server';
 
+import { Tables } from '@/lib/database.types';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import { SAPayload } from '@/types';
 
@@ -112,6 +113,12 @@ export async function getRunsByRepoId(repoId: string) {
   return data;
 }
 
+export type RunWithUser = Tables<'digger_runs'> & {
+  user_profiles: {
+    full_name: string | null;
+  } | null;
+};
+
 export async function getRunsByProjectId(projectId: string) {
   //TODO figure out a non-admin way to query users
   const supabase = createSupabaseUserServerComponentClient();
@@ -123,7 +130,9 @@ export async function getRunsByProjectId(projectId: string) {
 
   if (error) throw error;
   console.log('RUN 0', data[0]);
-  return data;
+  // supabase typings are wrong - it returns user_profiles as a single object, not a list
+  // @ts-ignore
+  return data as RunWithUser[];
 }
 
 export async function getAllRunsByOrganizationId(organizationId: string) {
