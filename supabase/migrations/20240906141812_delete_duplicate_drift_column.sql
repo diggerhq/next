@@ -1,0 +1,2 @@
+ALTER TABLE projects
+DROP COLUMN drift_latest_terraform_output;
