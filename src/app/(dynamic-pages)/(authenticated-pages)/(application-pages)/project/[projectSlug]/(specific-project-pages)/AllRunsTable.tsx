@@ -25,7 +25,7 @@ export const statusColors: StatusColor = {
 
 type RunWithUser = Tables<'digger_runs'> & {
     user_profiles: {
-        full_name: string;
+        full_name: string | null;
     };
 };
 
