@@ -38,6 +38,7 @@ type ProjectRunDetailsProps = {
     planBatchId: string | null
     applyBatchId: string | null
     approverUser: Table<'user_profiles'> | null
+    triggeredByUser: Table<'user_profiles'> | null
 }
 
 
@@ -74,6 +75,10 @@ export default async function RunDetailPage({
     let approverUserProfile
     if (run.approver_user_id) {
         approverUserProfile = await getUserProfile(run.approver_user_id);
+    }
+    let triggeredByUserProfile
+    if (run.triggered_by_user_id) {
+        triggeredByUserProfile = await getUserProfile(run.triggered_by_user_id);
     }
 
     // Fetch organization role and batch IDs in parallel
@@ -112,6 +117,7 @@ export default async function RunDetailPage({
                     <DynamicProjectRunDetails run={run}
                         loggedInUser={userProfile}
                         approverUser={approverUserProfile}
+                        triggeredByUser={triggeredByUserProfile}
                         isUserOrgAdmin={isOrganizationAdmin}
                         tfOutput={planData.terraform_output}
                         workflowRunUrl={planData.workflow_run_url}

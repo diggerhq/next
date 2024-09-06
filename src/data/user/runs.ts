@@ -113,14 +113,16 @@ export async function getRunsByRepoId(repoId: string) {
 }
 
 export async function getRunsByProjectId(projectId: string) {
+  //TODO figure out a non-admin way to query users
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('digger_runs')
-    .select('*')
+    .select(`*, user_profiles (full_name)`)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
+  console.log('RUN 0', data[0]);
   return data;
 }
 

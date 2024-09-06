@@ -116,17 +116,18 @@ function RenderContent({
 
 export const ProjectRunDetails: React.FC<{
     run: Table<'digger_runs'>,
-    loggedInUser: Table<'user_profiles'>
-    approverUser: Table<'user_profiles'> | null
-    isUserOrgAdmin: boolean
+    loggedInUser: Table<'user_profiles'>,
+    approverUser: Table<'user_profiles'> | null,
+    triggeredByUser: Table<'user_profiles'> | null,
+    isUserOrgAdmin: boolean,
     tfOutput: string | null,
     workflowRunUrl: string | null,
     applyTerraformOutput: string | null,
     applyWorkflowRunUrl: string | null,
-    fullRepoName: string | null
-    planBatchId: string | null
-    applyBatchId: string | null
-}> = ({ run: initialRun, loggedInUser, approverUser, isUserOrgAdmin, tfOutput: initialTfOutput,
+    fullRepoName: string | null,
+    planBatchId: string | null,
+    applyBatchId: string | null,
+}> = ({ run: initialRun, loggedInUser, approverUser, triggeredByUser, isUserOrgAdmin, tfOutput: initialTfOutput,
     workflowRunUrl: initialWorkflowRunUrl,
     applyTerraformOutput: initialApplyTerraformOutput,
     applyWorkflowRunUrl: initialApplyWorkflowRunUrl,
@@ -242,7 +243,7 @@ export const ProjectRunDetails: React.FC<{
                             <DetailItem label="Triggered at" value={new Date(run.created_at).toLocaleString()} />
                             <DetailItem label="Project" value={run.project_name || 'N/A'} />
                             <DetailItem label="Commit" value={run.commit_id.substring(0, 8)} link={`https://github.com/${fullRepoName}/commit/${run.commit_id}`} />
-                            <DetailItem label="Triggered by" value={run.triggered_by_user_id || run.triggertype} />
+                            <DetailItem label="Triggered by" value={triggeredByUser?.full_name || run.triggertype} />
                             <DetailItem label="Status" value={
                                 <Badge className={`${statusColors[ToSnakeCase(run.status)]} pointer-events-none`}>
                                     {run.status.toUpperCase()}
