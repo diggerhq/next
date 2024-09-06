@@ -123,6 +123,7 @@ export type Database = {
           branch_name: string
           comment_id: number | null
           digger_config: string | null
+          event_type: string | null
           github_installation_id: number | null
           gitlab_project_id: number | null
           id: string
@@ -140,6 +141,7 @@ export type Database = {
           branch_name: string
           comment_id?: number | null
           digger_config?: string | null
+          event_type?: string | null
           github_installation_id?: number | null
           gitlab_project_id?: number | null
           id?: string
@@ -157,6 +159,7 @@ export type Database = {
           branch_name?: string
           comment_id?: number | null
           digger_config?: string | null
+          event_type?: string | null
           github_installation_id?: number | null
           gitlab_project_id?: number | null
           id?: string
@@ -277,7 +280,6 @@ export type Database = {
           digger_job_id: string
           digger_job_summary_id: string | null
           id: string
-          is_drift_job: boolean | null
           job_spec: string | null
           plan_footprint: string | null
           pr_comment_url: string | null
@@ -296,7 +298,6 @@ export type Database = {
           digger_job_id: string
           digger_job_summary_id?: string | null
           id?: string
-          is_drift_job?: boolean | null
           job_spec?: string | null
           plan_footprint?: string | null
           pr_comment_url?: string | null
@@ -315,7 +316,6 @@ export type Database = {
           digger_job_id?: string
           digger_job_summary_id?: string | null
           id?: string
-          is_drift_job?: boolean | null
           job_spec?: string | null
           plan_footprint?: string | null
           pr_comment_url?: string | null
@@ -463,6 +463,7 @@ export type Database = {
           run_type: string
           status: string
           terraform_output: string | null
+          triggered_by_user_id: string | null
           triggertype: string
           updated_at: string
         }
@@ -487,6 +488,7 @@ export type Database = {
           run_type: string
           status: string
           terraform_output?: string | null
+          triggered_by_user_id?: string | null
           triggertype: string
           updated_at?: string
         }
@@ -511,6 +513,7 @@ export type Database = {
           run_type?: string
           status?: string
           terraform_output?: string | null
+          triggered_by_user_id?: string | null
           triggertype?: string
           updated_at?: string
         }
@@ -541,6 +544,13 @@ export type Database = {
             columns: ["repo_id"]
             isOneToOne: false
             referencedRelation: "repos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_triggered_by_user"
+            columns: ["triggered_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
