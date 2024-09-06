@@ -6,6 +6,7 @@ import { projectSlugParamSchema } from "@/utils/zod-schemas/params";
 import { AlertCircleIcon, ExternalLink, GitBranch } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { TriggerApplyButton } from "./TriggerApplyButton";
 
 
 async function ProjectPageHeading({ projectId, branch }: { projectId: string, branch: string | null }) {
@@ -13,7 +14,7 @@ async function ProjectPageHeading({ projectId, branch }: { projectId: string, br
   return (
     <PageHeading
       title={projectTitle}
-      subTitle={<p className="flex items-center"><GitBranch /> {branch || 'main'}</p>}
+      subTitle={<span className="flex items-center"><GitBranch /> {branch || 'main'}</span>}
     />
   );
 }
@@ -24,8 +25,6 @@ export default async function ProjectPagesLayout({ params, children }: { params:
   //TODO figure out a better way to access drift, without fetching twice
   const projectId = (await getSlimProjectBySlug(projectSlug)).id;
   const project = await getProjectById(projectId);
-
-
 
   const tabs = [
     {
@@ -60,8 +59,13 @@ export default async function ProjectPagesLayout({ params, children }: { params:
       )}
 
       <Suspense>
-        <ProjectPageHeading projectId={project.id} branch={project.branch} />
+        <div className="flex justify-between items-center space-y-4 max-w-5xl">
+          <ProjectPageHeading projectId={project.id} branch={project.branch} />
+          <TriggerApplyButton projectId={project.id} />
+        </div>
       </Suspense>
+
+
       <Suspense>
         <TabsNavigationV2 tabs={tabs} />
       </Suspense>

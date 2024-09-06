@@ -957,3 +957,34 @@ export async function deleteProject(projectId: string): Promise<SAPayload<unknow
 
   return { status: 'success', data };
 }
+
+export async function triggerApplyAction({ projectId }: { projectId: string }): Promise<SAPayload<unknown>> {
+  const triggerApplyUrl = process.env.DIGGER_TRIGGER_APPLY_URL;
+  const webhookSecret = process.env.DIGGER_WEBHOOK_SECRET;
+  if (!triggerApplyUrl) {
+    throw new Error('DIGGER_TRIGGER_APPLY_URL env variable is not set');
+  }
+  if (!webhookSecret) {
+    throw new Error('DIGGER_WEBHOOK_SECRET env variable is not set');
+  }
+
+  const user = await serverGetLoggedInUser();
+  const payload = {
+    user_id: user.id,
+    project_id: projectId,
+  }
+  const response = await fetch(
+    triggerApplyUrl,
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: {
+        Authorization: `Bearer ${webhookSecret}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Digger api responded with status: ${response.status}`);
+  }
+  return { status: 'success', data: {} };
+}
