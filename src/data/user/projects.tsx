@@ -303,18 +303,20 @@ export async function getProjectsListForUser({
   organizationId,
   query = '',
   teamIds = [],
+  driftedOnly = false,
 }: {
   userId: string;
   userRole: Enum<'organization_member_role'>;
   organizationId: string;
   query?: string;
   teamIds?: number[];
+  driftedOnly?: boolean;
 }): Promise<ProjectListType[]> {
   const supabase = createSupabaseUserServerComponentClient();
 
   let supabaseQuery = supabase
     .from('projects')
-    .select('id,name, slug, latest_action_on, created_at, repo_id')
+    .select('id, name, slug, latest_action_on, created_at, repo_id, latest_drift_output')
     .eq('organization_id', organizationId)
     .ilike('name', `%${query}%`);
 
@@ -347,9 +349,13 @@ export async function getProjectsListForUser({
 
   if (!data) return [];
 
+  const driftFilteredProjects = driftedOnly
+    ? data.filter(project => !!project.latest_drift_output)
+    : data;
+
   // Fetch repo details for each project
   const projectsWithRepoDetails = await Promise.all(
-    data.map(async (project) => {
+    driftFilteredProjects.map(async (project) => {
       const repoDetails = await getRepoDetails(project.repo_id);
       const { repo_id, ...projectWithoutRepoId } = project;
       return {
