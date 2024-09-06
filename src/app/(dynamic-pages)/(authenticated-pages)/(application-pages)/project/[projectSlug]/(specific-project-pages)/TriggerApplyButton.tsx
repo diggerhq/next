@@ -6,7 +6,7 @@ import { useSAToastMutation } from "@/hooks/useSAToastMutation";
 
 export function TriggerApplyButton({ projectId }: { projectId: string }) {
 
-    const updateProjectSettingsMutation = useSAToastMutation(
+    const triggerApplyMutation = useSAToastMutation(
         async () => {
             const result = await triggerApplyAction({
                 projectId: projectId,
@@ -22,7 +22,7 @@ export function TriggerApplyButton({ projectId }: { projectId: string }) {
 
     const onClick = async () => {
         try {
-            await updateProjectSettingsMutation.mutateAsync();
+            await triggerApplyMutation.mutateAsync();
         } catch (error) {
             console.error("Error updating project settings:", error);
         }

@@ -970,8 +970,8 @@ export async function triggerApplyAction({ projectId }: { projectId: string }): 
 
   const user = await serverGetLoggedInUser();
   const payload = {
-    userId: user.id,
-    projectId
+    user_id: user.id,
+    project_id: projectId,
   }
   const response = await fetch(
     triggerApplyUrl,
