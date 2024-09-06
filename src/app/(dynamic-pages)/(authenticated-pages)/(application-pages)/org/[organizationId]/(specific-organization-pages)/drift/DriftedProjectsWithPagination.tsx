@@ -15,7 +15,7 @@ export async function UserDriftedProjectsWithPagination({
         getLoggedInUserOrganizationRole(organizationId)
     ]);
     const [projects, totalPages] = await Promise.all([
-        getProjectsListForUser({ ...filters, organizationId, userRole, userId }),
+        getProjectsListForUser({ ...filters, organizationId, userRole, userId, driftedOnly: true }),
         getProjectsCountForUser({ ...filters, organizationId, userId }),
     ]);
 
