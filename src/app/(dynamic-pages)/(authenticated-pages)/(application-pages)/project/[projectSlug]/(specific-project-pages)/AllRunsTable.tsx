@@ -38,7 +38,7 @@ export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'
                     <TableHead className="text-left">Commit ID</TableHead>
                     <TableHead className="text-left">Status</TableHead>
                     <TableHead className="text-left">Last updated</TableHead>
-                    <TableHead className="text-left">User</TableHead>
+                    <TableHead className="text-left">Triggered By</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -66,7 +66,7 @@ export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'
                                     </span>
                                 </TableCell>
                                 <TableCell>{moment(run.updated_at).fromNow()}</TableCell>
-                                <TableCell>{run.approval_author}</TableCell>
+                                <TableCell>{run.triggered_by_user_id || run.triggertype}</TableCell>
                             </motion.tr>
                         ))
                     ) : (

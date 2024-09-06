@@ -242,13 +242,12 @@ export const ProjectRunDetails: React.FC<{
                             <DetailItem label="Triggered at" value={new Date(run.created_at).toLocaleString()} />
                             <DetailItem label="Project" value={run.project_name || 'N/A'} />
                             <DetailItem label="Commit" value={run.commit_id.substring(0, 8)} link={`https://github.com/${fullRepoName}/commit/${run.commit_id}`} />
-                            <DetailItem label="Trigger type" value={run.triggertype} />
+                            <DetailItem label="Triggered by" value={run.triggered_by_user_id || run.triggertype} />
                             <DetailItem label="Status" value={
                                 <Badge className={`${statusColors[ToSnakeCase(run.status)]} pointer-events-none`}>
                                     {run.status.toUpperCase()}
                                 </Badge>
                             } />
-                            {run.pr_number && <DetailItem label="PR Number" value={run.pr_number.toString()} />}
                         </div>
                     </CardContent>
 
