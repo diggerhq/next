@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tables } from "@/lib/database.types";
+import { RunWithUser } from "@/data/user/runs";
 import { ToSnakeCase } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Activity } from "lucide-react";
@@ -23,8 +23,7 @@ export const statusColors: StatusColor = {
     discarded: 'bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200',
 };
 
-
-export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'>[], projectSlug: string }) => {
+export const AllRunsTable = ({ runs, projectSlug }: { runs: RunWithUser[], projectSlug: string }) => {
     const sortedRuns = [...runs].sort((a, b) => {
         // Sort primarily by created_at in descending order (most recent first)
         return moment(b.created_at).valueOf() - moment(a.created_at).valueOf();
@@ -38,7 +37,7 @@ export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'
                     <TableHead className="text-left">Commit ID</TableHead>
                     <TableHead className="text-left">Status</TableHead>
                     <TableHead className="text-left">Last updated</TableHead>
-                    <TableHead className="text-left">User</TableHead>
+                    <TableHead className="text-left">Triggered By</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -66,7 +65,7 @@ export const AllRunsTable = ({ runs, projectSlug }: { runs: Tables<'digger_runs'
                                     </span>
                                 </TableCell>
                                 <TableCell>{moment(run.updated_at).fromNow()}</TableCell>
-                                <TableCell>{run.approval_author}</TableCell>
+                                <TableCell>{run.user_profiles?.full_name || run.triggertype}</TableCell>
                             </motion.tr>
                         ))
                     ) : (
