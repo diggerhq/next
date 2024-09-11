@@ -124,7 +124,7 @@ export async function getRunsByProjectId(projectId: string) {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from('digger_runs')
-    .select(`*, user_profiles (full_name)`)
+    .select(`*`)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false });
 
