@@ -53,6 +53,7 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
   const isOnboardingRoute = matchOnboarding(pathname);
   if (!isUnprotectedPage(pathname) && user && !isOnboardingRoute) {
     const userMetadata = authUserMetadataSchema.parse(user.user_metadata);
+    console.log('user metadata:', userMetadata);
     const {
       onboardingHasAcceptedTerms,
       onboardingHasCompletedProfile,
