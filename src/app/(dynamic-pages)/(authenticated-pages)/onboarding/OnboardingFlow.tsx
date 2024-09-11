@@ -95,9 +95,12 @@ function getAllFlowStates(onboardingStatus: AuthUserMetadata): FLOW_STATE[] {
   } = onboardingStatus;
   const flowStates: FLOW_STATE[] = [];
 
+  // disabling terms step
+  /*
   if (!onboardingHasAcceptedTerms) {
     flowStates.push("TERMS");
   }
+  */
   if (!onboardingHasCompletedProfile) {
     flowStates.push("PROFILE");
   }
@@ -119,9 +122,12 @@ function getInitialFlowState(
     onboardingHasCreatedOrganization,
   } = onboardingStatus;
 
+  // disabling terms step
+  /*
   if (!onboardingHasAcceptedTerms && flowStates.includes("TERMS")) {
     return "TERMS";
   }
+  */
 
   if (!onboardingHasCompletedProfile && flowStates.includes("PROFILE")) {
     return "PROFILE";
