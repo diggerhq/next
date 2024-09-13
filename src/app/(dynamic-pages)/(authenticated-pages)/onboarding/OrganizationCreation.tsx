@@ -8,10 +8,8 @@ import { generateSlug } from "@/lib/utils";
 import { CreateOrganizationSchema, createOrganizationSchema } from "@/utils/zod-schemas/organization";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import Cookies from 'js-cookie';
 import { useForm } from "react-hook-form";
-
-
-
 
 type OrganizationCreationProps = {
   onSuccess: () => void;
@@ -26,9 +24,11 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
   const createOrgMutation = useMutation({
     mutationFn: async ({ organizationTitle, organizationSlug }: CreateOrganizationSchema) => {
       return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true })
-    }
-    ,
+    },
     onSuccess: (data) => {
+      const { data: orgId } = data as { data: string }
+      console.log('created organization ID:', orgId);
+      Cookies.set('organization', orgId);
       toast({ title: "Organization created!", description: "Your new organization is ready." });
       onSuccess();
     },
