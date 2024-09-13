@@ -1,10 +1,12 @@
 import { getInitialOrganizationToRedirectTo } from '@/data/user/organizations';
+import { refreshSessionAction } from '@/data/user/session';
 import { toSiteURL } from '@/utils/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
+    await refreshSessionAction();
     try {
         const initialOrgId = req.cookies.get('organization')?.value;
         if (initialOrgId) {
