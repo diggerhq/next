@@ -78,9 +78,6 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient<Database>({ req, res });
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
-  if (shouldOnboardUser(req.nextUrl.pathname, maybeUser)) {
-    return NextResponse.redirect(toSiteURL('/onboarding'));
-  }
   if (isLandingPage(req.nextUrl.pathname)) {
     if (maybeUser) {
       //user is logged in, lets validate session and redirect on success
@@ -99,6 +96,9 @@ export async function middleware(req: NextRequest) {
     const user = await supabase.auth.getUser();
     if (user.error) {
       return NextResponse.redirect(toSiteURL('/login'));
+    }
+    if (shouldOnboardUser(req.nextUrl.pathname, user.data.user)) {
+      return NextResponse.redirect(toSiteURL('/onboarding'));
     }
   }
   if (!isUnprotectedPage(req.nextUrl.pathname) && !maybeUser) {
