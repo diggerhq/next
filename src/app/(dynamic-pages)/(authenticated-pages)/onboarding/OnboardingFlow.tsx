@@ -10,6 +10,7 @@ import { OrganizationCreation } from "./OrganizationCreation";
 import { ProfileUpdate } from "./ProfileUpdate";
 import { TermsAcceptance } from "./TermsAcceptance";
 
+import { refreshSessionAction } from "@/data/user/session";
 import type { Table } from "@/types";
 import type { AuthUserMetadata } from "@/utils/zod-schemas/authUserMetadata";
 
@@ -48,7 +49,7 @@ export function UserOnboardingFlow({
       console.log('currentStep is COMPLETE', currentStep);
       console.log('onboardingStatus : ', onboardingStatus);
       console.log('now redirecting to /dashboard');
-      router.push("/dashboard");
+      refreshSessionAction().then(() => { router.push("/dashboard"); });
     }
   }, [currentStep, router, onboardingStatus]);
 
