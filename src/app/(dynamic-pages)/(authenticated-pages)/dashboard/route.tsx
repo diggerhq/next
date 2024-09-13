@@ -6,6 +6,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
     try {
+        const initialOrgId = req.cookies.get('organization')?.value;
+        if (initialOrgId) {
+            console.log('Initial org id from cookies:', initialOrgId);
+            return NextResponse.redirect(new URL(`/org/${initialOrgId}`, req.url));
+        }
         const initialOrganization = await getInitialOrganizationToRedirectTo();
         if (initialOrganization.status === 'error') {
             return NextResponse.redirect(toSiteURL('/500'));
