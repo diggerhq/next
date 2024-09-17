@@ -88,16 +88,16 @@ export const createProjectAction = async ({
   repoId: number;
   branch: string;
   terraformWorkingDir: string;
-  workspace: string;
-  workflow_file: string;
+  workspace?: string;
+  workflow_file?: string;
   iac_type: "terraform" | "terragrunt" | "opentofu";
-  include_patterns: string;
-  exclude_patterns: string;
+  include_patterns?: string;
+  exclude_patterns?: string;
   managedState: boolean;
   labels: string[];
   teamId: number | null;
   is_drift_detection_enabled: boolean;
-  drift_crontab: string;
+  drift_crontab?: string;
 }): Promise<SAPayload<Tables<"projects">>> => {
   "use server";
   const supabaseClient = createSupabaseUserServerActionClient();

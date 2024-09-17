@@ -27,6 +27,11 @@ const createProjectFormSchema = z.object({
     name: z.string().min(1, "Project name is required"),
     repository: z.number().int().positive("Please select a repository"),
     terraformDir: z.string().min(1, "Terraform working directory is required"),
+    iac_type: z.enum(["terraform", "terragrunt", "opentofu"]).default("terraform"),
+    workspace: z.string().default("default").optional(),
+    workflow_file: z.string().default("digger_workflow.yml").optional(),
+    include_patterns: z.string().optional(),
+    exclude_patterns: z.string().optional(),
     branch: z.string().min(1, "Branch is required").default("main"),
     labels: z.array(z.string()),
     managedState: z.boolean().default(true),
@@ -65,6 +70,9 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
             name: "",
             repository: repositories[0]?.id || 0,
             terraformDir: "",
+            iac_type: "terraform",
+            workflow_file: "digger_workflow.yml",
+            workspace: "default",
             managedState: true,
             labels: [],
             teamId: teamId || null,
@@ -77,17 +85,22 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
         async (data: CreateProjectFormData) => {
             const slug = generateSlug(data.name);
             return await createProjectAction({
-                organizationId,
-                teamId: data.teamId,
                 name: data.name,
                 slug,
                 repoId: data.repository,
-                managedState: data.managedState,
+                branch: data.branch,
+                organizationId: organizationId,
+                teamId: data.teamId,
                 terraformWorkingDir: data.terraformDir,
-                branch: data.branch || '',
+                iac_type: data.iac_type,
+                workspace: data.workspace,
+                workflow_file: data.workflow_file,
+                include_patterns: data.include_patterns,
+                exclude_patterns: data.exclude_patterns,
                 labels: data.labels,
+                managedState: data.managedState,
                 is_drift_detection_enabled: data.is_drift_detection_enabled,
-                drift_crontab: data.drift_crontab || '',
+                drift_crontab: data.drift_crontab,
             });
         },
         {
@@ -311,53 +324,95 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                     <CardHeader>
                         <div className="flex flex-col">
                             <CardTitle className="text-lg ">Configuration</CardTitle>
-                            <CardDescription className="text-sm text-muted-foreground">Specify branch and working directory for Terraform</CardDescription>
+                            <CardDescription className="text-sm text-muted-foreground">Specify key settings for Terraform</CardDescription>
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div>
-                            <Label htmlFor="terraformDir">Terraform Working Directory *</Label>
-                            <Controller
-                                name="terraformDir"
-                                control={control}
-                                render={({ field }) => (
-                                    <div className="relative">
-                                        <Input
-                                            id="terraformDir"
-                                            placeholder="e.g. ./"
-                                            className={`mt-1 ${errors.terraformDir ? 'border-destructive' : ''}`}
-                                            {...field}
-                                        />
-                                        {errors.terraformDir && (
-                                            <div className="flex items-center mt-1 text-destructive">
-                                                <AlertCircle className="h-4 w-4 mr-1" />
-                                                <span className="text-sm">{errors.terraformDir.message}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            />
-                            <Label htmlFor="branch">Branch</Label>
-                            <Controller
-                                name="branch"
-                                control={control}
-                                render={({ field }) => (
-                                    <div className="relative">
-                                        <Input
-                                            id="branch"
-                                            placeholder="if not specified, main branch will be used"
-                                            className={`mt-1 ${errors.branch ? 'border-destructive' : ''}`}
-                                            {...field}
-                                        />
-                                        {errors.branch && (
-                                            <div className="flex items-center mt-1 text-destructive">
-                                                <AlertCircle className="h-4 w-4 mr-1" />
-                                                <span className="text-sm">{errors.branch.message}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            />
+                        <div className="space-y-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.15, delay: 0.4 }}
+                            >
+                                <Label htmlFor="terraformDir">Terraform Working Directory *</Label>
+                                <Controller
+                                    name="terraformDir"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="relative">
+                                            <Input
+                                                id="terraformDir"
+                                                placeholder="e.g. ./"
+                                                className={`mt-1 ${errors.terraformDir ? 'border-destructive' : ''}`}
+                                                {...field}
+                                            />
+                                            {errors.terraformDir && (
+                                                <div className="flex items-center mt-1 text-destructive">
+                                                    <AlertCircle className="h-4 w-4 mr-1" />
+                                                    <span className="text-sm">{errors.terraformDir.message}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                />
+                            </motion.div>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.15, delay: 0.4 }}
+                            >
+                                <Label htmlFor="branch">Branch</Label>
+                                <Controller
+                                    name="branch"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="relative">
+                                            <Input
+                                                id="branch"
+                                                placeholder="if not specified, main branch will be used"
+                                                className={`mt-1 ${errors.branch ? 'border-destructive' : ''}`}
+                                                {...field}
+                                            />
+                                            {errors.branch && (
+                                                <div className="flex items-center mt-1 text-destructive">
+                                                    <AlertCircle className="h-4 w-4 mr-1" />
+                                                    <span className="text-sm">{errors.branch.message}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                />
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.15, delay: 0.4 }}
+                            >
+                                <Label htmlFor="iac_type">IAC type</Label>
+                                <Controller
+                                    name="iac_type"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select IAC type" />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl">
+                                                <SelectItem value="terraform" className="rounded-lg">
+                                                    Terraform
+                                                </SelectItem>
+                                                <SelectItem value="terragrunt" className="rounded-lg">
+                                                    Terragrunt
+                                                </SelectItem>
+                                                <SelectItem value="opentofu" className="rounded-lg">
+                                                    Opentofu
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                            </motion.div>
                         </div>
                     </CardContent>
                 </MotionCard>
@@ -376,6 +431,69 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.15, delay: 0.4 }}
+                            >
+                                <Label htmlFor="workspace">Workspace</Label>
+                                <Controller
+                                    name="workspace"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Input id="workspace" {...field} />
+                                    )}
+                                />
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.15, delay: 0.4 }}
+                            >
+                                <Label htmlFor="workflow_file">Workflow file</Label>
+                                <Controller
+                                    name="workflow_file"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Input id="workflow_file" {...field} />
+                                    )}
+                                />
+                            </motion.div>
+
+                            <div className="grid grid-cols-2 gap-6">
+
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.15, delay: 0.4 }}
+                                >
+                                    <Label htmlFor="include_patterns">Include patterns</Label>
+                                    <Controller
+                                        name="include_patterns"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Input id="include_patterns" {...field} />
+                                        )}
+                                    />
+                                </motion.div>
+
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.15, delay: 0.4 }}
+                                >
+                                    <Label htmlFor="Exclude patterns">Exclude patterns</Label>
+                                    <Controller
+                                        name="exclude_patterns"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Input id="exclude_patterns" {...field} />
+                                        )}
+                                    />
+                                </motion.div>
+
+                            </div>
                             <div>
                                 <Label htmlFor="labels">Labels</Label>
                                 <Controller
