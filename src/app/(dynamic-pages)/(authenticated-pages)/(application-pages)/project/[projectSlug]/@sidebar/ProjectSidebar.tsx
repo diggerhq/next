@@ -38,8 +38,8 @@ async function ProjectSidebarInternal({ projectId, projectSlug }: { projectId: s
           icon={<Layers className="size-4 text-foreground" />}
         />
         <SidebarLink
-          label="Drifts"
-          href={`/org/${organizationId}/drifts`}
+          label="Drift"
+          href={`/org/${organizationId}/drift`}
           icon={<FlagIcon className="size-4 text-foreground" />}
         />
         <SidebarLink
