@@ -34,8 +34,8 @@ async function TeamSidebarInternal({ organizationId }: { organizationId: string 
                     icon={<Layers className="size-4 text-foreground" />}
                 />
                 <SidebarLink
-                    label="Drifts"
-                    href={`/org/${organizationId}/drifts`}
+                    label="Drift"
+                    href={`/org/${organizationId}/drift`}
                     icon={<FlagIcon className="size-4 text-foreground" />}
                 />
                 <SidebarLink

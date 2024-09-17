@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: "You can create projects within teams, or within your organization.",
 };
 
-export default async function DriftsPage({
+export default async function DriftedProjectsPage({
   params,
   searchParams,
 }: DashboardProps) {
@@ -39,7 +39,7 @@ export default async function DriftsPage({
         <Suspense
           fallback={
             <T.P className="text-muted-foreground my-6">
-              Loading drifts...
+              Loading drifted projects...
             </T.P>
           }
         >
