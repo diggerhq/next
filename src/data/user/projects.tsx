@@ -69,8 +69,13 @@ export const createProjectAction = async ({
   name,
   slug,
   repoId,
-  terraformWorkingDir,
   branch,
+  terraformWorkingDir,
+  workspace,
+  workflow_file,
+  iac_type,
+  include_patterns,
+  exclude_patterns,
   managedState,
   labels,
   teamId,
@@ -81,8 +86,13 @@ export const createProjectAction = async ({
   name: string;
   slug: string;
   repoId: number;
-  terraformWorkingDir: string;
   branch: string;
+  terraformWorkingDir: string;
+  workspace: string;
+  workflow_file: string;
+  iac_type: "terraform" | "terragrunt" | "opentofu";
+  include_patterns: string;
+  exclude_patterns: string;
   managedState: boolean;
   labels: string[];
   teamId: number | null;
@@ -99,8 +109,13 @@ export const createProjectAction = async ({
       slug,
       team_id: teamId,
       repo_id: repoId,
+      branch,
       terraform_working_dir: terraformWorkingDir,
-      branch: branch,
+      workspace,
+      workflow_file,
+      iac_type,
+      include_patterns,
+      exclude_patterns,
       is_managing_state: managedState,
       is_in_main_branch: true,
       is_generated: true,
@@ -904,6 +919,11 @@ export const getProjectsForUserTotalCount = async ({
 export async function updateProjectSettingsAction({
   projectId,
   terraformWorkingDir,
+  iac_type,
+  workspace,
+  workflow_file,
+  include_patterns,
+  exclude_patterns,
   labels,
   managedState,
   is_drift_detection_enabled,
@@ -911,6 +931,11 @@ export async function updateProjectSettingsAction({
 }: {
   projectId: string;
   terraformWorkingDir: string;
+  iac_type: 'terraform' | 'terragrunt' | 'opentofu',
+  workspace: string,
+  workflow_file: string,
+  include_patterns?: string,
+  exclude_patterns?: string,
   labels: string[];
   managedState: boolean;
   is_drift_detection_enabled: boolean;
@@ -923,6 +948,11 @@ export async function updateProjectSettingsAction({
       .from('projects')
       .update({
         terraform_working_dir: terraformWorkingDir,
+        iac_type,
+        workspace,
+        workflow_file,
+        include_patterns,
+        exclude_patterns,
         labels,
         is_managing_state: managedState,
         is_drift_detection_enabled: is_drift_detection_enabled,
