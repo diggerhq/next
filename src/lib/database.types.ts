@@ -550,7 +550,7 @@ export type Database = {
             foreignKeyName: "fk_triggered_by_user"
             columns: ["triggered_by_user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "user_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1316,7 +1316,10 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           drift_crontab: string | null
+          exclude_patterns: string | null
+          iac_type: Database["public"]["Enums"]["iac_type_enum"] | null
           id: string
+          include_patterns: string | null
           is_drift_detection_enabled: boolean | null
           is_generated: boolean | null
           is_in_main_branch: boolean | null
@@ -1333,6 +1336,8 @@ export type Database = {
           team_id: number | null
           terraform_working_dir: string | null
           updated_at: string
+          workflow_file: string | null
+          workspace: string | null
         }
         Insert: {
           branch?: string | null
@@ -1340,7 +1345,10 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           drift_crontab?: string | null
+          exclude_patterns?: string | null
+          iac_type?: Database["public"]["Enums"]["iac_type_enum"] | null
           id?: string
+          include_patterns?: string | null
           is_drift_detection_enabled?: boolean | null
           is_generated?: boolean | null
           is_in_main_branch?: boolean | null
@@ -1357,6 +1365,8 @@ export type Database = {
           team_id?: number | null
           terraform_working_dir?: string | null
           updated_at?: string
+          workflow_file?: string | null
+          workspace?: string | null
         }
         Update: {
           branch?: string | null
@@ -1364,7 +1374,10 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           drift_crontab?: string | null
+          exclude_patterns?: string | null
+          iac_type?: Database["public"]["Enums"]["iac_type_enum"] | null
           id?: string
+          include_patterns?: string | null
           is_drift_detection_enabled?: boolean | null
           is_generated?: boolean | null
           is_in_main_branch?: boolean | null
@@ -1381,6 +1394,8 @@ export type Database = {
           team_id?: number | null
           terraform_working_dir?: string | null
           updated_at?: string
+          workflow_file?: string | null
+          workspace?: string | null
         }
         Relationships: [
           {
@@ -1991,6 +2006,7 @@ export type Database = {
     Enums: {
       app_admin_role: "moderator" | "admin" | "super_admin"
       app_role: "admin"
+      iac_type_enum: "terraform" | "terragrunt" | "opentofu"
       internal_blog_post_status: "draft" | "published"
       internal_feedback_thread_priority: "low" | "medium" | "high"
       internal_feedback_thread_status:

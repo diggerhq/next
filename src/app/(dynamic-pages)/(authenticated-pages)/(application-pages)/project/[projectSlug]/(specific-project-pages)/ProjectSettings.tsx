@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { updateProjectSettingsAction } from "@/data/user/projects";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
@@ -20,6 +21,11 @@ type ProjectSettingsProps = {
 
 type ProjectSettingsFormData = {
     terraformWorkingDir: string;
+    iac_type: "terraform" | "terragrunt" | "opentofu";
+    workspace: string;
+    workflow_file: string;
+    include_patterns: string;
+    exclude_patterns: string;
     labels: string[];
     managedState: boolean;
     is_drift_detection_enabled: boolean;
@@ -32,6 +38,9 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
     const { control, handleSubmit, formState: { isDirty } } = useForm<ProjectSettingsFormData>({
         defaultValues: {
             terraformWorkingDir: project.terraform_working_dir || '',
+            iac_type: project.iac_type || 'terraform',
+            workspace: project.workspace || 'default',
+            workflow_file: project.workflow_file || 'digger_workflow.yml',
             labels: project.labels || [],
             managedState: project.is_managing_state || false,
             is_drift_detection_enabled: project.is_drift_detection_enabled || false,
@@ -44,6 +53,11 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
             const result = await updateProjectSettingsAction({
                 projectId: project.id,
                 terraformWorkingDir: data.terraformWorkingDir,
+                iac_type: data.iac_type,
+                workspace: data.workspace,
+                workflow_file: data.workflow_file,
+                include_patterns: data.include_patterns,
+                exclude_patterns: data.exclude_patterns,
                 labels: data.labels,
                 managedState: data.managedState,
                 is_drift_detection_enabled: data.is_drift_detection_enabled,
@@ -117,6 +131,100 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                                 )}
                             />
                         </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.15, delay: 0.4 }}
+                        >
+                            <Label htmlFor="iac_type">IAC type</Label>
+                            <Controller
+                                name="iac_type"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select IAC type" />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-xl">
+                                            <SelectItem value="terraform" className="rounded-lg">
+                                                Terraform
+                                            </SelectItem>
+                                            <SelectItem value="terragrunt" className="rounded-lg">
+                                                Terragrunt
+                                            </SelectItem>
+                                            <SelectItem value="opentofu" className="rounded-lg">
+                                                Opentofu
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.15, delay: 0.4 }}
+                        >
+                            <Label htmlFor="workspace">Workspace</Label>
+                            <Controller
+                                name="workspace"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input id="workspace" {...field} />
+                                )}
+                            />
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.15, delay: 0.4 }}
+                        >
+                            <Label htmlFor="workflow_file">Workflow file</Label>
+                            <Controller
+                                name="workflow_file"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input id="workflow_file" {...field} />
+                                )}
+                            />
+                        </motion.div>
+
+                        <div className="grid grid-cols-2 gap-6">
+
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.15, delay: 0.4 }}
+                            >
+                                <Label htmlFor="include_patterns">Include patterns</Label>
+                                <Controller
+                                    name="include_patterns"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Input id="include_patterns" {...field} />
+                                    )}
+                                />
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.15, delay: 0.4 }}
+                            >
+                                <Label htmlFor="Exclude patterns">Exclude patterns</Label>
+                                <Controller
+                                    name="exclude_patterns"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Input id="exclude_patterns" {...field} />
+                                    )}
+                                />
+                            </motion.div>
+
+                        </div>
 
                         <motion.div
                             initial={{ opacity: 0 }}
