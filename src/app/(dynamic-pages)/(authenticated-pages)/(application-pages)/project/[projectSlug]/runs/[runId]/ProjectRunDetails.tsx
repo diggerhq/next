@@ -65,6 +65,7 @@ function RenderContent({
                     run.status !== ToTitleCase('running_plan') && (
                         <pre className="bg-muted p-4 rounded-md overflow-auto flex-1 max-h-[600px] text-sm whitespace-pre-wrap">
                             {tfOutput}
+                            {run.status === ToTitleCase("failed") && run.failure_reason}
                         </pre>
                     )}
             </div>
@@ -106,6 +107,7 @@ function RenderContent({
                 {run.status === ToTitleCase('succeeded') && (
                     <div className="dark font-mono bg-muted p-4 rounded-md overflow-auto flex-1 max-h-[600px] text-sm whitespace-pre-wrap text-white">
                         {applyTerraformOutput}
+                        {run.status === ToTitleCase("failed") && run.failure_reason}
                     </div>
                 )}
             </div>

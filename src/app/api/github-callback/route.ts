@@ -3,11 +3,11 @@ import { toSiteURL } from '@/utils/helpers';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Use the environment variable for the callback URL
-const AUTH_SERVICE_URL = process.env.GITHUB_PROXY_CALLBACK_URL;
+const GITHUB_CALLBACK_URL = process.env.GITHUB_PROXY_CALLBACK_URL;
 const DIGGER_WEBHOOK_SECRET = process.env.DIGGER_WEBHOOK_SECRET;
 
-if (!AUTH_SERVICE_URL) {
-  throw new Error('GITHUB_CALLBACK_URL environment variable is not set');
+if (!GITHUB_CALLBACK_URL) {
+  throw new Error('GITHUB_PROXY_CALLBACK_URL environment variable is not set');
 }
 
 export async function GET(request: NextRequest) {
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     );
     const organizationId = await getOrganizationId();
     const response = await fetch(
-      `${AUTH_SERVICE_URL}?${searchParams.toString()}`,
+      `${GITHUB_CALLBACK_URL}?${searchParams.toString()}`,
       {
         method: 'GET',
         headers: {

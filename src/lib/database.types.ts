@@ -452,6 +452,7 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           digger_config: string | null
+          failure_reason: string | null
           github_installation_id: number | null
           id: string
           is_approved: boolean | null
@@ -477,6 +478,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           digger_config?: string | null
+          failure_reason?: string | null
           github_installation_id?: number | null
           id?: string
           is_approved?: boolean | null
@@ -502,6 +504,7 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           digger_config?: string | null
+          failure_reason?: string | null
           github_installation_id?: number | null
           id?: string
           is_approved?: boolean | null
