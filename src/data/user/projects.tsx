@@ -286,7 +286,8 @@ export async function getProjectsForUser({
     .from('projects')
     .select('*, teams(name)')
     .eq('organization_id', organizationId)
-    .ilike('name', `%${query}%`);
+    .ilike('name', `%${query}%`)
+    .is('deleted_at', null);
 
   if (userRole !== 'admin' || userId !== 'owner') {
     // For non-admin users, get their team memberships
@@ -333,7 +334,8 @@ export async function getProjectsListForUser({
     .from('projects')
     .select('id, name, slug, latest_action_on, created_at, repo_id, latest_drift_output')
     .eq('organization_id', organizationId)
-    .ilike('name', `%${query}%`);
+    .ilike('name', `%${query}%`)
+    .is('deleted_at', null);
 
   if (userRole !== 'admin' || userId !== 'owner') {
     // For non-admin users, get their team memberships
@@ -399,7 +401,8 @@ export async function getSlimProjectsForUser({
   let supabaseQuery = supabase
     .from('projects')
     .select('id,name, slug, latest_action_on, created_at, repo_id')
-    .in('id', projectIds);
+    .in('id', projectIds)
+    .is('deleted_at', null);
 
   if (userRole !== 'admin' || userId !== 'owner') {
     // For non-admin users, get their team memberships
@@ -463,7 +466,8 @@ export async function getProjectsIdsListForUser({
     .from('projects')
     .select('id,name, slug, latest_action_on, created_at, repo_id')
     .eq('organization_id', organizationId)
-    .ilike('name', `%${query}%`);
+    .ilike('name', `%${query}%`)
+    .is('deleted_at', null);
 
   if (userRole !== 'admin' || userId !== 'owner') {
     // For non-admin users, get their team memberships
@@ -538,7 +542,8 @@ export async function getProjectsCountForUser({
     .from('projects')
     .select('*', { count: 'exact', head: true })
     .eq('organization_id', organizationId)
-    .ilike('name', `%${query}%`);
+    .ilike('name', `%${query}%`)
+    .is('deleted_at', null);
 
   if (userRole.member_role !== 'admin') {
     // For non-admin users, get their team memberships
@@ -585,6 +590,7 @@ export const getAllProjectsInOrganization = async ({
     .from("projects")
     .select("*")
     .eq("organization_id", organizationId)
+    .is('deleted_at', null)
     .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
 
   if (query) {
@@ -609,6 +615,7 @@ export const getAllProjectIdsInOrganization = async (organizationId: string) => 
     .from("projects")
     .select("id")
     .eq("organization_id", organizationId)
+    .is('deleted_at', null)
     .order("created_at", { ascending: false });
 
   const { data, error } = await supabaseQuery;
@@ -626,6 +633,7 @@ export const getProjectIdsInOrganization = async (organizationId: string, count:
   const supabaseQuery = supabase
     .from("projects")
     .select("id")
+    .is('deleted_at', null)
     .eq("organization_id", organizationId);
 
   const { data, error } = await supabaseQuery;
@@ -660,6 +668,7 @@ export const getOrganizationLevelProjects = async ({
     .select("*")
     .eq("organization_id", organizationId)
     .is('team_id', null)
+    .is('deleted_at', null)
     .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
 
   if (query) {
@@ -698,6 +707,7 @@ export const getProjects = async ({
     .from("projects")
     .select("*")
     .eq("organization_id", organizationId)
+    .is('deleted_at', null)
     .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
 
   // Add team filter
@@ -742,6 +752,7 @@ export const getAllProjectsListInOrganization = async ({
     .from("projects")
     .select("id,name, slug, latest_action_on, created_at, repo_id")
     .eq("organization_id", organizationId)
+    .is('deleted_at', null)
     .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
 
   if (query) {
@@ -793,6 +804,7 @@ export const getProjectsList = async ({
     .from("projects")
     .select("id,name, slug, latest_action_on, created_at, repo_id")
     .eq("organization_id", organizationId)
+    .is('deleted_at', null)
     .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
 
   // Add team filter
@@ -891,6 +903,7 @@ export const getProjectsForUserTotalCount = async ({
       head: true,
     })
     .eq("organization_id", organizationId)
+    .is('deleted_at', null)
     .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
 
   if (query) {
