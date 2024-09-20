@@ -13,6 +13,7 @@ import { Tables } from "@/lib/database.types";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { DeleteProject } from "./DeleteProject";
 
 type ProjectSettingsProps = {
     project: Tables<'projects'>;
@@ -291,6 +292,7 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                     </form>
                 </CardContent>
             </Card>
+            <DeleteProject projectName={project.name} projectId={project.id} />
         </motion.div>
     );
 }
