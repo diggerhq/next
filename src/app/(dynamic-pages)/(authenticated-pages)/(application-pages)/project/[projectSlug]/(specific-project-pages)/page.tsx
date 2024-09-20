@@ -1,6 +1,7 @@
 import { getSlimProjectBySlug } from "@/data/user/projects";
 import { projectSlugParamSchema } from "@/utils/zod-schemas/params";
 import type { Metadata } from "next";
+import { redirect } from 'next/navigation';
 import AllRunsDetails from "./AllRunsDetails";
 
 type ProjectPageProps = {
@@ -24,6 +25,10 @@ export async function generateMetadata({
 export default async function ProjectPage({ params }: { params: unknown }) {
   const { projectSlug } = projectSlugParamSchema.parse(params);
   const slimProject = await getSlimProjectBySlug(projectSlug);
+
+  if (slimProject.deleted_at) {
+    redirect("/dashboard");
+  }
 
   return (
     <div className="flex flex-col space-y-4 max-w-5xl mt-2">
