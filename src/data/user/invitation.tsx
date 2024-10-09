@@ -45,6 +45,9 @@ async function setupInviteeUserDetails(email: string): Promise<{
   if (!inviteeUserId) {
     const { data, error } = await supabaseAdminClient.auth.admin.createUser({
       email: email,
+      user_metadata: {
+        isUserCreatedThroughOrgInvitation: true
+      }
     });
     if (error) {
       throw error;
@@ -221,6 +224,7 @@ export async function createInvitationHandler({
   return { status: 'success', data: invitationResponse.data };
 }
 
+
 export async function acceptInvitationAction(
   invitationId: string,
 ): Promise<SAPayload<string>> {
@@ -313,6 +317,8 @@ export async function getPendingInvitationsOfUser() {
 
   return Promise.all(invitationListPromise);
 }
+
+
 
 export const getInvitationById = async (invitationId: string) => {
   const supabaseClient = createSupabaseUserServerComponentClient();

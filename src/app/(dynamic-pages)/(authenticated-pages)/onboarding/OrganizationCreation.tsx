@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { createOrganization } from "@/data/user/organizations";
-import { generateSlug } from "@/lib/utils";
+import { generateOrganizationSlug } from "@/lib/utils";
 import { CreateOrganizationSchema, createOrganizationSchema } from "@/utils/zod-schemas/organization";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -55,7 +55,7 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
             {...register("organizationTitle")}
             placeholder="Enter organization name"
             onChange={(e) => {
-              setValue("organizationSlug", generateSlug(e.target.value), { shouldValidate: true });
+              setValue("organizationSlug", generateOrganizationSlug(e.target.value), { shouldValidate: true });
               setValue("organizationTitle", e.target.value, { shouldValidate: true });
             }}
           />

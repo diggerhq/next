@@ -1,5 +1,6 @@
 "use server";
 import { PRODUCT_NAME } from "@/constants";
+import { generateOrganizationSlug } from "@/lib/utils";
 import { createSupabaseUserServerActionClient } from "@/supabase-clients/user/createSupabaseUserServerActionClient";
 import { createSupabaseUserServerComponentClient } from "@/supabase-clients/user/createSupabaseUserServerComponentClient";
 import type { SAPayload, SupabaseFileUploadOptions, Table } from "@/types";
@@ -12,6 +13,8 @@ import ConfirmAccountDeletionEmail from "emails/account-deletion-request";
 import { revalidatePath } from "next/cache";
 import slugify from "slugify";
 import urlJoin from "url-join";
+import { acceptInvitationAction } from "./invitation";
+import { createOrganization, setDefaultOrganization } from "./organizations";
 import { refreshSessionAction } from "./session";
 
 export async function getIsAppAdmin(): Promise<boolean> {
@@ -237,6 +240,60 @@ export const acceptTermsOfService = async (
     data: true,
   };
 };
+
+
+export const autoAcceptFirstInvitation = async () => {
+  const user = await serverGetLoggedInUser();
+  const pendingInvitations = await getUserPendingInvitationsById(user.id);
+  const supabaseClient = createSupabaseUserServerActionClient();
+
+  if (pendingInvitations.length > 0) {
+    const invitation = pendingInvitations[0];
+    const invitationAcceptanceResponse = await acceptInvitationAction(invitation.id);
+    if (invitationAcceptanceResponse.status === "error") {
+      throw invitationAcceptanceResponse.message;
+    } else if (invitationAcceptanceResponse.status === "success") {
+      const joinedOrganizationId = invitationAcceptanceResponse.data;
+      // let's make the joined organization the default one
+      await setDefaultOrganization(joinedOrganizationId);
+    }
+    const userProfile = await getUserProfile(user.id);
+    const userFullName = userProfile?.full_name ?? `User ${user.email ?? ""}`;
+    const defaultOrganizationCreationResponse = await createOrganization(userFullName, generateOrganizationSlug(userFullName));
+
+    if (defaultOrganizationCreationResponse.status === "error") {
+      throw defaultOrganizationCreationResponse.message;
+    }
+  }
+
+  console.log('updating user metadata')
+
+
+  const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
+    onboardingHasCreatedOrganization: true,
+  };
+
+  const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
+    data: updateUserMetadataPayload,
+  });
+
+  if (updateUserMetadataResponse.error) {
+    return {
+      status: "error",
+      message: updateUserMetadataResponse.error.message,
+    };
+  }
+
+  const refreshSessionResponse = await refreshSessionAction();
+  if (refreshSessionResponse.status === "error") {
+    return refreshSessionResponse;
+  }
+
+  return {
+    status: "success",
+    data: true,
+  };
+}
 
 export async function requestAccountDeletion(): Promise<
   SAPayload<Table<"account_delete_tokens">>

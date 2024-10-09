@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Card } from "@/components/ui/card";
 
+import { AcceptInvitations } from "./AcceptInvitations";
 import { OrganizationCreation } from "./OrganizationCreation";
 import { ProfileUpdate } from "./ProfileUpdate";
 import { TermsAcceptance } from "./TermsAcceptance";
@@ -13,7 +14,7 @@ import { TermsAcceptance } from "./TermsAcceptance";
 import type { Table } from "@/types";
 import type { AuthUserMetadata } from "@/utils/zod-schemas/authUserMetadata";
 
-type FLOW_STATE = "TERMS" | "PROFILE" | "ORGANIZATION" | "COMPLETE";
+type FLOW_STATE = "TERMS" | "PROFILE" | "ORGANIZATION" | "JOIN_INVITED_ORG" | "COMPLETE";
 
 type UserOnboardingFlowProps = {
   userProfile: Table<"user_profiles">;
@@ -82,6 +83,9 @@ export function UserOnboardingFlow({
         {currentStep === "ORGANIZATION" && (
           <OrganizationCreation onSuccess={nextStep} />
         )}
+        {currentStep === "JOIN_INVITED_ORG" && (
+          <AcceptInvitations onSuccess={nextStep} />
+        )}
       </MotionCard>
     </AnimatePresence>
   );
@@ -92,6 +96,7 @@ function getAllFlowStates(onboardingStatus: AuthUserMetadata): FLOW_STATE[] {
     onboardingHasAcceptedTerms,
     onboardingHasCompletedProfile,
     onboardingHasCreatedOrganization,
+    isUserCreatedThroughOrgInvitation
   } = onboardingStatus;
   const flowStates: FLOW_STATE[] = [];
 
@@ -105,8 +110,13 @@ function getAllFlowStates(onboardingStatus: AuthUserMetadata): FLOW_STATE[] {
     flowStates.push("PROFILE");
   }
   if (!onboardingHasCreatedOrganization) {
-    flowStates.push("ORGANIZATION");
+    if (isUserCreatedThroughOrgInvitation) {
+      flowStates.push("JOIN_INVITED_ORG");
+    } else {
+      flowStates.push("ORGANIZATION");
+    }
   }
+
   flowStates.push("COMPLETE");
 
   return flowStates;
@@ -133,12 +143,15 @@ function getInitialFlowState(
     return "PROFILE";
   }
 
-  if (
-    !onboardingHasCreatedOrganization &&
-    flowStates.includes("ORGANIZATION")
-  ) {
-    return "ORGANIZATION";
+  if (!onboardingHasCreatedOrganization) {
+    if (flowStates.includes("JOIN_INVITED_ORG")) {
+      return "JOIN_INVITED_ORG";
+    } else if (flowStates.includes("ORGANIZATION")) {
+      return "ORGANIZATION";
+    }
   }
+
+
 
   return "COMPLETE";
 }

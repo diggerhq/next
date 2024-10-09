@@ -17,7 +17,7 @@ import {
   signInWithPassword,
   signInWithProvider,
 } from '@/data/auth/auth';
-import { getInitialOrganizationToRedirectTo } from '@/data/user/organizations';
+import { getMaybeInitialOrganizationToRedirectTo } from '@/data/user/organizations';
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
 import type { AuthProvider } from '@/types';
 import { PrefetchKind } from 'next/dist/client/components/router-reducer/router-reducer-types';
@@ -44,12 +44,16 @@ export function Login({
     })
   })
 
-  const initialOrgRedirectMutation = useSAToastMutation(getInitialOrganizationToRedirectTo, {
+  const initialOrgRedirectMutation = useSAToastMutation(getMaybeInitialOrganizationToRedirectTo, {
     loadingMessage: 'Loading your dashboard...',
     errorMessage: 'Failed to load dashboard',
     successMessage: 'Redirecting to your dashboard...',
     onSuccess: (successPayload) => {
-      router.push(`/org/${successPayload.data}`);
+      if (successPayload.data) {
+        router.push(`/org/${successPayload.data}`);
+      } else {
+        router.push('/dashboard');
+      }
     },
     onError: (errorPayload) => {
       console.error(errorPayload);

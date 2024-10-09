@@ -5,6 +5,7 @@ export const authUserMetadataSchema = z
     onboardingHasAcceptedTerms: z.boolean().default(true),
     onboardingHasCompletedProfile: z.boolean().default(false),
     onboardingHasCreatedOrganization: z.boolean().default(false),
+    isUserCreatedThroughOrgInvitation: z.boolean().default(false),
   })
   .passthrough();
 

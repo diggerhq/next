@@ -6,7 +6,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { updateOrganizationInfo } from "@/data/user/organizations";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
-import { generateSlug } from "@/lib/utils";
+import { generateOrganizationSlug } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -87,7 +87,7 @@ export function EditOrganizationForm({
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
-                          form.setValue("organizationSlug", generateSlug(e.target.value), { shouldValidate: true });
+                          form.setValue("organizationSlug", generateOrganizationSlug(e.target.value), { shouldValidate: true });
                         }}
                       />
                     </FormControl>

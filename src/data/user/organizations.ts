@@ -620,3 +620,14 @@ export async function getInitialOrganizationToRedirectTo(): Promise<
     status: 'success',
   };
 }
+
+export async function getMaybeInitialOrganizationToRedirectTo(): Promise<SAPayload<string | null>> {
+  const initialOrganization = await getInitialOrganizationToRedirectTo();
+  if (initialOrganization.status === 'error') {
+    return {
+      data: null,
+      status: 'success',
+    };
+  }
+  return initialOrganization;
+}
