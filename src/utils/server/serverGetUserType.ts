@@ -1,10 +1,12 @@
 'use server';
 import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import { userRoles } from '@/utils/userTypes';
-import { cache } from 'react';
 
 // make sure to return one of UserRoles
-export const serverGetUserType = cache(async () => {
+
+//TODO reintroduce cache; used to be cache from react
+// removed because it was failing: "(0 , react__WEBPACK_IMPORTED_MODULE_2__.cache) is not a function"
+export const serverGetUserType = async () => {
   const supabase = createSupabaseUserServerComponentClient();
   const {
     data: { session },
@@ -27,5 +29,4 @@ export const serverGetUserType = cache(async () => {
   }
 
   return userRoles.USER;
-}
-)
+};

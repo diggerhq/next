@@ -103,6 +103,7 @@ export const createOrganization = async (
       return { status: 'error', message: orgMemberErrors.message };
     }
 
+    // Why are we checking for onboarding deep in the data layer? Bad code.
     if (isOnboardingFlow) {
       const { error: updateError } = await supabaseClient
         .from('user_private_info')
@@ -621,7 +622,9 @@ export async function getInitialOrganizationToRedirectTo(): Promise<
   };
 }
 
-export async function getMaybeInitialOrganizationToRedirectTo(): Promise<SAPayload<string | null>> {
+export async function getMaybeInitialOrganizationToRedirectTo(): Promise<
+  SAPayload<string | null>
+> {
   const initialOrganization = await getInitialOrganizationToRedirectTo();
   if (initialOrganization.status === 'error') {
     return {

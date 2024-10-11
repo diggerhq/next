@@ -1,14 +1,9 @@
-import {
-  createMiddlewareClient,
-  type User,
-} from '@supabase/auth-helpers-nextjs';
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
 // const matchAppAdmin = match('/app_admin_preview/(.*)?');
+import { auth } from '@/auth';
+import { NextResponse } from 'next/server';
 import { match } from 'path-to-regexp';
-import type { Database } from './lib/database.types';
 import { toSiteURL } from './utils/helpers';
-import { authUserMetadataSchema } from './utils/zod-schemas/authUserMetadata';
+import { serverGetLoggedInUser } from './utils/server/serverGetLoggedInUser';
 
 const onboardingPaths = `/onboarding/(.*)?`;
 // Using a middleware to protect pages from unauthorized access
@@ -48,7 +43,8 @@ function isUnprotectedPage(pathname: string) {
   });
 }
 
-function shouldOnboardUser(pathname: string, user: User | undefined) {
+function shouldOnboardUser(pathname: string, userId: string) {
+  /*
   const matchOnboarding = match(onboardingPaths);
   const isOnboardingRoute = matchOnboarding(pathname);
   if (!isUnprotectedPage(pathname) && user && !isOnboardingRoute) {
@@ -69,11 +65,17 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
   }
   console.log('user is onboarded');
   return false;
+  */
+  return true;
+  //TODO figure way to store user metadata (extend user_profile table?)
 }
 
 // this middleware refreshes the user's session and must be run
 // for any Server Component route that uses `createServerComponentSupabaseClient`
-export async function middleware(req: NextRequest) {
+// renamed while moving to auth.js
+
+/*
+export async function middleware_NEXTBASE_LEGACY(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient<Database>({ req, res });
   const sessionResponse = await supabase.auth.getSession();
@@ -120,6 +122,17 @@ export async function middleware(req: NextRequest) {
   }
   return res;
 }
+
+*/
+
+export default auth(async (req) => {
+  const user = await serverGetLoggedInUser();
+  if (shouldOnboardUser(req.nextUrl.pathname, user.id)) {
+    return NextResponse.redirect(toSiteURL('/onboarding'));
+  } else {
+    return NextResponse.next();
+  }
+});
 
 export const config = {
   matcher: [

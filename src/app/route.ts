@@ -1,8 +1,15 @@
-import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
-import { NextResponse } from 'next/server';
+//import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
+
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
+export async function GET() {
+  redirect('/dashboard');
+}
+
+// TODO remove when move to authjs is complete
+/*
 export async function GET() {
   const supabase = createSupabaseUserRouteHandlerClient();
 
@@ -31,3 +38,4 @@ export async function GET() {
     );
   }
 }
+*/

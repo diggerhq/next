@@ -196,7 +196,7 @@ export const createProjectCommentAction = async (
   const user = await serverGetLoggedInUser();
   const { data, error } = await supabaseClient
     .from("project_comments")
-    .insert({ project_id: projectId, text, user_id: user.id })
+    .insert({ project_id: projectId, text, user_id: user.id! }) //TODO remove assertion or resolve
     .select("*, user_profiles(*)")
     .single();
   if (error) {
