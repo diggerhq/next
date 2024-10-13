@@ -8,6 +8,7 @@ import { createSupabaseUserServerComponentClient } from "@/supabase-clients/user
 import type { CommentWithUser, Enum, SAPayload } from "@/types";
 import { normalizeComment } from "@/utils/comments";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 import { getRepoDetails } from "./repos";
@@ -104,6 +105,7 @@ export const createProjectAction = async ({
   const { data: project, error } = await supabaseClient
     .from("projects")
     .insert({
+      id: randomUUID(),
       organization_id: organizationId,
       name,
       slug,
