@@ -1,10 +1,27 @@
 import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
-import { NextResponse } from 'next/server';
+// import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+// import { useEffect, useState } from 'react';
+
+import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = createSupabaseUserRouteHandlerClient();
+  const url = new URL(request.url);
+  const hash = url.hash;
+
+  console.log(url);
+
+  // Remove the '#' character if present
+  const cleanHash = hash.startsWith('#') ? hash.slice(1) : hash;
+
+  // You can now use the hash value as needed
+  if (cleanHash) {
+    console.log({ message: `Hash found: ${cleanHash}` });
+  } else {
+    console.log({ message: 'No hash found in the URL' });
+  }
 
   const {
     data: { user },

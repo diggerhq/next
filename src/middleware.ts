@@ -75,9 +75,16 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
 // for any Server Component route that uses `createServerComponentSupabaseClient`
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient<Database>({ req, res });
+  const supabase = createMiddlewareClient<Database>(
+    { req, res },
+    { supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL },
+  );
+  const url = new URL(req.url);
+  console.log('middleware', url);
+  return res;
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
+
   if (isLandingPage(req.nextUrl.pathname)) {
     if (maybeUser) {
       //user is logged in, lets validate session and redirect on success
