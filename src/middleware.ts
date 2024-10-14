@@ -79,11 +79,15 @@ export async function middleware(req: NextRequest) {
     { req, res },
     { supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL },
   );
-  const url = new URL(req.url);
-  console.log('middleware', url);
-  return res;
+
+  if (req.nextUrl.pathname === '/') {
+    return res;
+  }
+
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
+
+  console.log(req.nextUrl.pathname, sessionResponse);
 
   if (isLandingPage(req.nextUrl.pathname)) {
     if (maybeUser) {
