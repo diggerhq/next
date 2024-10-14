@@ -132,6 +132,7 @@ export const createProjectAction = async ({
 
 
   if (error) {
+    console.log(`could not create project ${name} for org ID: ${organizationId}`, error);
     return {
       status: 'error',
       message: error.message,
