@@ -45,10 +45,11 @@ export function Login({
     })
   })
 
-  const SSO_DOMAIN = "dev-0gsos99z.eu.auth0.com"
-  async function ssoLogin(sso_domain: string = SSO_DOMAIN) {
+
+  async function ssoLogin() {
+    const SSO_DOMAIN = process.env.NEXT_PUBLIC_SSO_DOMAIN || ''
     const { data, error } = await supabaseAnonClient.auth.signInWithSSO({
-      domain: sso_domain,
+      domain: SSO_DOMAIN,
     });
     if (error) {
       alert(error.message);

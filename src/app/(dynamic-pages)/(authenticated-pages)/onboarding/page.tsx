@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { UserOnboardingFlow } from "./OnboardingFlow";
 
 async function getDefaultOrganizationOrSet(): Promise<string | null> {
+  console.log(`get default organisation`)
   const [slimOrganizations, defaultOrganizationId] = await Promise.all([
     fetchSlimOrganizations(),
     getDefaultOrganization(),
@@ -35,6 +36,7 @@ async function getDefaultOrganizationOrSet(): Promise<string | null> {
 }
 
 async function getOnboardingConditions(userId: string) {
+  console.log(`get onboarding conditions ${userId}`)
   const [userProfile, defaultOrganizationId] = await Promise.all([
     getUserProfile(userId),
     getDefaultOrganizationOrSet(),
@@ -49,6 +51,7 @@ async function getOnboardingConditions(userId: string) {
 }
 
 async function OnboardingFlowWrapper({ userId, userEmail }: { userId: string; userEmail: string | undefined }) {
+  console.log(`onboarding flow wrapper ${userId} ${userEmail}`)
   const [onboardingConditions, user] = await Promise.all([
     getOnboardingConditions(userId),
     serverGetLoggedInUser(),

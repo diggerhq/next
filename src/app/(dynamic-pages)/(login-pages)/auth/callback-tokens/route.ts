@@ -35,6 +35,6 @@ export async function GET(request: Request) {
     // validate next param
     redirectTo = new URL(decodedNext, requestUrl.origin);
   }
-  console.log('redirecting to:', redirectTo);
+
   return NextResponse.redirect(redirectTo);
 }

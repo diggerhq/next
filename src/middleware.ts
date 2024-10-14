@@ -53,7 +53,6 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
   const isOnboardingRoute = matchOnboarding(pathname);
   if (!isUnprotectedPage(pathname) && user && !isOnboardingRoute) {
     const userMetadata = authUserMetadataSchema.parse(user.user_metadata);
-    console.log('user metadata:', userMetadata);
     const {
       onboardingHasAcceptedTerms,
       onboardingHasCompletedProfile,
@@ -67,7 +66,6 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
       return true;
     }
   }
-  console.log('user is onboarded');
   return false;
 }
 
@@ -86,8 +84,6 @@ export async function middleware(req: NextRequest) {
 
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
-
-  console.log(req.nextUrl.pathname, sessionResponse);
 
   if (isLandingPage(req.nextUrl.pathname)) {
     if (maybeUser) {
