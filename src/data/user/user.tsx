@@ -13,6 +13,7 @@ import ConfirmAccountDeletionEmail from "emails/account-deletion-request";
 import { revalidatePath } from "next/cache";
 import slugify from "slugify";
 import urlJoin from "url-join";
+import { v4 as uuidv4 } from 'uuid';
 import { acceptInvitationAction } from "./invitation";
 import { createOrganization, setDefaultOrganization } from "./organizations";
 import { refreshSessionAction } from "./session";
@@ -39,6 +40,47 @@ export const getUserProfile = async (userId: string) => {
 
   return data;
 };
+
+export const getUserProfileByEmail = async (email: string) => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .select("*")
+    .eq("email", email)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
+
+export const getUserProfileByEmailOrCreate = async (email: string) => {
+  const supabase = createSupabaseUserServerComponentClient();
+  try {
+    // Try to get the existing user profile
+    const existingProfile = await getUserProfileByEmail(email);
+    return existingProfile;
+  } catch (error) {
+    // If the profile doesn't exist, create a new one
+    // TODO filter error by code PGRST116 or details "the result contains 0 rows"
+    const { data, error: createError } = await supabase
+      .from("user_profiles")
+      .insert({ id: uuidv4(), email })
+      .select()
+      .single();
+
+    if (createError) {
+      console.log('creating profil error', createError);
+      throw createError;
+    }
+
+    return data;
+
+  }
+};
+
 export const getUserFullName = async (userId: string) => {
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase

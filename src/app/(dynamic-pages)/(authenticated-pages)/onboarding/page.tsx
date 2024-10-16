@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchSlimOrganizations, getDefaultOrganization, setDefaultOrganization } from "@/data/user/organizations";
-import { getUserProfile } from "@/data/user/user";
+import { getUserProfileByEmailOrCreate } from "@/data/user/user";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import { authUserMetadataSchema } from "@/utils/zod-schemas/authUserMetadata";
 import { Suspense } from 'react';
@@ -34,9 +34,10 @@ async function getDefaultOrganizationOrSet(): Promise<string | null> {
   return firstOrganization.id;
 }
 
-async function getOnboardingConditions(userId: string) {
+//TODO rename / refactor: it also creates profile. Temporary workaround.
+async function getOnboardingConditions(email: string) {
   const [userProfile, defaultOrganizationId] = await Promise.all([
-    getUserProfile(userId),
+    getUserProfileByEmailOrCreate(email),
     getDefaultOrganizationOrSet(),
   ]);
 
@@ -48,14 +49,17 @@ async function getOnboardingConditions(userId: string) {
   };
 }
 
-async function OnboardingFlowWrapper({ userId, userEmail }: { userId: string; userEmail: string | undefined }) {
-  const [onboardingConditions, user] = await Promise.all([
-    getOnboardingConditions(userId),
-    serverGetLoggedInUser(),
-  ]);
-  const { userProfile } = onboardingConditions;
-  console.log("userProfile", userProfile);
-  const onboardingStatus = authUserMetadataSchema.parse(user.user_metadata);
+async function OnboardingFlowWrapper({ userEmail }: { userEmail: string }) {
+  const { userProfile } = await getOnboardingConditions(userEmail)
+  console.log("Conditions got - profile", userProfile);
+  //TODO use actual user metadata instead of dummy
+  const dummyMetadata = authUserMetadataSchema.parse({
+    onboardingHasAcceptedTerms: true,
+    onboardingHasCompletedProfile: false,
+    onboardingHasCreatedOrganization: false,
+    isUserCreatedThroughOrgInvitation: false,
+  })
+  const onboardingStatus = dummyMetadata
   console.log(onboardingStatus);
   console.log(userEmail);
 
@@ -70,11 +74,10 @@ async function OnboardingFlowWrapper({ userId, userEmail }: { userId: string; us
 
 export default async function OnboardingPage() {
   const user = await serverGetLoggedInUser();
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <Suspense fallback={<Skeleton className="w-full max-w-md h-[400px]" />}>
-        <OnboardingFlowWrapper userId={user.id} userEmail={user.email} />
+        <OnboardingFlowWrapper userEmail={user.email} />
       </Suspense>
     </div>
   );
