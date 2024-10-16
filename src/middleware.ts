@@ -131,7 +131,10 @@ export default auth(async (req) => {
     return NextResponse.redirect(toSiteURL('/api/auth/signin'));
   } else {
     const user = await serverGetLoggedInUser();
-    if (shouldOnboardUser(req.nextUrl.pathname, user.id)) {
+    if (
+      shouldOnboardUser(req.nextUrl.pathname, user.id) &&
+      req.nextUrl.pathname !== '/onboarding'
+    ) {
       // authenticated but not onboarded
       return NextResponse.redirect(toSiteURL('/onboarding'));
     } else {
