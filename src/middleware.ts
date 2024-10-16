@@ -126,11 +126,18 @@ export async function middleware_NEXTBASE_LEGACY(req: NextRequest) {
 */
 
 export default auth(async (req) => {
-  const user = await serverGetLoggedInUser();
-  if (shouldOnboardUser(req.nextUrl.pathname, user.id)) {
-    return NextResponse.redirect(toSiteURL('/onboarding'));
+  if (!req.auth) {
+    //not authenticated - redirect to login URL defined by Auth.js
+    return NextResponse.redirect(toSiteURL('/api/auth/signin'));
   } else {
-    return NextResponse.next();
+    const user = await serverGetLoggedInUser();
+    if (shouldOnboardUser(req.nextUrl.pathname, user.id)) {
+      // authenticated but not onboarded
+      return NextResponse.redirect(toSiteURL('/onboarding'));
+    } else {
+      // authenticated and onboarded - no changes to URL
+      return NextResponse.next();
+    }
   }
 });
 
