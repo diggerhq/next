@@ -1,3 +1,7 @@
+import {
+  createDefaultUserPrivateInfo,
+  createDefaultUserProfile,
+} from '@/data/user/user';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
@@ -19,7 +23,10 @@ export async function GET(request: Request) {
         refresh_token,
       });
 
-      if (error) throw error;
+      // TODO: find out how user profile and private info are created automatically
+      const userId = data.user?.id;
+      createDefaultUserProfile(userId!);
+      createDefaultUserPrivateInfo(userId!);
 
       console.log('Session set successfully:', data.session);
     } catch (error) {
