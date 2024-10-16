@@ -7,7 +7,6 @@ import { Suspense } from 'react';
 import { UserOnboardingFlow } from "./OnboardingFlow";
 
 async function getDefaultOrganizationOrSet(): Promise<string | null> {
-  console.log(`get default organisation`)
   const [slimOrganizations, defaultOrganizationId] = await Promise.all([
     fetchSlimOrganizations(),
     getDefaultOrganization(),
@@ -30,8 +29,6 @@ async function getDefaultOrganizationOrSet(): Promise<string | null> {
   // reason, because of an invite or for some other reason,
   // make sure that the default organization is set to the first
   await setDefaultOrganization(firstOrganization.id);
-  console.log('set default organization to firstOrganization on onboarding', firstOrganization.id);
-
   return firstOrganization.id;
 }
 
@@ -41,9 +38,6 @@ async function getOnboardingConditions(userId: string) {
     getUserProfile(userId),
     getDefaultOrganizationOrSet(),
   ]);
-
-  console.log('userProfile on onboarding', userProfile);
-  console.log('defaultOrganizationId on onboarding', defaultOrganizationId);
   return {
     userProfile,
     defaultOrganizationId,
@@ -51,16 +45,12 @@ async function getOnboardingConditions(userId: string) {
 }
 
 async function OnboardingFlowWrapper({ userId, userEmail }: { userId: string; userEmail: string | undefined }) {
-  console.log(`onboarding flow wrapper ${userId} ${userEmail}`)
   const [onboardingConditions, user] = await Promise.all([
     getOnboardingConditions(userId),
     serverGetLoggedInUser(),
   ]);
   const { userProfile } = onboardingConditions;
-  console.log("userProfile", userProfile);
   const onboardingStatus = authUserMetadataSchema.parse(user.user_metadata);
-  console.log(onboardingStatus);
-  console.log(userEmail);
 
   return (
     <UserOnboardingFlow
