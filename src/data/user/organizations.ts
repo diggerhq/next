@@ -11,10 +11,10 @@ import type {
   UnwrapPromise,
 } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
 import { refreshSessionAction } from './session';
+import { updateUserProfileMetadata } from './user';
 
 export const getOrganizationIdBySlug = async (slug: string) => {
   const supabaseClient = createSupabaseUserServerComponentClient();
@@ -115,22 +115,15 @@ export const createOrganization = async (
         return { status: 'error', message: updateError.message };
       }
 
-      const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
-        onboardingHasCreatedOrganization: true,
-      };
-
-      const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
-        data: updateUserMetadataPayload,
-      });
-
-      if (updateUserMetadataResponse.error) {
-        console.error(
-          'Error updating user metadata:',
-          updateUserMetadataResponse.error,
-        );
+      try {
+        await updateUserProfileMetadata(user.id, {
+          has_created_organization: true,
+        });
+      } catch (e) {
+        console.error('Error updating user metadata:', e.message);
         return {
           status: 'error',
-          message: updateUserMetadataResponse.error.message,
+          message: e.message,
         };
       }
 

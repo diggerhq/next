@@ -1720,7 +1720,11 @@ export type Database = {
           created_at: string
           email: string | null
           full_name: string | null
+          has_accepted_terms: boolean | null
+          has_completed_profile: boolean | null
+          has_created_organization: boolean | null
           id: string
+          is_created_through_org_invitation: boolean | null
           user_name: string | null
         }
         Insert: {
@@ -1728,7 +1732,11 @@ export type Database = {
           created_at?: string
           email?: string | null
           full_name?: string | null
+          has_accepted_terms?: boolean | null
+          has_completed_profile?: boolean | null
+          has_created_organization?: boolean | null
           id: string
+          is_created_through_org_invitation?: boolean | null
           user_name?: string | null
         }
         Update: {
@@ -1736,7 +1744,11 @@ export type Database = {
           created_at?: string
           email?: string | null
           full_name?: string | null
+          has_accepted_terms?: boolean | null
+          has_completed_profile?: boolean | null
+          has_created_organization?: boolean | null
           id?: string
+          is_created_through_org_invitation?: boolean | null
           user_name?: string | null
         }
         Relationships: []

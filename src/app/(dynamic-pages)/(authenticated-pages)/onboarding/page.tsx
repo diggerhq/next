@@ -2,7 +2,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { fetchSlimOrganizations, getDefaultOrganization, setDefaultOrganization } from "@/data/user/organizations";
 import { getUserProfileByEmailOrCreate } from "@/data/user/user";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
-import { authUserMetadataSchema } from "@/utils/zod-schemas/authUserMetadata";
 import { Suspense } from 'react';
 import { UserOnboardingFlow } from "./OnboardingFlow";
 
@@ -61,14 +60,13 @@ async function getOnboardingConditions(email: string) {
 async function OnboardingFlowWrapper({ userEmail }: { userEmail: string }) {
   const { userProfile } = await getOnboardingConditions(userEmail)
   console.log("Conditions got - profile", userProfile);
-  //TODO use actual user metadata instead of dummy
-  const dummyMetadata = authUserMetadataSchema.parse({
-    onboardingHasAcceptedTerms: true,
-    onboardingHasCompletedProfile: false,
-    onboardingHasCreatedOrganization: false,
-    isUserCreatedThroughOrgInvitation: false,
-  })
-  const onboardingStatus = dummyMetadata
+
+  const onboardingStatus = {
+    onboardingHasAcceptedTerms: Boolean(userProfile.has_accepted_terms),
+    onboardingHasCompletedProfile: Boolean(userProfile.has_completed_profile),
+    onboardingHasCreatedOrganization: Boolean(userProfile.has_created_organization),
+    isUserCreatedThroughOrgInvitation: Boolean(userProfile.is_created_through_org_invitation),
+  }
 
   console.log(onboardingStatus);
   console.log(userEmail);

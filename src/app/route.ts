@@ -1,36 +1,17 @@
 //import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
 
+import { getUserProfileByEmail } from '@/data/user/user';
 import { toSiteURL } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-function shouldOnboardUser(pathname: string, userId: string) {
-  /*
-  const matchOnboarding = match(onboardingPaths);
-  const isOnboardingRoute = matchOnboarding(pathname);
-  if (!isUnprotectedPage(pathname) && user && !isOnboardingRoute) {
-    const userMetadata = authUserMetadataSchema.parse(user.user_metadata);
-    console.log('user metadata:', userMetadata);
-    const {
-      onboardingHasAcceptedTerms,
-      onboardingHasCompletedProfile,
-      onboardingHasCreatedOrganization,
-    } = userMetadata;
-    if (
-      !onboardingHasAcceptedTerms ||
-      !onboardingHasCompletedProfile ||
-      !onboardingHasCreatedOrganization
-    ) {
-      return true;
-    }
-  }
-  console.log('user is onboarded');
-  return false;
-  */
-  return true;
-  //TODO figure way to store user metadata (extend user_profile table?)
+async function shouldOnboardUser(pathname: string, email: string) {
+  const userProfile = await getUserProfileByEmail(email);
+  return (
+    !userProfile.has_completed_profile || !userProfile.has_created_organization
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -42,7 +23,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await serverGetLoggedInUser();
     if (
-      shouldOnboardUser(request.nextUrl.pathname, user.id) &&
+      (await shouldOnboardUser(request.nextUrl.pathname, user.email)) &&
       request.nextUrl.pathname !== '/onboarding'
     ) {
       // Authenticated but not onboarded
@@ -56,6 +37,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
+function getOnboardingConditions(
+  email: string,
+): { userProfile: any } | PromiseLike<{ userProfile: any }> {
+  throw new Error('Function not implemented.');
+}
 // TODO remove when move to authjs is complete
 /*
 export async function GET() {

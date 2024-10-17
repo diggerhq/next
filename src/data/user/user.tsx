@@ -186,6 +186,28 @@ export const uploadPublicUserAvatar = async (
   return { status: "success", data: supabaseFileUrl };
 };
 
+export async function updateUserProfileMetadata(userId: string, metadata: {
+  has_accepted_terms?: boolean,
+  has_completed_profile?: boolean,
+  has_created_organization?: boolean,
+  is_created_through_org_invitation?: boolean,
+}) {
+  const supabaseClient = createSupabaseUserServerActionClient();
+
+  const { data, error } = await supabaseClient
+    .from("user_profiles")
+    .update(metadata)
+    .eq("id", userId)
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export const updateUserProfileNameAndAvatar = async (
   {
     fullName,
@@ -224,18 +246,13 @@ export const updateUserProfileNameAndAvatar = async (
   }
 
   if (isOnboardingFlow) {
-    const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
-      onboardingHasCompletedProfile: true,
-    };
 
-    const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
-      data: updateUserMetadataPayload,
-    });
-
-    if (updateUserMetadataResponse.error) {
+    try {
+      await updateUserProfileMetadata(user.id, { has_completed_profile: true });
+    } catch (e) {
       return {
         status: "error",
-        message: updateUserMetadataResponse.error.message,
+        message: e.message,
       };
     }
 
