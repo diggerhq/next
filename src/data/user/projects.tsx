@@ -9,6 +9,7 @@ import type { CommentWithUser, Enum, SAPayload } from "@/types";
 import { normalizeComment } from "@/utils/comments";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import { PrismaClient } from '@prisma/client';
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 import { getRepoDetails } from "./repos";
@@ -124,6 +125,7 @@ export const createProjectAction = async ({
   const { data: project, error } = await supabaseClient
     .from("projects")
     .insert({
+      id: randomUUID(),
       organization_id: organizationId,
       name,
       slug,
@@ -150,6 +152,7 @@ export const createProjectAction = async ({
 
 
   if (error) {
+    console.log(`could not create project ${name} for org ID: ${organizationId}`, error);
     return {
       status: 'error',
       message: error.message,
