@@ -13,7 +13,7 @@ import type {
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { revalidatePath } from 'next/cache';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { refreshSessionAction } from './session';
 
 export const getOrganizationIdBySlug = async (slug: string) => {
@@ -62,7 +62,7 @@ export const createOrganization = async (
     const supabaseClient = createSupabaseUserServerActionClient();
     const user = await serverGetLoggedInUser();
 
-    const organizationId = uuid();
+    const organizationId = uuidv4();
 
     if (RESTRICTED_SLUG_NAMES.includes(slug)) {
       return { status: 'error', message: 'Slug is restricted' };
@@ -175,7 +175,6 @@ export async function fetchSlimOrganizations() {
   if (error) {
     throw error;
   }
-
   return data || [];
 }
 
@@ -498,6 +497,61 @@ export const getDefaultOrganization = async () => {
   }
 
   return data.default_organization;
+};
+
+//TODO remove, likely not needed
+export const getDefaultOrganizationOrCreate = async () => {
+  const supabaseClient = createSupabaseUserServerComponentClient();
+  const user = await serverGetLoggedInUser();
+
+  try {
+    const defaultOrganizationId = await getDefaultOrganization();
+    if (defaultOrganizationId) {
+      return defaultOrganizationId;
+    }
+  } catch (error) {
+    if (error.code !== 'PGRST116') {
+      throw error;
+    }
+  }
+  // create org
+  const { data: newOrg, error: createError } = await supabaseClient
+    .from('organizations')
+    .insert({ id: uuidv4() })
+    .select()
+    .single();
+
+  if (createError) {
+    console.error('Failed to create default organization', createError);
+    throw createError;
+  }
+  // update private info
+  const { error: privateInfoUpdateError } = await supabaseClient
+    .from('user_private_info')
+    .update({ default_organization: newOrg.id })
+    .eq('id', user.id);
+
+  if (privateInfoUpdateError) {
+    console.error('Failed to update user private info', privateInfoUpdateError);
+    throw privateInfoUpdateError;
+  }
+  // create org membership
+  const { error: membershipError } = await supabaseClient
+    .from('organization_members')
+    .insert({
+      member_id: user.id,
+      organization_id: newOrg.id,
+      member_role: 'owner',
+    })
+    .select()
+    .single();
+
+  if (membershipError) {
+    console.error('Failed to create default organization', membershipError);
+    throw membershipError;
+  }
+
+  return newOrg.id;
 };
 
 export const getDefaultOrganizationId = async () => {

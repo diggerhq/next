@@ -8,31 +8,38 @@ import { UserOnboardingFlow } from "./OnboardingFlow";
 
 async function getDefaultOrganizationOrSet(): Promise<string | null> {
   console.log(`get default organisation`)
-  const [slimOrganizations, defaultOrganizationId] = await Promise.all([
-    fetchSlimOrganizations(),
-    getDefaultOrganization(),
-  ]);
-  console.log('slimOrganizations on onboarding', slimOrganizations);
-  const firstOrganization = slimOrganizations[0];
+  try {
+    const [slimOrganizations, defaultOrganizationId] = await Promise.all([
+      fetchSlimOrganizations(),
+      getDefaultOrganization(),
+    ]);
+    console.log('slimOrganizations on onboarding', slimOrganizations);
+    const firstOrganization = slimOrganizations[0];
 
-  console.log('firstOrganization on onboarding', firstOrganization);
-  if (defaultOrganizationId) {
-    console.log('defaultOrganizationId on onboarding', defaultOrganizationId);
-    return defaultOrganizationId;
-  }
+    console.log('firstOrganization on onboarding', firstOrganization);
+    if (defaultOrganizationId) {
+      console.log('defaultOrganizationId on onboarding', defaultOrganizationId);
+      return defaultOrganizationId;
+    }
 
-  if (!firstOrganization) {
-    console.log('no firstOrganization on onboarding');
+    if (!firstOrganization) {
+      console.log('no firstOrganization on onboarding');
+      return null;
+    }
+
+    // if the user has an organization already for some
+    // reason, because of an invite or for some other reason,
+    // make sure that the default organization is set to the first
+    await setDefaultOrganization(firstOrganization.id);
+    console.log('Set default organization to firstOrganization on onboarding', firstOrganization.id);
+
+    return firstOrganization.id;
+  } catch (error) {
+    // this means that getDefaultOrganization() threw an error (bc fetchSlimOrganizations() always returns)
+    console.log('No default organization on onboarding');
     return null;
   }
 
-  // if the user has an organization already for some
-  // reason, because of an invite or for some other reason,
-  // make sure that the default organization is set to the first
-  await setDefaultOrganization(firstOrganization.id);
-  console.log('set default organization to firstOrganization on onboarding', firstOrganization.id);
-
-  return firstOrganization.id;
 }
 
 //TODO rename / refactor: it also creates profile. Temporary workaround.
