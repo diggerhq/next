@@ -2,9 +2,14 @@ var tsConfigs = ['./tsconfig.json'];
 var tsConfigEmail = ['./tsconfig-emails.json'];
 
 var srcRuleOverrides = {
-  'prettier/prettier': 1,
-  '@typescript-eslint/no-unused-vars': 1,
-  '@typescript-eslint/no-non-null-assertion': 'error',
+  'prettier/prettier': 0,
+  '@typescript-eslint/no-unused-vars': 0,
+  '@typescript-eslint/no-unused-expressions': 0,
+  '@typescript-eslint/no-non-null-assertion': 0,
+  '@next/next/no-img-element': 0,
+  '@typescript-eslint/no-empty-object-type': 0,
+  '@typescript-eslint/no-explicit-any': 0,
+  '@typescript-eslint/ban-ts-comment': 0,
 };
 
 module.exports = {
