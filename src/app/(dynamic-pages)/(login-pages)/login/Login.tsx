@@ -19,6 +19,7 @@ import {
 } from '@/data/auth/auth';
 import { getMaybeInitialOrganizationToRedirectTo } from '@/data/user/organizations';
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
+import { supabaseAnonClient } from '@/supabase-clients/anon/supabaseAnonClient';
 import type { AuthProvider } from '@/types';
 import { PrefetchKind } from 'next/dist/client/components/router-reducer/router-reducer-types';
 import { useRouter } from 'next/navigation';
@@ -43,6 +44,25 @@ export function Login({
       kind: PrefetchKind.AUTO
     })
   })
+
+
+  async function ssoLogin() {
+    const SSO_DOMAIN = process.env.NEXT_PUBLIC_SSO_DOMAIN || ''
+    const { data, error } = await supabaseAnonClient.auth.signInWithSSO({
+      domain: SSO_DOMAIN,
+    });
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    if (data?.url) {
+      // redirect the user to the identity provider's authentication flow
+      window.location.href = data.url;
+      return;
+    } else {
+      alert("Unable to open SSO login page.");
+    }
+  }
 
   const initialOrgRedirectMutation = useSAToastMutation(getMaybeInitialOrganizationToRedirectTo, {
     loadingMessage: 'Loading your dashboard...',
@@ -156,6 +176,7 @@ export function Login({
               <TabsTrigger value="password">Password</TabsTrigger>
               <TabsTrigger value="magic-link">Magic Link</TabsTrigger>
               <TabsTrigger value="social-login">Social Login</TabsTrigger>
+              <TabsTrigger value="sso-login">SSO Login</TabsTrigger>
             </TabsList>
             <TabsContent value="password">
               <Card className="border-none shadow-none">
@@ -211,6 +232,22 @@ export function Login({
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="sso-login">
+              <Card className="border-none shadow-none">
+                <CardHeader className="py-6 px-0">
+                  <CardTitle>Login to Digger</CardTitle>
+                  <CardDescription>
+                    Login with via SSO
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2 p-0">
+                  <button onClick={() => ssoLogin()}>SSO Login</button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+
           </Tabs>
         </div>
       )}

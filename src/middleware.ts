@@ -50,7 +50,6 @@ function shouldOnboardUser(pathname: string, userId: string) {
   const isOnboardingRoute = matchOnboarding(pathname);
   if (!isUnprotectedPage(pathname) && user && !isOnboardingRoute) {
     const userMetadata = authUserMetadataSchema.parse(user.user_metadata);
-    console.log('user metadata:', userMetadata);
     const {
       onboardingHasAcceptedTerms,
       onboardingHasCompletedProfile,
@@ -64,7 +63,6 @@ function shouldOnboardUser(pathname: string, userId: string) {
       return true;
     }
   }
-  console.log('user is onboarded');
   return false;
   */
   return true;
@@ -78,9 +76,18 @@ function shouldOnboardUser(pathname: string, userId: string) {
 /*
 export async function middleware_NEXTBASE_LEGACY(req: NextRequest) {
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient<Database>({ req, res });
+  const supabase = createMiddlewareClient<Database>(
+    { req, res },
+    { supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL },
+  );
+
+  if (req.nextUrl.pathname === '/') {
+    return res;
+  }
+
   const sessionResponse = await supabase.auth.getSession();
   const maybeUser = sessionResponse?.data.session?.user;
+
   if (isLandingPage(req.nextUrl.pathname)) {
     if (maybeUser) {
       //user is logged in, lets validate session and redirect on success

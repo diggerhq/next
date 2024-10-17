@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { UserOnboardingFlow } from "./OnboardingFlow";
 
 async function getDefaultOrganizationOrSet(): Promise<string | null> {
+  console.log(`get default organisation`)
   const [slimOrganizations, defaultOrganizationId] = await Promise.all([
     fetchSlimOrganizations(),
     getDefaultOrganization(),
@@ -36,6 +37,7 @@ async function getDefaultOrganizationOrSet(): Promise<string | null> {
 
 //TODO rename / refactor: it also creates profile. Temporary workaround.
 async function getOnboardingConditions(email: string) {
+
   const [userProfile, defaultOrganizationId] = await Promise.all([
     getUserProfileByEmailOrCreate(email),
     getDefaultOrganizationOrSet(),
@@ -60,6 +62,7 @@ async function OnboardingFlowWrapper({ userEmail }: { userEmail: string }) {
     isUserCreatedThroughOrgInvitation: false,
   })
   const onboardingStatus = dummyMetadata
+
   console.log(onboardingStatus);
   console.log(userEmail);
 

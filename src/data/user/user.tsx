@@ -27,6 +27,7 @@ export async function getIsAppAdmin(): Promise<boolean> {
 }
 
 export const getUserProfile = async (userId: string) => {
+  console.log(`get user profile ${userId}`)
   const supabase = createSupabaseUserServerComponentClient();
   const { data, error } = await supabase
     .from("user_profiles")

@@ -34,6 +34,11 @@ function shouldOnboardUser(pathname: string, userId: string) {
 }
 
 export async function GET(request: NextRequest) {
+  if (process.env.NEXT_PUBLIC_SSO_DOMAIN !== undefined) {
+    return NextResponse.redirect(
+      new URL('/auth/sso-verify', process.env.NEXT_PUBLIC_SITE_URL),
+    );
+  }
   try {
     const user = await serverGetLoggedInUser();
     if (

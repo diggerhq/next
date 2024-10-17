@@ -111,7 +111,7 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                 if (response.status === "success" && response.data) {
                     router.push(`/project/${response.data.slug}`);
                 }
-            },
+            }
         },
     )
 
