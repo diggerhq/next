@@ -8,6 +8,7 @@ import { sendEmail } from "@/utils/api-routes/utils";
 import { toSiteURL } from "@/utils/helpers";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import type { AuthUserMetadata } from "@/utils/zod-schemas/authUserMetadata";
+import { PrismaClient } from '@prisma/client';
 import { renderAsync } from "@react-email/render";
 import ConfirmAccountDeletionEmail from "emails/account-deletion-request";
 import { revalidatePath } from "next/cache";
@@ -28,19 +29,25 @@ export async function getIsAppAdmin(): Promise<boolean> {
 
 export const getUserProfile = async (userId: string) => {
   console.log(`get user profile ${userId}`)
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
+  const prisma = new PrismaClient();
+  try {
+    const data = await prisma.user_profiles.findUnique({
+      where: {
+        id: userId
+      }
+    })
 
-  if (error) {
-    throw error;
+    if (!data) {
+      throw new Error('User profile not found')
+    }
+
+    return data
+  } catch (error) {
+    throw error
+  } finally {
+    await prisma.$disconnect()
   }
-
-  return data;
-};
+}
 
 export const getUserProfileByEmail = async (email: string) => {
   const supabase = createSupabaseUserServerComponentClient();
