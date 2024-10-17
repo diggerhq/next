@@ -8,9 +8,16 @@ import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { serverGetUserType } from '@/utils/server/serverGetUserType';
 import { userRoles } from '@/utils/userTypes';
 import { revalidatePath } from 'next/cache';
-import { createFeedbackAddedToRoadmapUpdatedNotification, createFeedbackPriorityChangedNotification, createFeedbackReceivedCommentNotification, createFeedbackStatusChangedNotification, createFeedbackTypeUpdatedNotification, createFeedbackVisibilityUpdatedNotification, createUpdateFeedbackOpenForCommentsNotification } from './user/notifications';
+import {
+  createFeedbackAddedToRoadmapUpdatedNotification,
+  createFeedbackPriorityChangedNotification,
+  createFeedbackReceivedCommentNotification,
+  createFeedbackStatusChangedNotification,
+  createFeedbackTypeUpdatedNotification,
+  createFeedbackVisibilityUpdatedNotification,
+  createUpdateFeedbackOpenForCommentsNotification,
+} from './user/notifications';
 import { getUserFullName } from './user/user';
-
 
 export async function addCommentToInternalFeedbackThread({
   feedbackId,
@@ -42,7 +49,13 @@ export async function addCommentToInternalFeedbackThread({
      * App admins can comment on all the feedbacks
      * normal user can comment on their own feedback and the one's with open for public
      */
-    if (!(feedbackThread?.open_for_public_discussion || feedbackThread?.user_id == user.id || userRoleType == userRoles.ADMIN)) {
+    if (
+      !(
+        feedbackThread?.open_for_public_discussion ||
+        feedbackThread?.user_id == user.id ||
+        userRoleType == userRoles.ADMIN
+      )
+    ) {
       return {
         status: 'error',
         message: 'This feedback thread is not open for public discussion',
@@ -61,7 +74,7 @@ export async function addCommentToInternalFeedbackThread({
       };
     }
 
-    const userFullName = await getUserFullName(user.id)
+    const userFullName = await getUserFullName(user.id);
 
     await createFeedbackReceivedCommentNotification({
       feedbackId,
@@ -69,7 +82,7 @@ export async function addCommentToInternalFeedbackThread({
       comment: content,
       commenterId: user.id,
       commenterName: userFullName ?? 'User',
-    })
+    });
 
     revalidatePath('/feedback', 'layout');
     revalidatePath(`/feedback/${feedbackId}`, 'layout');
@@ -77,7 +90,6 @@ export async function addCommentToInternalFeedbackThread({
       status: 'success',
       data,
     };
-
   } catch (error) {
     return {
       status: 'error',
@@ -166,7 +178,7 @@ export async function adminUpdateFeedbackStatus({
       .from('internal_feedback_threads')
       .select('user_id, status')
       .eq('id', feedbackId)
-      .single()
+      .single();
 
   if (feedbackThreadError) {
     return {
@@ -177,7 +189,7 @@ export async function adminUpdateFeedbackStatus({
   const { error } = await supabaseAdminClient
     .from('internal_feedback_threads')
     .update({ status })
-    .eq('id', feedbackId)
+    .eq('id', feedbackId);
 
   if (error) {
     return { status: 'error', message: error.message };
@@ -215,7 +227,7 @@ export async function adminUpdateFeedbackType({
       .from('internal_feedback_threads')
       .select('user_id, type')
       .eq('id', feedbackId)
-      .single()
+      .single();
 
   if (feedbackThreadError) {
     return {
@@ -266,7 +278,7 @@ export async function adminUpdateFeedbackPriority({
       .from('internal_feedback_threads')
       .select('user_id, priority')
       .eq('id', feedbackId)
-      .single()
+      .single();
 
   if (feedbackThreadError) {
     return {
@@ -331,8 +343,8 @@ export async function adminToggleFeedbackFromRoadmap({
   await createFeedbackAddedToRoadmapUpdatedNotification({
     feedbackId,
     isInRoadmap,
-    updaterId: user.id
-  })
+    updaterId: user.id,
+  });
 
   revalidatePath('/feedback', 'page');
   revalidatePath(`/feedback/${feedbackId}`, 'page');
@@ -373,8 +385,8 @@ export async function adminToggleFeedbackOpenForComments({
   await createUpdateFeedbackOpenForCommentsNotification({
     feedbackId,
     isOpenForComments,
-    updaterId: user.id
-  })
+    updaterId: user.id,
+  });
 
   revalidatePath('/feedback', 'page');
   revalidatePath(`/feedback/${feedbackId}`, 'page');
@@ -408,8 +420,8 @@ export async function adminToggleFeedbackVisibility({
   await createFeedbackVisibilityUpdatedNotification({
     feedbackId,
     isPubliclyVisible,
-    updaterId: user.id
-  })
+    updaterId: user.id,
+  });
 
   revalidatePath('/feedback', 'page');
   revalidatePath(`/feedback/${feedbackId}`, 'page');
@@ -417,7 +429,13 @@ export async function adminToggleFeedbackVisibility({
   return { status: 'success' };
 }
 
-export async function getFeedbackStakeholdersExceptMentionedUser({ feedbackId, excludedUserId }: { feedbackId: string, excludedUserId?: string }): Promise<string[]> {
+export async function getFeedbackStakeholdersExceptMentionedUser({
+  feedbackId,
+  excludedUserId,
+}: {
+  feedbackId: string;
+  excludedUserId?: string;
+}): Promise<string[]> {
   // return all the user ids that are concerned with the feedback conversation including owner
   // except the one mentioned, the mentioned user could be owner of the feedback thread or the commentator or logged in user
   try {
@@ -430,15 +448,15 @@ export async function getFeedbackStakeholdersExceptMentionedUser({ feedbackId, e
     const feedbackCommentatorsQuery = supabaseClient
       .from('internal_feedback_comments')
       .select('user_id')
-      .eq('thread_id', feedbackId)
+      .eq('thread_id', feedbackId);
 
-    const [feedbackOwnerResult, feedbackCommentatorsResult] = await Promise.all([
-      feedbackOwnerQuery,
-      feedbackCommentatorsQuery
-    ]);
+    const [feedbackOwnerResult, feedbackCommentatorsResult] = await Promise.all(
+      [feedbackOwnerQuery, feedbackCommentatorsQuery],
+    );
 
     if (feedbackOwnerResult.error) throw feedbackOwnerResult.error;
-    if (feedbackCommentatorsResult.error) throw feedbackCommentatorsResult.error;
+    if (feedbackCommentatorsResult.error)
+      throw feedbackCommentatorsResult.error;
 
     const stakeholders = new Set<string>();
 
@@ -446,7 +464,7 @@ export async function getFeedbackStakeholdersExceptMentionedUser({ feedbackId, e
       stakeholders.add(feedbackOwnerResult.data[0].user_id);
     }
 
-    feedbackCommentatorsResult.data.forEach(comment => {
+    feedbackCommentatorsResult.data.forEach((comment) => {
       stakeholders.add(comment.user_id);
     });
 
@@ -456,6 +474,7 @@ export async function getFeedbackStakeholdersExceptMentionedUser({ feedbackId, e
 
     return Array.from(stakeholders);
   } catch (error) {
+    console.log('error in getFeedbackStakeholdersExceptMentionedUser: ', error);
     throw error;
   }
 }
