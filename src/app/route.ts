@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       // Authenticated but not onboarded
       return NextResponse.redirect(toSiteURL('/onboarding'));
     } else {
-      return NextResponse.next();
+      return NextResponse.redirect(toSiteURL('/dashboard'));
     }
   } catch (error) {
     console.log('User not signed in, redirecting to login', error);
