@@ -1,9 +1,6 @@
 // const matchAppAdmin = match('/app_admin_preview/(.*)?');
-import { auth } from '@/auth';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { match } from 'path-to-regexp';
-import { toSiteURL } from './utils/helpers';
-import { serverGetLoggedInUser } from './utils/server/serverGetLoggedInUser';
 
 const onboardingPaths = `/onboarding/(.*)?`;
 // Using a middleware to protect pages from unauthorized access
@@ -31,6 +28,10 @@ const unprotectedPagePrefixes = [
   `/terms`,
   `/waitlist(/.*)?`,
 ];
+
+export function middleware(request: NextRequest) {
+  return NextResponse.next();
+}
 
 function isLandingPage(pathname: string) {
   return pathname === '/';
@@ -125,6 +126,8 @@ export async function middleware_NEXTBASE_LEGACY(req: NextRequest) {
 
 */
 
+/*
+Middleware for Auth.js - but it doesn't work, edge runtime error. Back to route level
 export default auth(async (req) => {
   if (!req.auth) {
     //not authenticated - redirect to login URL defined by Auth.js
@@ -143,6 +146,7 @@ export default auth(async (req) => {
     }
   }
 });
+*/
 
 export const config = {
   matcher: [

@@ -1,11 +1,54 @@
 //import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
 
-import { redirect } from 'next/navigation';
+import { toSiteURL } from '@/utils/helpers';
+import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
+import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  redirect('/dashboard');
+function shouldOnboardUser(pathname: string, userId: string) {
+  /*
+  const matchOnboarding = match(onboardingPaths);
+  const isOnboardingRoute = matchOnboarding(pathname);
+  if (!isUnprotectedPage(pathname) && user && !isOnboardingRoute) {
+    const userMetadata = authUserMetadataSchema.parse(user.user_metadata);
+    console.log('user metadata:', userMetadata);
+    const {
+      onboardingHasAcceptedTerms,
+      onboardingHasCompletedProfile,
+      onboardingHasCreatedOrganization,
+    } = userMetadata;
+    if (
+      !onboardingHasAcceptedTerms ||
+      !onboardingHasCompletedProfile ||
+      !onboardingHasCreatedOrganization
+    ) {
+      return true;
+    }
+  }
+  console.log('user is onboarded');
+  return false;
+  */
+  return true;
+  //TODO figure way to store user metadata (extend user_profile table?)
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const user = await serverGetLoggedInUser();
+    if (
+      shouldOnboardUser(request.nextUrl.pathname, user.id) &&
+      request.nextUrl.pathname !== '/onboarding'
+    ) {
+      // Authenticated but not onboarded
+      return NextResponse.redirect(toSiteURL('/onboarding'));
+    } else {
+      return NextResponse.next();
+    }
+  } catch (error) {
+    console.log('User not signed in, redirecting to login', error);
+    return NextResponse.redirect(toSiteURL('/api/auth/signin'));
+  }
 }
 
 // TODO remove when move to authjs is complete
