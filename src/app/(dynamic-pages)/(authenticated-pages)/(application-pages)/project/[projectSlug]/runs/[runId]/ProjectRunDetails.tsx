@@ -11,6 +11,7 @@ import { useSAToastMutation } from "@/hooks/useSAToastMutation";
 import { ToSnakeCase, ToTitleCase } from "@/lib/utils";
 import { supabaseUserClientComponentClient } from "@/supabase-clients/user/supabaseUserClientComponentClient";
 import { Table } from "@/types";
+import { user_profiles } from "@prisma/client";
 import { DotFilledIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, GitPullRequest, LinkIcon, Loader2, Play, XCircle } from 'lucide-react';
@@ -118,7 +119,7 @@ function RenderContent({
 
 export const ProjectRunDetails: React.FC<{
     run: Table<'digger_runs'>,
-    loggedInUser: Table<'user_profiles'>,
+    loggedInUser: user_profiles,
     approverUser: Table<'user_profiles'> | null,
     triggeredByUser: Table<'user_profiles'> | null,
     isUserOrgAdmin: boolean,

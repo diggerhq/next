@@ -1,8 +1,9 @@
 "use server";
 import { supabaseAdminClient } from "@/supabase-clients/admin/supabaseAdminClient";
-import type { SAPayload, SupabaseFileUploadOptions, Table } from "@/types";
+import type { SAPayload, SupabaseFileUploadOptions } from "@/types";
 import { sendEmail } from "@/utils/api-routes/utils";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
+import { PrismaClient, user_profiles } from "@prisma/client";
 import { renderAsync } from "@react-email/render";
 import type { User } from "@supabase/supabase-js";
 import SignInEmail from "emails/SignInEmail";
@@ -11,21 +12,29 @@ import urlJoin from "url-join";
 import { ensureAppAdmin } from "./security";
 
 export const appAdminGetUserProfile = async (
-  userId: string,
-): Promise<Table<"user_profiles">> => {
+  userId: string
+): Promise<user_profiles> => {
   ensureAppAdmin();
-  const { data, error } = await supabaseAdminClient
-    .from("user_profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
+  const prisma = new PrismaClient();
 
-  if (error) {
-    throw error;
+  try {
+    const data = await prisma.user_profiles.findUnique({
+      where: {
+        id: userId
+      }
+    })
+
+    if (!data) {
+      throw new Error('User profile not found')
+    }
+
+    return data
+  } catch (error) {
+    throw error
+  } finally {
+    await prisma.$disconnect()
   }
-
-  return data;
-};
+}
 
 export const uploadImage = async (
   formData: FormData,
