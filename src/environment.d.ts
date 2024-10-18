@@ -11,7 +11,7 @@ declare global {
       SUPABASE_SERVICE_ROLE_KEY: string;
       SUPABASE_PROJECT_REF: string;
       NEXT_PUBLIC_VERCEL_URL?: string;
-      NEXT_PUBLIC_SITE_URL?: string;
+      ITE_URL?: string;
       SUPABASE_JWT_SECRET: string;
       STRIPE_WEBHOOK_SECRET: string;
       ADMIN_EMAIL: string;

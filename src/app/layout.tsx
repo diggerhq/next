@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: 'Digger',
   description: 'Digger',
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? `https://usenextbase.com`,
+    process.env.SITE_URL ?? `https://usenextbase.com`,
   ),
 };
 
