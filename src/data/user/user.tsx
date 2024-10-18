@@ -9,7 +9,10 @@ import { toSiteURL } from "@/utils/helpers";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import type { AuthUserMetadata } from "@/utils/zod-schemas/authUserMetadata";
 import { PrismaClient, user_profiles } from '@prisma/client';
-import { getUserPendingInvitationsByEmail as userPendingInvitationsByEmailSQL, getUserPendingInvitationsById as userPendingInvitationsByIdSQL } from '@prisma/client/sql';
+import {
+  getUserPendingInvitationsByEmail as userPendingInvitationsByEmailSQL,
+  getUserPendingInvitationsById as userPendingInvitationsByIdSQL
+} from '@prisma/client/sql';
 import { renderAsync } from "@react-email/render";
 import ConfirmAccountDeletionEmail from "emails/account-deletion-request";
 import { revalidatePath } from "next/cache";
