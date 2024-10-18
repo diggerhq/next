@@ -11,6 +11,7 @@ import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import {
     runIdParamSchema
 } from "@/utils/zod-schemas/params";
+import { user_profiles } from "@prisma/client";
 import type { Metadata } from "next";
 import dynamic from 'next/dynamic';
 import { ComponentType, Suspense } from "react";
@@ -28,7 +29,7 @@ type RunDetailPageProps = {
 
 type ProjectRunDetailsProps = {
     run: Table<'digger_runs'>,
-    loggedInUser: Table<'user_profiles'>,
+    loggedInUser: user_profiles,
     isUserOrgAdmin: boolean
     tfOutput: string | null
     workflowRunUrl: string | null
@@ -40,7 +41,6 @@ type ProjectRunDetailsProps = {
     approverUser: Table<'user_profiles'> | null
     triggeredByUser: Table<'user_profiles'> | null
 }
-
 
 
 const DynamicProjectRunDetails = dynamic<ProjectRunDetailsProps>(() =>

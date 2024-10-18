@@ -103,7 +103,7 @@ export function UserSidebarMenu({
       <Separator />
       <div className='px-2 py-2 pb-2'>
         <Link
-          href="/logout"
+          href="/api/auth/signout"
           prefetch={false}
           className={cn(
             'hover:bg-muted rounded-sm',

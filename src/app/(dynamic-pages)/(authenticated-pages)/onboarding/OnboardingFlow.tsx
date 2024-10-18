@@ -11,13 +11,13 @@ import { OrganizationCreation } from "./OrganizationCreation";
 import { ProfileUpdate } from "./ProfileUpdate";
 import { TermsAcceptance } from "./TermsAcceptance";
 
-import type { Table } from "@/types";
 import type { AuthUserMetadata } from "@/utils/zod-schemas/authUserMetadata";
+import { user_profiles } from "@prisma/client";
 
 type FLOW_STATE = "TERMS" | "PROFILE" | "ORGANIZATION" | "JOIN_INVITED_ORG" | "COMPLETE";
 
 type UserOnboardingFlowProps = {
-  userProfile: Table<"user_profiles">;
+  userProfile: user_profiles;
   onboardingStatus: AuthUserMetadata;
   userEmail: string | undefined;
 };

@@ -6,7 +6,7 @@ import {
   uploadPublicUserAvatar,
 } from '@/data/user/user';
 import { useSAToastMutation } from '@/hooks/useSAToastMutation';
-import type { Table } from '@/types';
+import { user_profiles } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ConfirmDeleteAccountDialog } from './ConfirmDeleteAccountDialog';
@@ -15,7 +15,7 @@ export function AccountSettings({
   userProfile,
   userEmail
 }: {
-  userProfile: Table<'user_profiles'>;
+  userProfile: user_profiles;
   userEmail: string | undefined;
 }) {
   const router = useRouter();

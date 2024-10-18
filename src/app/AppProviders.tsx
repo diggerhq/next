@@ -1,5 +1,6 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SessionProvider } from "next-auth/react";
 import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import type React from "react";
 import { Suspense } from "react";
@@ -27,18 +28,20 @@ export function AppProviders({
   return (
     <>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <QueryClientProvider client={queryClient}>
-          {children}
-          <SonnerToaster theme={"light"} />
-          <Suspense>
-            <ProgressBar
-              height="4px"
-              color="#0047ab"
-              options={{ showSpinner: false }}
-              shallowRouting
-            />
-          </Suspense>
-        </QueryClientProvider>
+        <SessionProvider>
+          <QueryClientProvider client={queryClient}>
+            {children}
+            <SonnerToaster theme={"light"} />
+            <Suspense>
+              <ProgressBar
+                height="4px"
+                color="#0047ab"
+                options={{ showSpinner: false }}
+                shallowRouting
+              />
+            </Suspense>
+          </QueryClientProvider>
+        </SessionProvider>
       </ThemeProvider>
     </>
   );

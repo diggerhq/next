@@ -13,10 +13,10 @@ async function fetchData(projectId: string) {
   const [organizationData, maybeTeamData, organizationRole, teamRole] =
     await Promise.all([
       getSlimOrganizationById(projectByIdData.organization_id),
-      projectByIdData.team_id ? getSlimTeamById(projectByIdData.team_id) : null,
+      projectByIdData.team_id ? getSlimTeamById(Number(projectByIdData.team_id)) : null,
       getLoggedInUserOrganizationRole(projectByIdData.organization_id),
       projectByIdData.team_id
-        ? getLoggedInUserTeamRole(projectByIdData.team_id)
+        ? getLoggedInUserTeamRole(Number(projectByIdData.team_id))
         : null,
     ]);
 
