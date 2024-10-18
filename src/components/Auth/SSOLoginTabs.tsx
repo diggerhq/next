@@ -1,4 +1,5 @@
 'use client';
+import { useConfig } from '@/app/AppProviders';
 import { Button } from "@/components/ui/button";
 import { supabaseAnonClient } from '@/supabase-clients/anon/supabaseAnonClient';
 import { useRouter } from 'next/navigation';
@@ -11,10 +12,11 @@ export default function DefaultLoginTabs({
     nextActionType?: string;
 }) {
 
+    const config = useConfig();
     const router = useRouter();
 
     async function ssoLogin() {
-        const SSO_DOMAIN = process.env.NEXT_PUBLIC_SSO_DOMAIN || ''
+        const SSO_DOMAIN = config.SB_SSO_DOMAIN || ''
         const { data, error } = await supabaseAnonClient.auth.signInWithSSO({
             domain: SSO_DOMAIN,
         });
