@@ -42,9 +42,11 @@ function getOnboardingConditions(
 ): { userProfile: any } | PromiseLike<{ userProfile: any }> {
   throw new Error('Function not implemented.');
 }
+
 // TODO remove when move to authjs is complete
 /*
 export async function GET() {
+
   const supabase = createSupabaseUserRouteHandlerClient();
 
   const {

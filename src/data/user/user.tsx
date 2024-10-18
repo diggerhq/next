@@ -31,6 +31,36 @@ export async function getIsAppAdmin(): Promise<boolean> {
   return false;
 }
 
+
+export const createDefaultUserProfile = async (userId: string) => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase.from('user_profiles').insert({
+    id: userId,
+    full_name: '',
+    user_name: '',
+    avatar_url: '',
+  });
+
+  if (error) {
+    throw error
+  }
+
+}
+
+
+export const createDefaultUserPrivateInfo = async (userId: string) => {
+  const supabase = createSupabaseUserServerComponentClient();
+  const { data, error } = await supabase
+    .from('user_private_info')
+    .insert({
+      id: userId,
+    });
+
+  if (error) throw error;
+}
+
+
+
 export const getUserProfile = async (userId: string) => {
   console.log(`get user profile ${userId}`)
   const prisma = new PrismaClient();
