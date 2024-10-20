@@ -32,13 +32,13 @@ export async function GET(request: Request) {
     }
   }
 
-  let redirectTo = '/dashboard';
+  let redirectTo = new URL('/dashboard', process.env.SITE_URL);
 
   if (next) {
     // decode next param
     const decodedNext = decodeURIComponent(next);
     // validate next param
-    redirectTo = decodedNext;
+    redirectTo = new URL(decodedNext, process.env.SITE_URL);
   }
 
   return NextResponse.redirect(redirectTo);
