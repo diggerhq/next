@@ -27,20 +27,18 @@ export async function GET(request: Request) {
       const userId = data.user?.id;
       createDefaultUserProfile(userId!);
       createDefaultUserPrivateInfo(userId!);
-
-      console.log('Session set successfully:', data.session);
     } catch (error) {
       console.error('Error setting session:', error);
     }
   }
 
-  let redirectTo = new URL('/dashboard', requestUrl.origin);
+  let redirectTo = '/dashboard';
 
   if (next) {
     // decode next param
     const decodedNext = decodeURIComponent(next);
     // validate next param
-    redirectTo = new URL(decodedNext, requestUrl.origin);
+    redirectTo = decodedNext;
   }
 
   return NextResponse.redirect(redirectTo);
