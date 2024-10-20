@@ -2,6 +2,7 @@ import {
   createDefaultUserPrivateInfo,
   createDefaultUserProfile,
 } from '@/data/user/user';
+import { toSiteURL } from '@/utils/helpers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
@@ -32,13 +33,13 @@ export async function GET(request: Request) {
     }
   }
 
-  let redirectTo = new URL('/dashboard', process.env.SITE_URL);
+  let redirectTo = toSiteURL('/dashboard');
 
   if (next) {
     // decode next param
     const decodedNext = decodeURIComponent(next);
     // validate next param
-    redirectTo = new URL(decodedNext, process.env.SITE_URL);
+    redirectTo = toSiteURL(decodedNext);
   }
 
   return NextResponse.redirect(redirectTo);
