@@ -26,27 +26,30 @@ async function OrganizationSubscriptionSidebarCard({
 
   const isOrganizationAdmin = userRole === 'admin' || userRole === 'owner'
 
-  switch (normalizedSubscription.type) {
-    case 'bypassed_enterprise_organization':
-      return null;
-    case 'trialing':
-      return <FreeTrialComponent
-        organizationId={organizationId}
-        planName={normalizedSubscription.product.name ?? 'Digger Plan'}
-        daysRemaining={differenceInDays(new Date(normalizedSubscription.trialEnd), new Date())}
-      />
-    case 'active':
-      return null;
-    default:
-      return <>
-        <FreeTrialDialog
-          isOrganizationAdmin={isOrganizationAdmin}
+  if (process.env.NEXT_PUBLIC_HIDE_FREE_TRIAL_DIALOG == "true") {
+    switch (normalizedSubscription.type) {
+      case 'bypassed_enterprise_organization':
+        return null;
+      case 'trialing':
+        return <FreeTrialComponent
           organizationId={organizationId}
-          activeProducts={activeProducts}
-          defaultOpen={true}
+          planName={normalizedSubscription.product.name ?? 'Digger Plan'}
+          daysRemaining={differenceInDays(new Date(normalizedSubscription.trialEnd), new Date())}
         />
-      </>
+      case 'active':
+        return null;
+      default:
+        return <>
+          <FreeTrialDialog
+            isOrganizationAdmin={isOrganizationAdmin}
+            organizationId={organizationId}
+            activeProducts={activeProducts}
+            defaultOpen={true}
+          />
+        </>
+    }
   }
+
 
 }
 
