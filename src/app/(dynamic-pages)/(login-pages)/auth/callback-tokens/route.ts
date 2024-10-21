@@ -31,8 +31,8 @@ export async function GET(request: Request) {
 
       // TODO: find out how user profile and private info are created automatically
       const userId = data.user?.id;
-      createDefaultUserProfile(userId!);
-      createDefaultUserPrivateInfo(userId!);
+      await createDefaultUserProfile(userId!);
+      await createDefaultUserPrivateInfo(userId!);
       const defaultOrgTitle = process.env.DEFAULT_ORG_TITLE || 'digger';
       const defaultOrgSlug = process.env.DEFAULT_ORG_SLUG || 'digger';
 
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
       }
 
       // set meta_data to state that the user has created organisation already so it skips in onboarding screen
-      supabaseAdminClient.auth.admin.updateUserById(userId!, {
+      await supabaseAdminClient.auth.admin.updateUserById(userId!, {
         user_metadata: { onboardingHasCreatedOrganization: true },
       });
     } catch (error) {
