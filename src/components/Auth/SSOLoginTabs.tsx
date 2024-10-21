@@ -16,7 +16,7 @@ export default function DefaultLoginTabs({
     const router = useRouter();
 
     async function ssoLogin() {
-        const SSO_DOMAIN = config.SB_SSO_DOMAIN || ''
+        const SSO_DOMAIN = process.env.NEXT_PUBLIC_SB_SSO_DOMAIN || ''
         const { data, error } = await supabaseAnonClient.auth.signInWithSSO({
             domain: SSO_DOMAIN,
         });

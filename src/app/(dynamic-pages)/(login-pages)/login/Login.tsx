@@ -14,7 +14,7 @@ export function Login({
 
   return (
     <>
-      {config.SB_SSO_DOMAIN ? <SSOLoginTabs></SSOLoginTabs> : <DefaultLoginTabs></DefaultLoginTabs>}
+      {process.env.NEXT_PUBLIC_SB_SSO_DOMAIN ? <SSOLoginTabs></SSOLoginTabs> : <DefaultLoginTabs></DefaultLoginTabs>}
     </>
   );
 }
