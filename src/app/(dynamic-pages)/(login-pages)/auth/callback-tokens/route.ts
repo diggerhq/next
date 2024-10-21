@@ -2,10 +2,6 @@ import {
   createOrganization,
   getOrganizationIdBySlug,
 } from '@/data/user/organizations';
-import {
-  createDefaultUserPrivateInfo,
-  createDefaultUserProfile,
-} from '@/data/user/user';
 import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
 import { toSiteURL } from '@/utils/helpers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
@@ -31,8 +27,8 @@ export async function GET(request: Request) {
 
       // TODO: find out how user profile and private info are created automatically
       const userId = data.user?.id;
-      await createDefaultUserProfile(userId!);
-      await createDefaultUserPrivateInfo(userId!);
+      // await createDefaultUserProfile(userId!);
+      // await createDefaultUserPrivateInfo(userId!);
       const defaultOrgTitle = process.env.DEFAULT_ORG_TITLE || 'digger';
       const defaultOrgSlug = process.env.DEFAULT_ORG_SLUG || 'digger';
 
