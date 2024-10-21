@@ -1,4 +1,8 @@
 import {
+  createOrganization,
+  getOrganizationIdBySlug,
+} from '@/data/user/organizations';
+import {
   createDefaultUserPrivateInfo,
   createDefaultUserProfile,
 } from '@/data/user/user';
@@ -28,6 +32,29 @@ export async function GET(request: Request) {
       const userId = data.user?.id;
       createDefaultUserProfile(userId!);
       createDefaultUserPrivateInfo(userId!);
+      const defaultOrgTitle = process.env.DEFAULT_ORG_TITLE || 'digger';
+      const defaultOrgSlug = process.env.DEFAULT_ORG_SLUG || 'digger';
+
+      // creating the default org and membership
+      try {
+        const orgId = getOrganizationIdBySlug(defaultOrgSlug);
+        const { error: orgMemberErrors } = await supabase
+          .from('organization_members')
+          .insert([
+            {
+              member_id: userId,
+              organization_id: orgId,
+              member_role: 'owner',
+            },
+          ]);
+      } catch (error) {
+        createOrganization(defaultOrgTitle, defaultOrgSlug);
+      }
+
+      // set meta_data to state that the user has created organisation already so it skips in onboarding screen
+      supabase.auth.admin.updateUserById(userId!, {
+        user_metadata: { onboardingHasCreatedOrganization: true },
+      });
     } catch (error) {
       console.error('Error setting session:', error);
     }
