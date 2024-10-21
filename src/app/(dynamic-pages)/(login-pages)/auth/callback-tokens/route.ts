@@ -6,6 +6,7 @@ import {
   createDefaultUserPrivateInfo,
   createDefaultUserProfile,
 } from '@/data/user/user';
+import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
 import { toSiteURL } from '@/utils/helpers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
@@ -37,12 +38,12 @@ export async function GET(request: Request) {
 
       // creating the default org and membership
       try {
-        const orgId = getOrganizationIdBySlug(defaultOrgSlug);
-        const { error: orgMemberErrors } = await supabase
+        const orgId = await getOrganizationIdBySlug(defaultOrgSlug);
+        const { error: orgMemberErrors } = await supabaseAdminClient
           .from('organization_members')
           .insert([
             {
-              member_id: userId,
+              member_id: userId!,
               organization_id: orgId,
               member_role: 'owner',
             },
@@ -52,7 +53,7 @@ export async function GET(request: Request) {
       }
 
       // set meta_data to state that the user has created organisation already so it skips in onboarding screen
-      supabase.auth.admin.updateUserById(userId!, {
+      supabaseAdminClient.auth.admin.updateUserById(userId!, {
         user_metadata: { onboardingHasCreatedOrganization: true },
       });
     } catch (error) {
