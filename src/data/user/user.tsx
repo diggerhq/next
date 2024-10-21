@@ -1,6 +1,7 @@
 "use server";
 import { PRODUCT_NAME } from "@/constants";
 import { generateOrganizationSlug } from "@/lib/utils";
+import { supabaseAdminClient } from "@/supabase-clients/admin/supabaseAdminClient";
 import { createSupabaseUserServerActionClient } from "@/supabase-clients/user/createSupabaseUserServerActionClient";
 import { createSupabaseUserServerComponentClient } from "@/supabase-clients/user/createSupabaseUserServerComponentClient";
 import type { SAPayload, SupabaseFileUploadOptions, Table } from "@/types";
@@ -27,8 +28,7 @@ export async function getIsAppAdmin(): Promise<boolean> {
 
 
 export const createDefaultUserProfile = async (userId: string) => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase.from('user_profiles').insert({
+  const { data, error } = await supabaseAdminClient.from('user_profiles').insert({
     id: userId,
     full_name: '',
     user_name: '',
@@ -43,8 +43,7 @@ export const createDefaultUserProfile = async (userId: string) => {
 
 
 export const createDefaultUserPrivateInfo = async (userId: string) => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdminClient
     .from('user_private_info')
     .insert({
       id: userId,
