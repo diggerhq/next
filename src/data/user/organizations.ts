@@ -49,6 +49,26 @@ export const getOrganizationSlugByOrganizationId = async (
   return data.slug;
 };
 
+export const setUserMetaDataWithOrgCreated = async () => {
+  const supabaseClient = createSupabaseUserServerActionClient();
+  const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
+    onboardingHasCreatedOrganization: true,
+  };
+
+  const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
+    data: updateUserMetadataPayload,
+  });
+
+  if (updateUserMetadataResponse.error) {
+    console.error(
+      'Error updating user metadata:',
+      updateUserMetadataResponse.error,
+    );
+
+    throw updateUserMetadataResponse.error;
+  }
+};
+
 export const createOrganization = async (
   name: string,
   slug: string,
@@ -114,24 +134,7 @@ export const createOrganization = async (
         return { status: 'error', message: updateError.message };
       }
 
-      const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
-        onboardingHasCreatedOrganization: true,
-      };
-
-      const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
-        data: updateUserMetadataPayload,
-      });
-
-      if (updateUserMetadataResponse.error) {
-        console.error(
-          'Error updating user metadata:',
-          updateUserMetadataResponse.error,
-        );
-        return {
-          status: 'error',
-          message: updateUserMetadataResponse.error.message,
-        };
-      }
+      const response = await setUserMetaDataWithOrgCreated();
 
       const refreshSessionResponse = await refreshSessionAction();
       if (refreshSessionResponse.status === 'error') {
@@ -621,7 +624,9 @@ export async function getInitialOrganizationToRedirectTo(): Promise<
   };
 }
 
-export async function getMaybeInitialOrganizationToRedirectTo(): Promise<SAPayload<string | null>> {
+export async function getMaybeInitialOrganizationToRedirectTo(): Promise<
+  SAPayload<string | null>
+> {
   const initialOrganization = await getInitialOrganizationToRedirectTo();
   if (initialOrganization.status === 'error') {
     return {

@@ -1,7 +1,4 @@
-import {
-  createOrganization,
-  getOrganizationIdBySlug,
-} from '@/data/user/organizations';
+import { createOrganization } from '@/data/user/organizations';
 import { supabaseAdminClient } from '@/supabase-clients/admin/supabaseAdminClient';
 import { toSiteURL } from '@/utils/helpers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
@@ -34,7 +31,19 @@ export async function GET(request: Request) {
 
       // creating the default org and membership
       try {
-        const orgId = await getOrganizationIdBySlug(defaultOrgSlug);
+        console.log('finding org: by slug', defaultOrgSlug);
+
+        const { data, error } = await supabaseAdminClient
+          .from('organizations')
+          .select('*')
+          .eq('slug', defaultOrgSlug)
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
+        const orgId = data.id;
         const { error: orgMemberErrors } = await supabaseAdminClient
           .from('organization_members')
           .insert([
@@ -45,13 +54,11 @@ export async function GET(request: Request) {
             },
           ]);
       } catch (error) {
-        createOrganization(defaultOrgTitle, defaultOrgSlug);
+        console.log('could not get orgid or create org membership:', error);
+        createOrganization(defaultOrgTitle, defaultOrgSlug, {
+          isOnboardingFlow: false,
+        });
       }
-
-      // set meta_data to state that the user has created organisation already so it skips in onboarding screen
-      await supabaseAdminClient.auth.admin.updateUserById(userId!, {
-        user_metadata: { onboardingHasCreatedOrganization: true },
-      });
     } catch (error) {
       console.error('Error setting session:', error);
     }
