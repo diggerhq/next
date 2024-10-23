@@ -81,7 +81,7 @@ async function getMagicLink(email: string): Promise<string> {
       properties: { hashed_token },
     } = generateLinkData;
 
-    if (process.env.SITE_URL !== undefined) {
+    if (process.env.NEXT_PUBLIC_SITE_URL !== undefined) {
       // change the origin of the link to the site url
 
       const tokenHash = hashed_token;
@@ -90,7 +90,7 @@ async function getMagicLink(email: string): Promise<string> {
         next: "/dashboard",
       });
 
-      const url = new URL(process.env.SITE_URL);
+      const url = new URL(process.env.NEXT_PUBLIC_SITE_URL);
       url.pathname = `/auth/confirm`;
       url.search = searchParams.toString();
 

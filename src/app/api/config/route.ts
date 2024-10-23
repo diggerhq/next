@@ -7,6 +7,6 @@ export interface Config {
 }
 export async function GET() {
   return NextResponse.json({
-    SITE_URL: process.env.SITE_URL,
+    SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   });
 }
