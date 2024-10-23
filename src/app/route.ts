@@ -4,12 +4,6 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  if (process.env.NEXT_PUBLIC_SSO_DOMAIN !== undefined) {
-    return NextResponse.redirect(
-      new URL('/auth/sso-verify', process.env.NEXT_PUBLIC_SITE_URL),
-    );
-  }
-
   const supabase = createSupabaseUserRouteHandlerClient();
 
   const {
