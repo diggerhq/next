@@ -31,8 +31,6 @@ export async function GET(request: Request) {
 
       // creating the default org and membership
       try {
-        console.log('finding org: by slug', defaultOrgSlug);
-
         const { data, error } = await supabaseAdminClient
           .from('organizations')
           .select('*')
@@ -44,15 +42,24 @@ export async function GET(request: Request) {
         }
 
         const orgId = data.id;
-        const { error: orgMemberErrors } = await supabaseAdminClient
+
+        const { count } = await supabase
           .from('organization_members')
-          .insert([
-            {
-              member_id: userId!,
-              organization_id: orgId,
-              member_role: 'owner',
-            },
-          ]);
+          .select('*', { count: 'exact', head: true })
+          .eq('member_id', userId!)
+          .eq('organization_id', orgId);
+
+        if (count === 0) {
+          const { error: orgMemberErrors } = await supabaseAdminClient
+            .from('organization_members')
+            .insert([
+              {
+                member_id: userId!,
+                organization_id: orgId,
+                member_role: 'owner',
+              },
+            ]);
+        }
       } catch (error) {
         console.log('could not get orgid or create org membership:', error);
         createOrganization(defaultOrgTitle, defaultOrgSlug, {
