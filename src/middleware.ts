@@ -78,8 +78,11 @@ export async function middleware(req: NextRequest) {
     { supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL },
   );
 
-  if (req.nextUrl.pathname === '/') {
-    return res;
+  if (
+    process.env.NEXT_PUBLIC_SSO_DOMAIN !== undefined &&
+    req.nextUrl.pathname === '/'
+  ) {
+    return NextResponse.redirect(toSiteURL('/auth/sso-verify'));
   }
 
   const sessionResponse = await supabase.auth.getSession();
