@@ -1,6 +1,7 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
+      NEXT_PUBLIC_SKIP_ORG_CREATION: string;
       NEXT_PUBLIC_SUPABASE_URL: string;
       NEXT_PUBLIC_SUPABASE_ANON_KEY: string;
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: string;
@@ -11,7 +12,7 @@ declare global {
       SUPABASE_SERVICE_ROLE_KEY: string;
       SUPABASE_PROJECT_REF: string;
       NEXT_PUBLIC_VERCEL_URL?: string;
-      NEXT_PUBLIC_SITE_URL?: string;
+      ITE_URL?: string;
       SUPABASE_JWT_SECRET: string;
       STRIPE_WEBHOOK_SECRET: string;
       ADMIN_EMAIL: string;

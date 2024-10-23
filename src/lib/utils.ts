@@ -42,17 +42,18 @@ export const getPricingCardWidth = (count: number) => {
   return 'md:w-80 lg:w-96'; // Fixed width for overflow cases
 };
 
-export const isLocalEnvironment =
-  process.env.NEXT_PUBLIC_SITE_URL?.includes('localhost');
+export const isLocalEnvironment = process.env.SITE_URL?.includes('localhost');
 
-
-export const generateSlugWithNanoId = (title: string, {
-  withNanoIdSuffix = true,
-  prefix = ''
-}: {
-  withNanoIdSuffix?: boolean
-  prefix?: string
-} = {}) => {
+export const generateSlugWithNanoId = (
+  title: string,
+  {
+    withNanoIdSuffix = true,
+    prefix = '',
+  }: {
+    withNanoIdSuffix?: boolean;
+    prefix?: string;
+  } = {},
+) => {
   const slug = slugify(title, {
     lower: true,
     strict: true,
@@ -60,11 +61,11 @@ export const generateSlugWithNanoId = (title: string, {
   });
   const withSuffix = withNanoIdSuffix ? `${slug}-${nanoid()}` : slug;
   return prefix ? `${prefix}-${withSuffix}` : withSuffix;
-}
+};
 
 export const generateOrganizationSlug = (title: string) => {
   return generateSlugWithNanoId(title, {
     prefix: 'o',
     withNanoIdSuffix: true,
   });
-}
+};

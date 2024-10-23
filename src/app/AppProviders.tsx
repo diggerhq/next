@@ -2,13 +2,17 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import type React from "react";
-import { Suspense } from "react";
+import { createContext, Suspense, useContext, useEffect, useState } from "react";
 import { Toaster as SonnerToaster } from "sonner";
 import { ThemeProvider } from "./ThemeProvider";
+import { Config } from "./api/config/route";
 import { useMyReportWebVitals } from "./reportWebVitals";
 
 // Create a client
 const queryClient = new QueryClient();
+
+const ConfigContext = createContext<Config>({});
+
 
 /**
  * This is a wrapper for the app that provides the supabase client, the router event wrapper
@@ -23,12 +27,22 @@ export function AppProviders({
 }: {
   children: React.ReactNode;
 }) {
+  const [config, setConfig] = useState({});
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(data => setConfig(data));
+  }, []);
+
   useMyReportWebVitals();
   return (
     <>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <ConfigContext.Provider value={config}>
+            {children}
+          </ConfigContext.Provider>
           <SonnerToaster theme={"light"} />
           <Suspense>
             <ProgressBar
@@ -43,3 +57,6 @@ export function AppProviders({
     </>
   );
 }
+
+export const useConfig = () => useContext(ConfigContext);
+

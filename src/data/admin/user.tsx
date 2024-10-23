@@ -119,7 +119,7 @@ export async function appAdminGetUserImpersonationUrl(userId: string): Promise<S
     };
   }
 
-  if (process.env.NEXT_PUBLIC_SITE_URL !== undefined) {
+  if (process.env.SITE_URL !== undefined) {
     // change the origin of the link to the site url
     const {
       properties: { hashed_token },
@@ -131,7 +131,7 @@ export async function appAdminGetUserImpersonationUrl(userId: string): Promise<S
       next: "/dashboard",
     });
 
-    const checkAuthUrl = new URL(process.env.NEXT_PUBLIC_SITE_URL);
+    const checkAuthUrl = new URL(process.env.SITE_URL);
     checkAuthUrl.pathname = `/auth/confirm`;
     checkAuthUrl.search = searchParams.toString();
 
@@ -192,7 +192,7 @@ export async function sendLoginLinkAction(email: string): Promise<SAPayload> {
       properties: { hashed_token },
     } = generateLinkData;
 
-    if (process.env.NEXT_PUBLIC_SITE_URL !== undefined) {
+    if (process.env.SITE_URL !== undefined) {
       // change the origin of the link to the site url
 
       const tokenHash = hashed_token;
@@ -201,7 +201,7 @@ export async function sendLoginLinkAction(email: string): Promise<SAPayload> {
         next: "/dashboard",
       });
 
-      const url = new URL(process.env.NEXT_PUBLIC_SITE_URL);
+      const url = new URL(process.env.SITE_URL);
       url.pathname = `/auth/confirm`;
       url.search = searchParams.toString();
 
