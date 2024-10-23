@@ -11,5 +11,9 @@ export const supabaseAnonClient = createClient<Database>(
     global: {
       fetch,
     },
+    auth: {
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+    },
   },
 );
