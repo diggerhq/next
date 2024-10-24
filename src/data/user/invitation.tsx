@@ -12,11 +12,6 @@ import TeamInvitationEmail from "emails/TeamInvitation";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getInvitationOrganizationDetails } from "./elevatedQueries";
-import {
-  createAcceptedOrgInvitationNotification,
-  createNotification,
-} from "./notifications";
-import { getUserProfile } from "./user";
 
 // This function allows an application admin with service_role
 // to check if a user with a given email exists in the auth.users table
@@ -211,14 +206,6 @@ export async function createInvitationHandler({
     from: process.env.ADMIN_EMAIL,
   });
 
-  // send notification
-  await createNotification(inviteeUserDetails.userId, {
-    inviterFullName: inviterName,
-    organizationId: organizationId,
-    organizationName: organizationResponse.data.title,
-    invitationId: invitationResponse.data.id,
-  });
-
   revalidatePath("/[organizationSlug]/settings/members", "layout");
 
   return { status: 'success', data: invitationResponse.data };
@@ -247,20 +234,6 @@ export async function acceptInvitationAction(
   if (invitationResponse.error) {
     return { status: 'error', message: invitationResponse.error.message };
   }
-
-
-  const userProfile = await getUserProfile(user.id);
-
-  await createAcceptedOrgInvitationNotification(
-    invitationResponse.data?.inviter_user_id,
-    {
-      organizationId: invitationResponse.data.organization_id,
-      inviteeFullName: userProfile.full_name ?? `User ${userProfile.id}`,
-    },
-  );
-
-
-
 
   revalidatePath("/", "layout");
 

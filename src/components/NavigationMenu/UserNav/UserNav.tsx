@@ -1,5 +1,4 @@
 import { AppAdminSidebarLink } from '@/components/AppAdminSidebarLink';
-import { Notifications } from '@/components/NavigationMenu/Notifications';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { getUserProfile } from '@/data/user/user';
 import { getUserAvatarUrl } from '@/utils/helpers';
@@ -19,7 +18,6 @@ export async function UserNav() {
   return (
     <>
       <ThemeToggle />
-      <Notifications userId={user.id} />
 
       <UserNavPopover
         avatarUrl={getUserAvatarUrl({

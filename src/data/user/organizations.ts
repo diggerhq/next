@@ -106,7 +106,7 @@ export const createOrganization = async (
     // Why are we checking for onboarding deep in the data layer? Bad code.
     if (isOnboardingFlow) {
       const { error: updateError } = await supabaseClient
-        .from('user_private_info')
+        .from('user_profiles')
         .update({ default_organization: organizationId })
         .eq('id', user.id);
 
@@ -480,77 +480,23 @@ export const getDefaultOrganization = async () => {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const user = await serverGetLoggedInUser();
   const { data, error } = await supabaseClient
-    .from('user_private_info')
+    .from('user_profiles')
     .select('id, default_organization')
     .eq('id', user.id)
     .single();
 
   if (error) {
+    console.error(`Failed to get default organisation for user ${user.id}`);
     throw error;
   }
 
   return data.default_organization;
 };
 
-//TODO remove, likely not needed
-export const getDefaultOrganizationOrCreate = async () => {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const user = await serverGetLoggedInUser();
-
-  try {
-    const defaultOrganizationId = await getDefaultOrganization();
-    if (defaultOrganizationId) {
-      return defaultOrganizationId;
-    }
-  } catch (error) {
-    if (error.code !== 'PGRST116') {
-      throw error;
-    }
-  }
-  // create org
-  const { data: newOrg, error: createError } = await supabaseClient
-    .from('organizations')
-    .insert({ id: uuidv4() })
-    .select()
-    .single();
-
-  if (createError) {
-    console.error('Failed to create default organization', createError);
-    throw createError;
-  }
-  // update private info
-  const { error: privateInfoUpdateError } = await supabaseClient
-    .from('user_private_info')
-    .update({ default_organization: newOrg.id })
-    .eq('id', user.id);
-
-  if (privateInfoUpdateError) {
-    console.error('Failed to update user private info', privateInfoUpdateError);
-    throw privateInfoUpdateError;
-  }
-  // create org membership
-  const { error: membershipError } = await supabaseClient
-    .from('organization_members')
-    .insert({
-      member_id: user.id,
-      organization_id: newOrg.id,
-      member_role: 'owner',
-    })
-    .select()
-    .single();
-
-  if (membershipError) {
-    console.error('Failed to create default organization', membershipError);
-    throw membershipError;
-  }
-
-  return newOrg.id;
-};
-
 export const getDefaultOrganizationId = async () => {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const { data, error } = await supabaseClient
-    .from('user_private_info')
+    .from('user_profiles')
     .select('default_organization')
     .single();
 
@@ -572,7 +518,7 @@ export async function setDefaultOrganization(
   const user = await serverGetLoggedInUser();
 
   const { error: updateError } = await supabaseClient
-    .from('user_private_info')
+    .from('user_profiles')
     .update({ default_organization: organizationId })
     .eq('id', user.id);
 

@@ -47,20 +47,6 @@ export const createDefaultUserProfile = async (userId: string) => {
 
 }
 
-
-export const createDefaultUserPrivateInfo = async (userId: string) => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from('user_private_info')
-    .insert({
-      id: userId,
-    });
-
-  if (error) throw error;
-}
-
-
-
 export const getUserProfile = async (userId: string) => {
   console.log(`get user profile ${userId}`)
   const prisma = new PrismaClient();
