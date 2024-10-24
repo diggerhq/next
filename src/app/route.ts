@@ -1,49 +1,32 @@
-//import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
-
 import { getUserProfileByEmail } from '@/data/user/user';
 import { toSiteURL } from '@/utils/helpers';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import { NextRequest, NextResponse } from 'next/server';
+import { redirect } from 'next/navigation';
+import { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-async function shouldOnboardUser(pathname: string, email: string) {
+async function isUserOnboarded(email: string) {
   const userProfile = await getUserProfileByEmail(email);
   return (
-    !userProfile.has_completed_profile || !userProfile.has_created_organization
+    userProfile.has_completed_profile && userProfile.has_created_organization
   );
 }
 
 export async function GET(request: NextRequest) {
-  if (process.env.NEXT_PUBLIC_SSO_DOMAIN !== undefined) {
-    return NextResponse.redirect(
-      new URL('/auth/sso-verify', process.env.NEXT_PUBLIC_SITE_URL),
-    );
-  }
-  try {
-    const user = await serverGetLoggedInUser();
-    if (
-      (await shouldOnboardUser(request.nextUrl.pathname, user.email)) &&
-      request.nextUrl.pathname !== '/onboarding'
-    ) {
-      // Authenticated but not onboarded
-      return NextResponse.redirect(toSiteURL('/onboarding'));
-    } else {
-      return NextResponse.redirect(toSiteURL('/dashboard'));
-    }
-  } catch (error) {
-    console.log('User not signed in, redirecting to login', error);
-    return NextResponse.redirect(toSiteURL('/api/auth/signin'));
+  const user = await serverGetLoggedInUser();
+  const isOnboarded = await isUserOnboarded(user.email);
+  const pathname = request.nextUrl.pathname;
+  if (!isOnboarded && pathname !== '/onboarding') {
+    redirect(toSiteURL('/onboarding'));
+  } else if (isOnboarded) {
+    redirect(toSiteURL('/dashboard'));
   }
 }
 
-function getOnboardingConditions(
-  email: string,
-): { userProfile: any } | PromiseLike<{ userProfile: any }> {
-  throw new Error('Function not implemented.');
-}
+// No need to check for login - it is done in the middleware
+// Preserving commented out from Nextbase as-is for future reference, just in case
 
-// TODO remove when move to authjs is complete
 /*
 export async function GET() {
 

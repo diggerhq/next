@@ -39,8 +39,6 @@ export async function getSlimProjectById(projectId: string) {
     }
 
     return project;
-  } catch (error) {
-    throw error;
   } finally {
     await prisma.$disconnect();
   }

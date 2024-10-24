@@ -39,7 +39,7 @@ export const verifySession = async () => {
   */
   const session = await auth();
   if (!session?.user) {
-    redirect('/login'); //TODO update route - there's no longer embedded login pager. preserving as-is for now
+    redirect('/api/auth/signin');
   }
   return session?.user as AuthUser;
 };

@@ -29,8 +29,6 @@ export const appAdminGetUserProfile = async (
     }
 
     return data
-  } catch (error) {
-    throw error
   } finally {
     await prisma.$disconnect()
   }

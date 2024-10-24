@@ -76,8 +76,6 @@ export const getUserProfile = async (userId: string) => {
     }
 
     return data
-  } catch (error) {
-    throw error
   } finally {
     await prisma.$disconnect()
   }
@@ -98,8 +96,6 @@ export const getUserProfileByEmail = async (email: string) => {
     }
 
     return data
-  } catch (error) {
-    throw error
   } finally {
     await prisma.$disconnect()
   }
@@ -261,8 +257,6 @@ export async function updateUserProfileMetadata(userId: string, metadata: {
     })
 
     return data
-  } catch (error) {
-    throw error
   } finally {
     await prisma.$disconnect()
   }

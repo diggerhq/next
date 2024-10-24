@@ -1,5 +1,4 @@
 // const matchAppAdmin = match('/app_admin_preview/(.*)?');
-import { NextRequest, NextResponse } from 'next/server';
 import { match } from 'path-to-regexp';
 
 const onboardingPaths = `/onboarding/(.*)?`;
@@ -29,9 +28,7 @@ const unprotectedPagePrefixes = [
   `/waitlist(/.*)?`,
 ];
 
-export function middleware(request: NextRequest) {
-  return NextResponse.next();
-}
+export { auth as middleware } from '@/auth';
 
 function isLandingPage(pathname: string) {
   return pathname === '/';
