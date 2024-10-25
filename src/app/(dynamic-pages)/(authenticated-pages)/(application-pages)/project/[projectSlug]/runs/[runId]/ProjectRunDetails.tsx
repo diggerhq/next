@@ -6,19 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { approveRun, rejectRun } from "@/data/user/runs";
+import { approveRun, getOutputLogsAndWorkflowURLFromBatchId, getRunById, getTFOutputAndWorkflowURLFromBatchId, rejectRun } from "@/data/user/runs";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
 import { ToSnakeCase, ToTitleCase } from "@/lib/utils";
-import { supabaseUserClientComponentClient } from "@/supabase-clients/user/supabaseUserClientComponentClient";
 import { Table } from "@/types";
 import { user_profiles } from "@prisma/client";
 import { DotFilledIcon } from "@radix-ui/react-icons";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, GitPullRequest, LinkIcon, Loader2, Play, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { statusColors } from "../../(specific-project-pages)/AllRunsTable";
 
 
@@ -166,71 +166,51 @@ export const ProjectRunDetails: React.FC<{
             }
         );
 
-        const [run, setRun] = useState(initialRun);
+        const { data: run } = useQuery(
+            [`run-${initialRun.id}`, initialRun.id],
+            async () => {
+                return getRunById(initialRun.id);
+            },
+            {
+                refetchInterval: 5000,
+                initialData: initialRun
+            }
+        );
+
+        useQuery(
+            [`batch-${planBatchId}`, planBatchId],
+            async () => {
+                const data = await getTFOutputAndWorkflowURLFromBatchId(planBatchId);
+                setTfOutput(data.terraform_output);
+                setWorkflowRunUrl(data.workflow_run_url);
+                return data;
+            },
+            {
+                refetchInterval: 5000,
+                initialData: { terraform_output: initialTfOutput, workflow_run_url: initialWorkflowRunUrl }
+            }
+        );
+
+        useQuery(
+            [`batch-${applyBatchId}`, applyBatchId],
+            async () => {
+                const data = await getOutputLogsAndWorkflowURLFromBatchId(applyBatchId);
+                setApplyTerraformOutput(data.terraform_output);
+                setApplyWorkflowRunUrl(data.workflow_run_url);
+                return data;
+            },
+            {
+                refetchInterval: 5000,
+                initialData: { terraform_output: initialTfOutput, workflow_run_url: initialWorkflowRunUrl }
+            }
+        );
+
         const [tfOutput, setTfOutput] = useState(initialTfOutput);
         const [workflowRunUrl, setWorkflowRunUrl] = useState(initialWorkflowRunUrl);
         const [applyTerraformOutput, setApplyTerraformOutput] = useState(initialApplyTerraformOutput);
         const [applyWorkflowRunUrl, setApplyWorkflowRunUrl] = useState(initialApplyWorkflowRunUrl);
 
         const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-
-        useEffect(() => {
-            const channel = supabaseUserClientComponentClient
-                .channel(`digger_run_${run.id}`)
-                .on(
-                    'postgres_changes',
-                    {
-                        event: 'UPDATE',
-                        schema: 'public',
-                        table: 'digger_runs',
-                        filter: `id=eq.${run.id}`
-                    },
-                    (payload) => {
-                        setRun(payload.new as Table<'digger_runs'>);
-                    }
-                )
-                .subscribe();
-
-            const jobChannel = supabaseUserClientComponentClient
-                .channel(`digger_jobs_${run.id}`)
-                .on(
-                    'postgres_changes',
-                    {
-                        event: 'UPDATE',
-                        schema: 'public',
-                        table: 'digger_jobs',
-                        filter: `batch_id=eq.${planBatchId}`
-                    },
-                    (payload) => {
-                        const updatedJob = payload.new as Table<'digger_jobs'>;
-                        setTfOutput(updatedJob.terraform_output || null);
-                        setWorkflowRunUrl(updatedJob.workflow_run_url || null);
-                    }
-                )
-                .on(
-                    'postgres_changes',
-                    {
-                        event: 'UPDATE',
-                        schema: 'public',
-                        table: 'digger_jobs',
-                        filter: `batch_id=eq.${applyBatchId}`
-                    },
-                    (payload) => {
-                        const updatedJob = payload.new as Table<'digger_jobs'>;
-                        setApplyTerraformOutput(updatedJob.terraform_output || null);
-                        setApplyWorkflowRunUrl(updatedJob.workflow_run_url || null);
-                    }
-                )
-                .subscribe();
-
-            return () => {
-                supabaseUserClientComponentClient.removeChannel(channel);
-                supabaseUserClientComponentClient.removeChannel(jobChannel);
-            };
-
-
-        }, [run.id, run.plan_stage_id, run.apply_stage_id]);
 
         return (
             <div className="flex rounded-lg bg-background border overflow-hidden h-[calc(100vh-220px)] w-full">

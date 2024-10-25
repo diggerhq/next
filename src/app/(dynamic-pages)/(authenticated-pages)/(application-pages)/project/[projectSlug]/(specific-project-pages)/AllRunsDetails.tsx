@@ -3,10 +3,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getRunsByProjectId } from "@/data/user/runs";
-import { supabaseUserClientComponentClient } from "@/supabase-clients/user/supabaseUserClientComponentClient";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
 import { AllRunsTable } from "./AllRunsTable";
 
 export default function AllRunsDetails({
@@ -17,49 +15,16 @@ export default function AllRunsDetails({
     projectSlug: string;
 }) {
 
-    const { data: runs, refetch, isLoading } = useQuery(
+    const { data: runs, isLoading } = useQuery(
         ['runs', projectId],
         async () => {
             return getRunsByProjectId(projectId);
         },
         {
             refetchOnWindowFocus: false,
+            refetchInterval: 10000,
         }
     );
-
-    useEffect(() => {
-        const channel = supabaseUserClientComponentClient
-            .channel('digger_runs_realtime')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'digger_runs',
-                    filter: `project_id=eq.${projectId}`
-                },
-                (payload) => {
-                    refetch();
-                }
-            )
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'digger_runs',
-                    filter: `project_id=eq.${projectId}`
-                },
-                (payload) => {
-                    refetch();
-                },
-            )
-            .subscribe();
-
-        return () => {
-            channel.unsubscribe();
-        };
-    }, [projectId, refetch]);
 
     if (isLoading) {
         return (
