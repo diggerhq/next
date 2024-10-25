@@ -201,7 +201,7 @@ export const ProjectRunDetails: React.FC<{
             },
             {
                 refetchInterval: 5000,
-                initialData: { terraform_output: initialTfOutput, workflow_run_url: initialWorkflowRunUrl }
+                initialData: { terraform_output: initialApplyTerraformOutput, workflow_run_url: initialApplyWorkflowRunUrl }
             }
         );
 
