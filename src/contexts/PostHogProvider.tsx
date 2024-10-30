@@ -26,7 +26,7 @@ const useInitPostHog = () => {
     if (user && hasInit) {
       posthog.identify(user.id, {
         email: user.email,
-        name: user.user_metadata.full_name,
+        name: user.name,
       });
     }
   }, [user, hasInit]);

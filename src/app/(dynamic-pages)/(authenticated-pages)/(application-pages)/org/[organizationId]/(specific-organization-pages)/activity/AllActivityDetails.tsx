@@ -3,10 +3,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAllRunsByOrganizationId } from "@/data/user/runs";
-import { supabaseUserClientComponentClient } from "@/supabase-clients/user/supabaseUserClientComponentClient";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
 import { AllActivityTable } from "./AllActivityTable";
 
 export default function AllActivityDetails({
@@ -16,59 +14,16 @@ export default function AllActivityDetails({
     organizationId: string;
     allowedProjectIdsForUser: string[];
 }) {
-    const { data: runs, refetch, isLoading } = useQuery(
+    const { data: runs, isLoading } = useQuery(
         ['runs', organizationId],
         async () => {
             return getAllRunsByOrganizationId(organizationId);
         },
         {
             refetchOnWindowFocus: false,
+            refetchInterval: 10000,
         }
     );
-
-    useEffect(() => {
-        const channels: ReturnType<typeof supabaseUserClientComponentClient.channel>[] = [];
-
-        if (runs) {
-            const projectIds = Array.from(new Set(runs.map(run => run.project_id)));
-
-            projectIds.forEach(projectId => {
-                const channel = supabaseUserClientComponentClient
-                    .channel(`digger_runs_realtime_${projectId}`)
-                    .on(
-                        'postgres_changes',
-                        {
-                            event: 'INSERT',
-                            schema: 'public',
-                            table: 'digger_runs',
-                            filter: `project_id=eq.${projectId}`
-                        },
-                        (payload) => {
-                            refetch();
-                        }
-                    )
-                    .on(
-                        'postgres_changes',
-                        {
-                            event: 'UPDATE',
-                            schema: 'public',
-                            table: 'digger_runs',
-                            filter: `project_id=eq.${projectId}`
-                        },
-                        (payload) => {
-                            refetch();
-                        },
-                    )
-                    .subscribe();
-
-                channels.push(channel);
-            });
-        }
-
-        return () => {
-            channels.forEach(channel => channel.unsubscribe());
-        };
-    }, [runs, refetch]);
 
     if (isLoading) {
         return (

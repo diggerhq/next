@@ -1,0 +1,5 @@
+ALTER TABLE user_profiles
+ADD COLUMN hasAcceptedTerms BOOLEAN DEFAULT TRUE,
+ADD COLUMN hasCompletedProfile BOOLEAN DEFAULT FALSE,
+ADD COLUMN hasCreatedOrganization BOOLEAN DEFAULT FALSE,
+ADD COLUMN isCreatedThroughOrgInvitation BOOLEAN DEFAULT FALSE;

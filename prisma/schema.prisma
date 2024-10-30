@@ -1,0 +1,767 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["typedSql"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model account_delete_tokens {
+  token         String        @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       String        @id @db.Uuid
+  user_profiles user_profiles @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model billing_bypass_organizations {
+  id            String        @id @db.Uuid
+  created_at    DateTime      @default(now()) @db.Timestamptz(6)
+  organizations organizations @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model chats {
+  id         String   @id
+  user_id    String?  @db.Uuid
+  payload    Json?
+  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  project_id String   @db.Uuid
+  projects   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "public_chats_project_id_fkey")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model customers {
+  stripe_customer_id String        @unique @db.VarChar
+  organization_id    String        @db.Uuid
+  organizations      organizations @relation(fields: [organization_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([stripe_customer_id, organization_id])
+  @@index([organization_id], map: "customers_organization_id_index")
+  @@index([stripe_customer_id], map: "customers_stripe_customer_id_index")
+}
+
+model digger_batches {
+  id                     String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pr_number              BigInt?
+  status                 Int                 @db.SmallInt
+  branch_name            String
+  digger_config          String?
+  github_installation_id BigInt?
+  repo_full_name         String
+  repo_owner             String
+  repo_name              String
+  batch_type             String
+  comment_id             BigInt?
+  source_details         Bytes?
+  vcs                    String?
+  gitlab_project_id      BigInt?
+  organization_id        String?             @db.Uuid
+  event_type             String?
+  digger_jobs            digger_jobs[]
+  digger_run_stages      digger_run_stages[]
+}
+
+model digger_job_parent_links {
+  id                   BigInt    @id @default(autoincrement())
+  created_at           DateTime? @db.Timestamptz(6)
+  updated_at           DateTime? @db.Timestamptz(6)
+  deleted_at           DateTime? @db.Timestamptz(6)
+  digger_job_id        String?
+  parent_digger_job_id String?
+
+  @@index([deleted_at], map: "idx_digger_job_parent_links_deleted_at")
+}
+
+model digger_job_summaries {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at        DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime      @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime?     @db.Timestamptz(6)
+  resources_created BigInt        @default(0)
+  resources_deleted BigInt        @default(0)
+  resources_updated BigInt        @default(0)
+  digger_jobs       digger_jobs[]
+
+  @@index([deleted_at], map: "idx_digger_job_summaries_deleted_at")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model digger_job_tokens {
+  id              BigInt         @id(map: "job_tokens_pkey") @default(autoincrement())
+  created_at      DateTime?      @db.Timestamptz(6)
+  updated_at      DateTime?      @db.Timestamptz(6)
+  deleted_at      DateTime?      @db.Timestamptz(6)
+  value           String?
+  expiry          DateTime?      @db.Timestamptz(6)
+  type            String?
+  organisation_id String?        @db.Uuid
+  organizations   organizations? @relation(fields: [organisation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_jt_organisation_id")
+
+  @@index([deleted_at], map: "idx_job_tokens_deleted_at")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model digger_jobs {
+  id                    String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at            DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime              @default(now()) @db.Timestamptz(6)
+  deleted_at            DateTime?             @db.Timestamptz(6)
+  digger_job_id         String
+  status                Int                   @db.SmallInt
+  batch_id              String                @db.Uuid
+  status_updated_at     DateTime?             @db.Timestamptz(6)
+  digger_job_summary_id String?               @db.Uuid
+  workflow_file         String?
+  workflow_run_url      String?
+  plan_footprint        Bytes?
+  pr_comment_url        String?
+  terraform_output      String?
+  job_spec              Bytes?
+  variables_spec        Bytes?
+  digger_batches        digger_batches        @relation(fields: [batch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_digger_jobs_batch")
+  digger_job_summaries  digger_job_summaries? @relation(fields: [digger_job_summary_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_digger_jobs_digger_job_summary")
+
+  @@index([batch_id])
+  @@index([batch_id], map: "idx_digger_job_id")
+  @@index([deleted_at], map: "idx_digger_jobs_deleted_at")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model digger_locks {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime      @default(now()) @db.Timestamptz(6)
+  deleted_at      DateTime?     @db.Timestamptz(6)
+  resource        String
+  lock_id         BigInt
+  organization_id String        @db.Uuid
+  organizations   organizations @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_digger_locks_organization")
+
+  @@index([resource], map: "idx_digger_locked_resource")
+  @@index([deleted_at], map: "idx_digger_locks_deleted_at")
+}
+
+model digger_run_queue_items {
+  id            BigInt    @id @default(autoincrement())
+  created_at    DateTime? @db.Timestamptz(6)
+  updated_at    DateTime? @db.Timestamptz(6)
+  deleted_at    DateTime? @db.Timestamptz(6)
+  digger_run_id String?   @db.Uuid
+  project_id    String?   @db.Uuid
+
+  @@index([deleted_at], map: "idx_digger_run_queue_items_deleted_at")
+}
+
+model digger_run_stages {
+  id                                                        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at                                                DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at                                                DateTime       @default(now()) @db.Timestamptz(6)
+  deleted_at                                                DateTime?      @db.Timestamptz(6)
+  batch_id                                                  String         @db.Uuid
+  digger_batches                                            digger_batches @relation(fields: [batch_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_digger_run_stages_batch")
+  digger_runs_digger_runs_apply_stage_idTodigger_run_stages digger_runs[]  @relation("digger_runs_apply_stage_idTodigger_run_stages")
+  digger_runs_digger_runs_plan_stage_idTodigger_run_stages  digger_runs[]  @relation("digger_runs_plan_stage_idTodigger_run_stages")
+
+  @@index([batch_id], map: "idx_digger_run_batch_id")
+  @@index([deleted_at], map: "idx_digger_run_stages_deleted_at")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model digger_runs {
+  id                                                              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at                                                      DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at                                                      DateTime           @default(now()) @db.Timestamptz(6)
+  deleted_at                                                      DateTime?          @db.Timestamptz(6)
+  triggertype                                                     String
+  pr_number                                                       BigInt?
+  status                                                          String
+  commit_id                                                       String
+  digger_config                                                   String?
+  github_installation_id                                          BigInt?
+  repo_id                                                         BigInt             @default(autoincrement())
+  run_type                                                        String
+  plan_stage_id                                                   String?            @db.Uuid
+  apply_stage_id                                                  String?            @db.Uuid
+  project_name                                                    String?
+  is_approved                                                     Boolean?
+  approval_author                                                 String?
+  approval_date                                                   DateTime?          @db.Timestamptz(6)
+  project_id                                                      String             @db.Uuid
+  terraform_output                                                String?
+  apply_logs                                                      String?
+  approver_user_id                                                String?            @db.Uuid
+  triggered_by_user_id                                            String?            @db.Uuid
+  failure_reason                                                  String?
+  digger_run_stages_digger_runs_apply_stage_idTodigger_run_stages digger_run_stages? @relation("digger_runs_apply_stage_idTodigger_run_stages", fields: [apply_stage_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_digger_runs_apply_stage")
+  digger_run_stages_digger_runs_plan_stage_idTodigger_run_stages  digger_run_stages? @relation("digger_runs_plan_stage_idTodigger_run_stages", fields: [plan_stage_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_digger_runs_plan_stage")
+  projects                                                        projects           @relation(fields: [project_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_digger_runs_project")
+  repos                                                           repos              @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_digger_runs_repo")
+  user_profiles                                                   user_profiles?     @relation(fields: [triggered_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_triggered_by_user")
+
+  @@index([project_id])
+  @@index([deleted_at], map: "idx_digger_runs_deleted_at")
+  @@index([project_id], map: "idx_digger_runs_project_id")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model env_vars {
+  id         String   @id(map: "encrypted_env_vars_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id String   @db.Uuid
+  name       String   @db.VarChar(255)
+  value      String   @default("")
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  is_secret  Boolean  @default(false)
+  projects   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "encrypted_env_vars_project_id_fkey")
+
+  @@unique([project_id, name], map: "unique_project_var_name")
+}
+
+model github_app_installation_links {
+  id                     String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at             DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime      @default(now()) @db.Timestamptz(6)
+  deleted_at             DateTime?     @db.Timestamptz(6)
+  github_installation_id BigInt
+  organization_id        String        @db.Uuid
+  status                 Int           @db.SmallInt
+  organizations          organizations @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_github_app_installation_links_organization")
+
+  @@index([deleted_at], map: "idx_github_app_installation_links_deleted_at")
+  @@index([github_installation_id, organization_id], map: "idx_github_installation_org")
+}
+
+model github_app_installations {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at             DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at             DateTime? @db.Timestamptz(6)
+  github_installation_id BigInt
+  github_app_id          BigInt
+  account_id             BigInt
+  login                  String
+  repo                   String?
+  status                 BigInt
+
+  @@index([deleted_at], map: "idx_github_app_installations_deleted_at")
+}
+
+model github_apps {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at     DateTime? @db.Timestamptz(6)
+  github_id      BigInt
+  name           String
+  github_app_url String
+
+  @@index([deleted_at], map: "idx_github_apps_deleted_at")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model internal_blog_author_posts {
+  author_id                     String                        @db.Uuid
+  post_id                       String                        @db.Uuid
+  internal_blog_author_profiles internal_blog_author_profiles @relation(fields: [author_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  internal_blog_posts           internal_blog_posts           @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([author_id, post_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model internal_blog_author_profiles {
+  user_id                    String                       @id @db.Uuid
+  display_name               String                       @db.VarChar(255)
+  bio                        String
+  avatar_url                 String                       @db.VarChar(255)
+  website_url                String?                      @db.VarChar(255)
+  twitter_handle             String?                      @db.VarChar(255)
+  facebook_handle            String?                      @db.VarChar(255)
+  linkedin_handle            String?                      @db.VarChar(255)
+  instagram_handle           String?                      @db.VarChar(255)
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  internal_blog_author_posts internal_blog_author_posts[]
+  user_profiles              user_profiles                @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model internal_blog_post_tags {
+  id                                   Int                                    @id @default(autoincrement())
+  slug                                 String
+  name                                 String
+  description                          String?
+  internal_blog_post_tags_relationship internal_blog_post_tags_relationship[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model internal_blog_post_tags_relationship {
+  blog_post_id            String                  @db.Uuid
+  tag_id                  Int
+  internal_blog_posts     internal_blog_posts     @relation(fields: [blog_post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  internal_blog_post_tags internal_blog_post_tags @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([blog_post_id, tag_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model internal_blog_posts {
+  id                                   String                                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug                                 String                                 @unique @db.VarChar(255)
+  title                                String                                 @db.VarChar(255)
+  summary                              String
+  content                              String
+  created_at                           DateTime                               @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime                               @default(now()) @db.Timestamptz(6)
+  is_featured                          Boolean                                @default(false)
+  status                               internal_blog_post_status              @default(draft)
+  cover_image                          String?                                @db.VarChar(255)
+  seo_data                             Json?
+  json_content                         Json                                   @default("{}")
+  internal_blog_author_posts           internal_blog_author_posts[]
+  internal_blog_post_tags_relationship internal_blog_post_tags_relationship[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model internal_changelog {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title         String         @db.VarChar(255)
+  changes       String
+  user_id       String?        @db.Uuid
+  created_at    DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime?      @default(now()) @db.Timestamptz(6)
+  cover_image   String?
+  user_profiles user_profiles? @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model internal_feedback_comments {
+  id                        String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                   String                    @db.Uuid
+  thread_id                 String                    @db.Uuid
+  content                   String
+  created_at                DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime                  @default(now()) @db.Timestamptz(6)
+  internal_feedback_threads internal_feedback_threads @relation(fields: [thread_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_profiles             user_profiles             @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model internal_feedback_threads {
+  id                         String                            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title                      String                            @db.VarChar(255)
+  content                    String
+  user_id                    String                            @db.Uuid
+  created_at                 DateTime                          @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                          @default(now()) @db.Timestamptz(6)
+  priority                   internal_feedback_thread_priority @default(low)
+  type                       internal_feedback_thread_type     @default(general)
+  status                     internal_feedback_thread_status   @default(open)
+  added_to_roadmap           Boolean                           @default(false)
+  open_for_public_discussion Boolean                           @default(false)
+  is_publicly_visible        Boolean                           @default(false)
+  internal_feedback_comments internal_feedback_comments[]
+  user_profiles              user_profiles                     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model organization_credits {
+  organization_id String        @id @db.Uuid
+  credits         BigInt        @default(12)
+  organizations   organizations @relation(fields: [organization_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model organization_join_invitations {
+  created_at                                                                 DateTime                                 @default(now()) @db.Timestamptz(6)
+  inviter_user_id                                                            String                                   @db.Uuid
+  status                                                                     organization_join_invitation_link_status @default(active)
+  id                                                                         String                                   @id(map: "organization_invitations_pkey") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  invitee_user_email                                                         String                                   @db.VarChar
+  organization_id                                                            String                                   @db.Uuid
+  invitee_organization_role                                                  organization_member_role                 @default(member)
+  invitee_user_id                                                            String?                                  @db.Uuid
+  user_profiles_organization_join_invitations_invitee_user_idTouser_profiles user_profiles?                           @relation("organization_join_invitations_invitee_user_idTouser_profiles", fields: [invitee_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_profiles_organization_join_invitations_inviter_user_idTouser_profiles user_profiles                            @relation("organization_join_invitations_inviter_user_idTouser_profiles", fields: [inviter_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  organizations                                                              organizations                            @relation(fields: [organization_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([invitee_user_email])
+  @@index([invitee_user_id])
+  @@index([inviter_user_id])
+  @@index([organization_id])
+  @@index([status])
+}
+
+model organization_members {
+  id              BigInt                   @id @default(autoincrement())
+  created_at      DateTime                 @default(now()) @db.Timestamptz(6)
+  member_id       String                   @db.Uuid
+  member_role     organization_member_role
+  organization_id String                   @db.Uuid
+  user_profiles   user_profiles            @relation(fields: [member_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  organizations   organizations            @relation(fields: [organization_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([member_id])
+  @@index([member_role])
+  @@index([organization_id])
+}
+
+model organizations {
+  created_at                    DateTime                        @default(now()) @db.Timestamptz(6)
+  id                            String                          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  title                         String                          @default("Test Organization") @db.VarChar
+  slug                          String                          @unique @default(dbgenerated("(gen_random_uuid())::text")) @db.VarChar(255)
+  public_key                    String?
+  billing_bypass_organizations  billing_bypass_organizations?
+  customers                     customers[]
+  digger_job_tokens             digger_job_tokens[]
+  digger_locks                  digger_locks[]
+  github_app_installation_links github_app_installation_links[]
+  organization_credits          organization_credits?
+  organization_join_invitations organization_join_invitations[]
+  organization_members          organization_members[]
+  organizations_private_info    organizations_private_info?
+  projects                      projects[]
+  repos                         repos[]
+  subscriptions                 subscriptions[]
+  teams                         teams[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model organizations_private_info {
+  id              String        @id(map: "projects_private_info_pkey") @db.Uuid
+  billing_address Json?         @db.Json
+  payment_method  Json?         @db.Json
+  organizations   organizations @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model prices {
+  id                String                 @id(map: "price_pkey") @db.VarChar
+  product_id        String?                @db.VarChar
+  active            Boolean?
+  description       String?                @db.VarChar
+  unit_amount       BigInt?
+  currency          String?                @db.VarChar
+  type              pricing_type?
+  interval          pricing_plan_interval?
+  interval_count    BigInt?
+  trial_period_days BigInt?
+  metadata          Json?
+  products          products?              @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subscriptions     subscriptions[]
+
+  @@index([active])
+  @@index([product_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model products {
+  id               String   @id(map: "product_pkey") @db.VarChar
+  active           Boolean?
+  name             String?  @db.VarChar
+  description      String?  @db.VarChar
+  image            String?  @db.VarChar
+  metadata         Json?
+  is_visible_in_ui Boolean  @default(false)
+  prices           prices[]
+
+  @@index([active])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model project_comments {
+  id            BigInt        @id @default(autoincrement())
+  created_at    DateTime?     @default(now()) @db.Timestamptz(6)
+  text          String
+  user_id       String        @db.Uuid
+  in_reply_to   BigInt?
+  project_id    String        @db.Uuid
+  user_profiles user_profiles @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([project_id])
+  @@index([user_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model project_tfvars {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id String   @unique @db.Uuid
+  tfvars     Json
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model projects {
+  id                         String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                       String
+  created_at                 DateTime       @default(now())
+  updated_at                 DateTime       @default(now())
+  organization_id            String         @db.Uuid
+  team_id                    BigInt?
+  project_status             project_status @default(draft)
+  slug                       String         @unique @default(dbgenerated("(gen_random_uuid())::text")) @db.VarChar(255)
+  latest_action_on           String?
+  repo_id                    BigInt         @default(autoincrement())
+  configuration_yaml         String?
+  status                     String?
+  is_generated               Boolean?
+  is_in_main_branch          Boolean?
+  deleted_at                 DateTime?      @db.Timestamptz(6)
+  terraform_working_dir      String?
+  is_managing_state          Boolean?
+  labels                     String[]
+  is_drift_detection_enabled Boolean?       @default(false)
+  drift_crontab              String?
+  branch                     String?
+  latest_drift_output        String?
+  iac_type                   iac_type_enum? @default(terraform)
+  workspace                  String?
+  workflow_file              String?
+  include_patterns           String?
+  exclude_patterns           String?
+  chats                      chats[]
+  digger_runs                digger_runs[]
+  env_vars                   env_vars[]
+  organizations              organizations  @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_projects_organization")
+  repos                      repos          @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_projects_repo")
+  teams                      teams?         @relation(fields: [team_id], references: [id], onDelete: Cascade)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model repos {
+  id                BigInt         @id @default(autoincrement())
+  created_at        DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?      @db.Timestamptz(6)
+  deleted_at        DateTime?      @db.Timestamptz(6)
+  name              String
+  organization_id   String?        @db.Uuid
+  digger_config     String?
+  repo_name         String?
+  repo_full_name    String?
+  repo_organisation String?
+  repo_url          String?
+  digger_runs       digger_runs[]
+  projects          projects[]
+  organizations     organizations? @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_repos_organization")
+
+  @@unique([name, organization_id], map: "idx_org_repo")
+  @@index([deleted_at], map: "idx_repos_deleted_at")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model subscriptions {
+  id                   String               @id(map: "subscription_pkey") @db.VarChar
+  status               subscription_status?
+  metadata             Json?                @db.Json
+  price_id             String?              @db.VarChar
+  quantity             BigInt?
+  cancel_at_period_end Boolean?
+  created              DateTime             @db.Timestamptz(6)
+  current_period_start DateTime             @db.Timestamptz(6)
+  current_period_end   DateTime             @db.Timestamptz(6)
+  ended_at             DateTime?            @db.Timestamptz(6)
+  cancel_at            DateTime?            @db.Timestamptz(6)
+  canceled_at          DateTime?            @db.Timestamptz(6)
+  trial_start          DateTime?            @db.Timestamptz(6)
+  trial_end            DateTime?            @db.Timestamptz(6)
+  organization_id      String?              @db.Uuid
+  organizations        organizations?       @relation(fields: [organization_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  prices               prices?              @relation(fields: [price_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([organization_id])
+  @@index([price_id])
+  @@index([status])
+}
+
+model team_members {
+  id            BigInt                   @id @default(autoincrement())
+  created_at    DateTime?                @default(now()) @db.Timestamptz(6)
+  user_id       String                   @db.Uuid
+  role          project_team_member_role @default(member)
+  team_id       BigInt
+  user_profiles user_profiles            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model teams {
+  id              BigInt        @id @default(autoincrement())
+  created_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  organization_id String        @db.Uuid
+  name            String
+  projects        projects[]
+  organizations   organizations @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_api_keys {
+  key_id     String    @id
+  masked_key String
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  user_id    String    @db.Uuid
+  expires_at DateTime? @db.Timestamptz(6)
+  is_revoked Boolean   @default(false)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_notifications {
+  id            String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id       String?        @db.Uuid
+  is_read       Boolean        @default(false)
+  is_seen       Boolean        @default(false)
+  payload       Json           @default("{}")
+  created_at    DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime       @default(now()) @db.Timestamptz(6)
+  user_profiles user_profiles? @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_onboarding {
+  user_id        String        @id @db.Uuid
+  created_at     DateTime      @default(now()) @db.Timestamptz(6)
+  accepted_terms Boolean       @default(false)
+  user_profiles  user_profiles @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model user_profiles {
+  id                                                                                         String                          @id @db.Uuid
+  full_name                                                                                  String?                         @db.VarChar
+  avatar_url                                                                                 String?                         @db.VarChar
+  created_at                                                                                 DateTime                        @default(now()) @db.Timestamptz(6)
+  user_name                                                                                  String?                         @db.VarChar
+  email                                                                                      String?                         @unique(map: "email_unique") @db.VarChar(255)
+  has_accepted_terms                                                                         Boolean?                        @default(true)
+  has_completed_profile                                                                      Boolean?                        @default(false)
+  has_created_organization                                                                   Boolean?                        @default(false)
+  is_created_through_org_invitation                                                          Boolean?                        @default(false)
+  default_organization                                                                       String?                         @db.Uuid
+  account_delete_tokens                                                                      account_delete_tokens?
+  digger_runs                                                                                digger_runs[]
+  internal_blog_author_profiles                                                              internal_blog_author_profiles?
+  internal_changelog                                                                         internal_changelog[]
+  internal_feedback_comments                                                                 internal_feedback_comments[]
+  internal_feedback_threads                                                                  internal_feedback_threads[]
+  organization_join_invitations_organization_join_invitations_invitee_user_idTouser_profiles organization_join_invitations[] @relation("organization_join_invitations_invitee_user_idTouser_profiles")
+  organization_join_invitations_organization_join_invitations_inviter_user_idTouser_profiles organization_join_invitations[] @relation("organization_join_invitations_inviter_user_idTouser_profiles")
+  organization_members                                                                       organization_members[]
+  project_comments                                                                           project_comments[]
+  team_members                                                                               team_members[]
+  user_notifications                                                                         user_notifications[]
+  user_onboarding                                                                            user_onboarding?
+  user_roles                                                                                 user_roles[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_roles {
+  id            BigInt        @id @default(autoincrement())
+  user_id       String        @db.Uuid
+  role          app_role
+  user_profiles user_profiles @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, role])
+  @@index([user_id])
+}
+
+enum app_admin_role {
+  moderator
+  admin
+  super_admin
+}
+
+enum app_role {
+  admin
+}
+
+enum iac_type_enum {
+  terraform
+  terragrunt
+  opentofu
+}
+
+enum internal_blog_post_status {
+  draft
+  published
+}
+
+enum internal_feedback_thread_priority {
+  low
+  medium
+  high
+}
+
+enum internal_feedback_thread_status {
+  open
+  under_review
+  planned
+  closed
+  in_progress
+  completed
+}
+
+enum internal_feedback_thread_type {
+  bug
+  feature_request
+  general
+}
+
+enum organization_join_invitation_link_status {
+  active
+  finished_accepted
+  finished_declined
+  inactive
+}
+
+enum organization_joining_status {
+  invited
+  joinied
+  declined_invitation
+  joined
+}
+
+enum organization_member_role {
+  owner
+  admin
+  member
+  readonly
+}
+
+enum pricing_plan_interval {
+  day
+  week
+  month
+  year
+}
+
+enum pricing_type {
+  one_time
+  recurring
+}
+
+enum project_status {
+  draft
+  pending_approval
+  approved
+  completed
+}
+
+enum project_team_member_role {
+  admin
+  member
+  readonly
+}
+
+enum subscription_status {
+  trialing
+  active
+  canceled
+  incomplete
+  incomplete_expired
+  past_due
+  unpaid
+  paused
+}

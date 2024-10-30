@@ -1,18 +1,29 @@
 'use server';
-import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
+
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
-import { cache } from 'react';
 
-export const getSession = cache(async () => {
-  const supabase = createSupabaseUserServerComponentClient();
-  return await supabase.auth.getSession();
-});
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+}
 
-// This is a server-side function that verifies the session of the user.
-// and runs in server components.
-export const verifySession = cache(async () => {
+//TODO reintroduce cache; used to be cache from react
+// removed because it was failing: "(0 , react__WEBPACK_IMPORTED_MODULE_2__.cache) is not a function"
+export const getSession = async () => {
+  //const supabase = createSupabaseUserServerComponentClient();
+  //return await supabase.auth.getSession();
+  const session = await auth();
+  return session;
+};
+
+//TODO reintroduce cache; used to be cache from react
+// removed because it was failing: "(0 , react__WEBPACK_IMPORTED_MODULE_2__.cache) is not a function"
+export const verifySession = async () => {
+  /*
   const {
-    data: { session },
+    user: { session },
     error: sessionError,
   } = await getSession();
 
@@ -25,4 +36,10 @@ export const verifySession = cache(async () => {
   }
 
   return session.user;
-});
+  */
+  const session = await auth();
+  if (!session?.user) {
+    redirect('/api/auth/signin');
+  }
+  return session?.user as AuthUser;
+};

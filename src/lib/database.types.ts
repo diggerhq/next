@@ -79,13 +79,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "chats_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "public_chats_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -1695,70 +1688,47 @@ export type Database = {
           },
         ]
       }
-      user_private_info: {
-        Row: {
-          created_at: string | null
-          default_organization: string | null
-          id: string
-        }
-        Insert: {
-          created_at?: string | null
-          default_organization?: string | null
-          id: string
-        }
-        Update: {
-          created_at?: string | null
-          default_organization?: string | null
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_private_info_default_organization_fkey"
-            columns: ["default_organization"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_private_info_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
+          default_organization: string | null
+          email: string | null
           full_name: string | null
+          has_accepted_terms: boolean | null
+          has_completed_profile: boolean | null
+          has_created_organization: boolean | null
           id: string
+          is_created_through_org_invitation: boolean | null
           user_name: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          default_organization?: string | null
+          email?: string | null
           full_name?: string | null
+          has_accepted_terms?: boolean | null
+          has_completed_profile?: boolean | null
+          has_created_organization?: boolean | null
           id: string
+          is_created_through_org_invitation?: boolean | null
           user_name?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          default_organization?: string | null
+          email?: string | null
           full_name?: string | null
+          has_accepted_terms?: boolean | null
+          has_completed_profile?: boolean | null
+          has_created_organization?: boolean | null
           id?: string
+          is_created_through_org_invitation?: boolean | null
           user_name?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -2132,3 +2102,4 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
+

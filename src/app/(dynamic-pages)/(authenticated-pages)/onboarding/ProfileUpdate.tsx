@@ -6,15 +6,15 @@ import { T } from "@/components/ui/Typography";
 import { useToast } from "@/components/ui/use-toast";
 import { updateUserProfileNameAndAvatar, uploadPublicUserAvatar } from "@/data/user/user";
 import { generateSlug } from "@/lib/utils";
-import type { Table } from "@/types";
 import { getUserAvatarUrl } from "@/utils/helpers";
+import { user_profiles } from "@prisma/client";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import { useState } from "react";
 
 type ProfileUpdateProps = {
-  userProfile: Table<"user_profiles">;
+  userProfile: user_profiles;
   onSuccess: () => void;
   userEmail: string | undefined;
 };

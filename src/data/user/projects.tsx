@@ -8,22 +8,40 @@ import { createSupabaseUserServerComponentClient } from "@/supabase-clients/user
 import type { CommentWithUser, Enum, SAPayload } from "@/types";
 import { normalizeComment } from "@/utils/comments";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
+import { PrismaClient } from '@prisma/client';
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 import { getRepoDetails } from "./repos";
 
+
 export async function getSlimProjectById(projectId: string) {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from("projects")
-    .select("id,name,project_status,organization_id,team_id,slug, repo_id")
-    .eq("id", projectId)
-    .single();
-  if (error) {
-    throw error;
+  const prisma = new PrismaClient();
+
+  try {
+    const project = await prisma.projects.findUnique({
+      where: {
+        id: projectId,
+      },
+      select: {
+        id: true,
+        name: true,
+        project_status: true,
+        organization_id: true,
+        team_id: true,
+        slug: true,
+        repo_id: true,
+      },
+    });
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    return project;
+  } finally {
+    await prisma.$disconnect();
   }
-  return data;
 }
 
 export const getSlimProjectBySlug = async (projectSlug: string) => {
@@ -179,7 +197,7 @@ export const createProjectCommentAction = async (
   const user = await serverGetLoggedInUser();
   const { data, error } = await supabaseClient
     .from("project_comments")
-    .insert({ project_id: projectId, text, user_id: user.id })
+    .insert({ project_id: projectId, text, user_id: user.id! }) //TODO remove assertion or resolve
     .select("*, user_profiles(*)")
     .single();
   if (error) {

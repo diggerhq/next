@@ -18,8 +18,7 @@ async function EditOrganization({
   organizationId: string;
 }) {
   const organizationTitle = await getOrganizationTitle(organizationId);
-  const organizationSlug =
-    await getOrganizationSlugByOrganizationId(organizationId);
+  const organizationSlug = await getOrganizationSlugByOrganizationId(organizationId);
   return (
     <EditOrganizationForm
       organizationId={organizationId}

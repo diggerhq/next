@@ -1,0 +1,4 @@
+ALTER TABLE user_profiles RENAME COLUMN hasAcceptedTerms TO has_accepted_terms;
+ALTER TABLE user_profiles RENAME COLUMN hasCompletedProfile TO has_completed_profile;
+ALTER TABLE user_profiles RENAME COLUMN hasCreatedOrganization TO has_created_organization;
+ALTER TABLE user_profiles RENAME COLUMN isCreatedThroughOrgInvitation TO is_created_through_org_invitation;

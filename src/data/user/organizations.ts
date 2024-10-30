@@ -11,10 +11,10 @@ import type {
   UnwrapPromise,
 } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { revalidatePath } from 'next/cache';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { refreshSessionAction } from './session';
+import { updateUserProfileMetadata } from './user';
 
 export const getOrganizationIdBySlug = async (slug: string) => {
   const supabaseClient = createSupabaseUserServerComponentClient();
@@ -62,7 +62,7 @@ export const createOrganization = async (
     const supabaseClient = createSupabaseUserServerActionClient();
     const user = await serverGetLoggedInUser();
 
-    const organizationId = uuid();
+    const organizationId = uuidv4();
 
     if (RESTRICTED_SLUG_NAMES.includes(slug)) {
       return { status: 'error', message: 'Slug is restricted' };
@@ -103,9 +103,10 @@ export const createOrganization = async (
       return { status: 'error', message: orgMemberErrors.message };
     }
 
+    // Why are we checking for onboarding deep in the data layer? Bad code.
     if (isOnboardingFlow) {
       const { error: updateError } = await supabaseClient
-        .from('user_private_info')
+        .from('user_profiles')
         .update({ default_organization: organizationId })
         .eq('id', user.id);
 
@@ -114,22 +115,15 @@ export const createOrganization = async (
         return { status: 'error', message: updateError.message };
       }
 
-      const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
-        onboardingHasCreatedOrganization: true,
-      };
-
-      const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
-        data: updateUserMetadataPayload,
-      });
-
-      if (updateUserMetadataResponse.error) {
-        console.error(
-          'Error updating user metadata:',
-          updateUserMetadataResponse.error,
-        );
+      try {
+        await updateUserProfileMetadata(user.id, {
+          has_created_organization: true,
+        });
+      } catch (e) {
+        console.error('Error updating user metadata:', e.message);
         return {
           status: 'error',
-          message: updateUserMetadataResponse.error.message,
+          message: e.message,
         };
       }
 
@@ -174,7 +168,6 @@ export async function fetchSlimOrganizations() {
   if (error) {
     throw error;
   }
-
   return data || [];
 }
 
@@ -487,12 +480,13 @@ export const getDefaultOrganization = async () => {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const user = await serverGetLoggedInUser();
   const { data, error } = await supabaseClient
-    .from('user_private_info')
+    .from('user_profiles')
     .select('id, default_organization')
     .eq('id', user.id)
     .single();
 
   if (error) {
+    console.error(`Failed to get default organisation for user ${user.id}`);
     throw error;
   }
 
@@ -502,7 +496,7 @@ export const getDefaultOrganization = async () => {
 export const getDefaultOrganizationId = async () => {
   const supabaseClient = createSupabaseUserServerComponentClient();
   const { data, error } = await supabaseClient
-    .from('user_private_info')
+    .from('user_profiles')
     .select('default_organization')
     .single();
 
@@ -524,7 +518,7 @@ export async function setDefaultOrganization(
   const user = await serverGetLoggedInUser();
 
   const { error: updateError } = await supabaseClient
-    .from('user_private_info')
+    .from('user_profiles')
     .update({ default_organization: organizationId })
     .eq('id', user.id);
 
@@ -621,7 +615,9 @@ export async function getInitialOrganizationToRedirectTo(): Promise<
   };
 }
 
-export async function getMaybeInitialOrganizationToRedirectTo(): Promise<SAPayload<string | null>> {
+export async function getMaybeInitialOrganizationToRedirectTo(): Promise<
+  SAPayload<string | null>
+> {
   const initialOrganization = await getInitialOrganizationToRedirectTo();
   if (initialOrganization.status === 'error') {
     return {

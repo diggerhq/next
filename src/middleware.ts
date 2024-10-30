@@ -1,14 +1,5 @@
-import {
-  createMiddlewareClient,
-  type User,
-} from '@supabase/auth-helpers-nextjs';
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
 // const matchAppAdmin = match('/app_admin_preview/(.*)?');
 import { match } from 'path-to-regexp';
-import type { Database } from './lib/database.types';
-import { toSiteURL } from './utils/helpers';
-import { authUserMetadataSchema } from './utils/zod-schemas/authUserMetadata';
 
 const onboardingPaths = `/onboarding/(.*)?`;
 // Using a middleware to protect pages from unauthorized access
@@ -37,6 +28,8 @@ const unprotectedPagePrefixes = [
   `/waitlist(/.*)?`,
 ];
 
+export { auth as middleware } from '@/auth';
+
 function isLandingPage(pathname: string) {
   return pathname === '/';
 }
@@ -48,7 +41,8 @@ function isUnprotectedPage(pathname: string) {
   });
 }
 
-function shouldOnboardUser(pathname: string, user: User | undefined) {
+function shouldOnboardUser(pathname: string, userId: string) {
+  /*
   const matchOnboarding = match(onboardingPaths);
   const isOnboardingRoute = matchOnboarding(pathname);
   if (!isUnprotectedPage(pathname) && user && !isOnboardingRoute) {
@@ -67,11 +61,17 @@ function shouldOnboardUser(pathname: string, user: User | undefined) {
     }
   }
   return false;
+  */
+  return true;
+  //TODO figure way to store user metadata (extend user_profile table?)
 }
 
 // this middleware refreshes the user's session and must be run
 // for any Server Component route that uses `createServerComponentSupabaseClient`
-export async function middleware(req: NextRequest) {
+// renamed while moving to auth.js
+
+/*
+export async function middleware_NEXTBASE_LEGACY(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient<Database>(
     { req, res },
@@ -130,6 +130,30 @@ export async function middleware(req: NextRequest) {
   }
   return res;
 }
+
+*/
+
+/*
+Middleware for Auth.js - but it doesn't work, edge runtime error. Back to route level
+export default auth(async (req) => {
+  if (!req.auth) {
+    //not authenticated - redirect to login URL defined by Auth.js
+    return NextResponse.redirect(toSiteURL('/api/auth/signin'));
+  } else {
+    const user = await serverGetLoggedInUser();
+    if (
+      shouldOnboardUser(req.nextUrl.pathname, user.id) &&
+      req.nextUrl.pathname !== '/onboarding'
+    ) {
+      // authenticated but not onboarded
+      return NextResponse.redirect(toSiteURL('/onboarding'));
+    } else {
+      // authenticated and onboarded - no changes to URL
+      return NextResponse.next();
+    }
+  }
+});
+*/
 
 export const config = {
   matcher: [

@@ -8,11 +8,17 @@ import { sendEmail } from "@/utils/api-routes/utils";
 import { toSiteURL } from "@/utils/helpers";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import type { AuthUserMetadata } from "@/utils/zod-schemas/authUserMetadata";
+import { PrismaClient, user_profiles } from '@prisma/client';
+import {
+  getUserPendingInvitationsByEmail as userPendingInvitationsByEmailSQL,
+  getUserPendingInvitationsById as userPendingInvitationsByIdSQL
+} from '@prisma/client/sql';
 import { renderAsync } from "@react-email/render";
 import ConfirmAccountDeletionEmail from "emails/account-deletion-request";
 import { revalidatePath } from "next/cache";
 import slugify from "slugify";
 import urlJoin from "url-join";
+import { v4 as uuidv4 } from 'uuid';
 import { acceptInvitationAction } from "./invitation";
 import { createOrganization, setDefaultOrganization } from "./organizations";
 import { refreshSessionAction } from "./session";
@@ -41,96 +47,146 @@ export const createDefaultUserProfile = async (userId: string) => {
 
 }
 
+export const getUserProfile = async (userId: string) => {
+  console.log(`get user profile ${userId}`)
+  const prisma = new PrismaClient();
+  try {
+    const data = await prisma.user_profiles.findUnique({
+      where: {
+        id: userId
+      }
+    })
 
-export const createDefaultUserPrivateInfo = async (userId: string) => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from('user_private_info')
-    .insert({
-      id: userId,
-    });
+    if (!data) {
+      throw new Error('User profile not found')
+    }
 
-  if (error) throw error;
+    return data
+  } finally {
+    await prisma.$disconnect()
+  }
 }
 
+export const getUserProfileByEmail = async (email: string) => {
+  const prisma = new PrismaClient()
 
+  try {
+    const data = await prisma.user_profiles.findUnique({
+      where: {
+        email: email
+      }
+    })
 
-export const getUserProfile = async (userId: string) => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
+    if (!data) {
+      throw new Error('User profile not found')
+    }
 
-  if (error) {
-    throw error;
+    return data
+  } finally {
+    await prisma.$disconnect()
   }
+}
 
-  return data;
-};
+export const getUserProfileByEmailOrCreate = async (email: string) => {
+  const prisma = new PrismaClient()
+
+  try {
+    const existingProfile = await prisma.user_profiles.findUnique({
+      where: { email }
+    })
+
+    if (existingProfile) {
+      return existingProfile
+    }
+
+    // If the profile doesn't exist, create a new one
+    const newProfile = await prisma.user_profiles.create({
+      data: {
+        id: uuidv4(),
+        email
+      }
+    })
+
+    return newProfile
+
+  } catch (error) {
+    console.log('Error in getUserProfileByEmailOrCreate:', error)
+    throw error
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
 export const getUserFullName = async (userId: string) => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from("user_profiles")
-    .select("full_name")
-    .eq("id", userId)
-    .single();
+  const prisma = new PrismaClient();
 
-  if (error) {
-    throw error;
+  try {
+    const user = await prisma.user_profiles.findUnique({
+      where: { id: userId },
+      select: { full_name: true }
+    })
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user.full_name
+  } catch (error) {
+    console.error('Error in getUserFullName:', error)
+    throw error
+  } finally {
+    await prisma.$disconnect()
   }
-
-  return data.full_name;
-};
+}
 
 export const getUserAvatarUrl = async (userId: string) => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from("user_profiles")
-    .select("avatar_url")
-    .eq("id", userId)
-    .single();
+  const prisma = new PrismaClient();
 
-  if (error) {
+  try {
+    const user = await prisma.user_profiles.findUnique({
+      where: { id: userId },
+      select: { avatar_url: true }
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user.avatar_url;
+  } catch (error) {
+    console.error('Error in getUserAvatarUrl:', error);
     throw error;
+  } finally {
+    await prisma.$disconnect();
   }
-
-  return data.avatar_url;
 };
 
 export const getUserPendingInvitationsByEmail = async (userEmail: string) => {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from("organization_join_invitations")
-    .select(
-      "*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*), organization:organizations(*)",
-    )
-    .ilike("invitee_user_email", `%${userEmail}%`)
-    .eq("status", "active");
+  const prisma = new PrismaClient();
 
-  if (error) {
+  try {
+    const invitations = await prisma.$queryRawTyped(userPendingInvitationsByEmailSQL(userEmail));
+    return invitations;
+  } catch (error) {
+    console.error('Error in getUserPendingInvitationsByEmail:', error);
     throw error;
+  } finally {
+    await prisma.$disconnect();
   }
-
-  return data || [];
 };
 
 export const getUserPendingInvitationsById = async (userId: string) => {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from("organization_join_invitations")
-    .select(
-      "*, inviter:user_profiles!inviter_user_id(*), invitee:user_profiles!invitee_user_id(*), organization:organizations(*)",
-    )
-    .eq("invitee_user_id", userId)
-    .eq("status", "active");
+  const prisma = new PrismaClient();
 
-  if (error) {
+  try {
+    const invitations = await prisma.$queryRawTyped(userPendingInvitationsByIdSQL(userId));
+    return invitations;
+  } catch (error) {
+    console.error('Error in getUserPendingInvitationsByEmail:', error);
     throw error;
+  } finally {
+    await prisma.$disconnect();
   }
-
-  return data || [];
 };
 
 export const uploadPublicUserAvatar = async (
@@ -173,6 +229,26 @@ export const uploadPublicUserAvatar = async (
   return { status: "success", data: supabaseFileUrl };
 };
 
+export async function updateUserProfileMetadata(userId: string, metadata: {
+  has_accepted_terms?: boolean,
+  has_completed_profile?: boolean,
+  has_created_organization?: boolean,
+  is_created_through_org_invitation?: boolean,
+}) {
+  const prisma = new PrismaClient()
+  try {
+    const data = await prisma.user_profiles.update({
+      where: { id: userId },
+      data: metadata,
+    })
+
+    return data
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+
 export const updateUserProfileNameAndAvatar = async (
   {
     fullName,
@@ -188,57 +264,46 @@ export const updateUserProfileNameAndAvatar = async (
   }: {
     isOnboardingFlow?: boolean;
   } = {},
-): Promise<SAPayload<Table<"user_profiles">>> => {
+): Promise<SAPayload<user_profiles>> => {
   "use server";
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const user = await serverGetLoggedInUser();
-  const { data, error } = await supabaseClient
-    .from("user_profiles")
-    .update({
-      full_name: fullName,
-      user_name: userName,
-      avatar_url: avatarUrl,
-    })
-    .eq("id", user.id)
-    .select()
-    .single();
+  const prisma = new PrismaClient()
 
-  if (error) {
+  try {
+    const user = await serverGetLoggedInUser()
+
+    const data = await prisma.user_profiles.update({
+      where: { id: user.id },
+      data: {
+        full_name: fullName,
+        user_name: userName,
+        avatar_url: avatarUrl,
+      },
+    })
+
+    if (isOnboardingFlow) {
+      await updateUserProfileMetadata(user.id, { has_completed_profile: true })
+
+      const refreshSessionResponse = await refreshSessionAction()
+      if (refreshSessionResponse.status === "error") {
+        return refreshSessionResponse
+      }
+
+      revalidatePath("/", "layout")
+    }
+
+    return {
+      status: "success",
+      data,
+    }
+  } catch (error) {
     return {
       status: "error",
       message: error.message,
-    };
-  }
-
-  if (isOnboardingFlow) {
-    const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
-      onboardingHasCompletedProfile: true,
-    };
-
-    const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
-      data: updateUserMetadataPayload,
-    });
-
-    if (updateUserMetadataResponse.error) {
-      return {
-        status: "error",
-        message: updateUserMetadataResponse.error.message,
-      };
     }
-
-    const refreshSessionResponse = await refreshSessionAction();
-    if (refreshSessionResponse.status === "error") {
-      return refreshSessionResponse;
-    }
-
-    revalidatePath("/", "layout");
+  } finally {
+    await prisma.$disconnect()
   }
-
-  return {
-    status: "success",
-    data,
-  };
-};
+}
 
 export const acceptTermsOfService = async (
   accepted: boolean,
