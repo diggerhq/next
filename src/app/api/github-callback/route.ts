@@ -1,5 +1,6 @@
 import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
 import { toSiteURL } from '@/utils/helpers';
+import { getSession } from '@/utils/server/verifySession';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Use the environment variable for the callback URL
@@ -59,10 +60,17 @@ async function getOrganizationId(): Promise<string> {
     console.error('Failed to get current user', error);
     throw error;
   }
+
+  const session = await getSession();
+  const userId = session.data.session?.user.id;
+  if (userId === undefined) {
+    console.log();
+    throw Error('could not verify session');
+  }
   const { data: orgs, error: errOrg } = await supabase
     .from('organization_members')
     .select('*')
-    .eq('member_id', user.id);
+    .eq('member_id', userId);
 
   if (errOrg || !orgs[0]) {
     console.error('Failed to get org');
