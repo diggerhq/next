@@ -146,6 +146,9 @@ export const createProjectAction = async ({
         drift_crontab,
       }
     });
+    // why are we revalidating paths in a getter query?
+    // a getter query is not supposed to have side effects. bad code.
+    // leaving as is because idk what breaks if I remove it
     if (teamId) {
       revalidatePath(`/org/[organizationId]/team/[teamId]`, "layout");
     } else {
