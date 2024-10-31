@@ -8,7 +8,7 @@ import { createSupabaseUserServerComponentClient } from "@/supabase-clients/user
 import type { CommentWithUser, Enum, SAPayload } from "@/types";
 import { normalizeComment } from "@/utils/comments";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, projects } from '@prisma/client';
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
@@ -104,7 +104,7 @@ export const createProjectAction = async ({
   organizationId: string;
   name: string;
   slug: string;
-  repoId: number;
+  repoId: bigint;
   branch: string;
   terraformWorkingDir: string;
   workspace?: string;
@@ -117,60 +117,54 @@ export const createProjectAction = async ({
   teamId: number | null;
   is_drift_detection_enabled: boolean;
   drift_crontab?: string;
-}): Promise<SAPayload<Tables<"projects">>> => {
+}): Promise<SAPayload<projects>> => {
   "use server";
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const { data: project, error } = await supabaseClient
-    .from("projects")
-    .insert({
-      id: randomUUID(),
-      organization_id: organizationId,
-      name,
-      slug,
-      team_id: teamId,
-      repo_id: repoId,
-      branch,
-      terraform_working_dir: terraformWorkingDir,
-      workspace,
-      workflow_file,
-      iac_type,
-      include_patterns,
-      exclude_patterns,
-      is_managing_state: managedState,
-      is_in_main_branch: true,
-      is_generated: true,
-      project_status: "draft",
-      latest_action_on: new Date().toISOString(),
-      labels,
-      is_drift_detection_enabled,
-      drift_crontab,
-    })
-    .select("*")
-    .single();
-
-
-  if (error) {
+  const prisma = new PrismaClient();
+  try {
+    const project = await prisma.projects.create({
+      data: {
+        id: randomUUID(),
+        organization_id: organizationId,
+        name,
+        slug,
+        team_id: teamId,
+        repo_id: repoId,
+        branch,
+        terraform_working_dir: terraformWorkingDir,
+        workspace,
+        workflow_file,
+        iac_type,
+        include_patterns,
+        exclude_patterns,
+        is_managing_state: managedState,
+        is_in_main_branch: true,
+        is_generated: true,
+        project_status: "draft",
+        latest_action_on: String(new Date()),
+        labels,
+        is_drift_detection_enabled,
+        drift_crontab,
+      }
+    });
+    if (teamId) {
+      revalidatePath(`/org/[organizationId]/team/[teamId]`, "layout");
+    } else {
+      revalidatePath(`/org/[organizationId]`, "layout");
+      revalidatePath(`/org/[organizationId]/projects/`, "layout");
+    }
+    return {
+      status: 'success',
+      data: project,
+    };
+  } catch (error) {
     console.log(`could not create project ${name} for org ID: ${organizationId}`, error);
     return {
       status: 'error',
       message: error.message,
     };
+  } finally {
+    await prisma.$disconnect()
   }
-
-  if (teamId) {
-    revalidatePath(`/org/[organizationId]/team/[teamId]`, "layout");
-  } else {
-    revalidatePath(`/org/[organizationId]`, "layout");
-    revalidatePath(`/org/[organizationId]/projects/`, "layout");
-  }
-
-
-
-
-  return {
-    status: 'success',
-    data: project,
-  };
 };
 
 export const getProjectComments = async (
