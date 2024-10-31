@@ -493,24 +493,6 @@ export const getDefaultOrganization = async () => {
   return data.default_organization;
 };
 
-export const getDefaultOrganizationId = async () => {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from('user_profiles')
-    .select('default_organization')
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  if (!data.default_organization) {
-    return null;
-  }
-
-  return data.default_organization;
-};
-
 export async function setDefaultOrganization(
   organizationId: string,
 ): Promise<SAPayload> {
