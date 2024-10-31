@@ -1,6 +1,5 @@
-import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
+import { getDefaultOrganization } from '@/data/user/organizations';
 import { toSiteURL } from '@/utils/helpers';
-import { getSession } from '@/utils/server/verifySession';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Use the environment variable for the callback URL
@@ -27,7 +26,13 @@ export async function GET(request: NextRequest) {
       'Trying to get org id for the following installation ID:',
       installationId,
     );
-    const organizationId = await getOrganizationId();
+    // always installing github app in the default organisation
+    // TODO install into user's current organisation
+    const organizationId = await getDefaultOrganization();
+    if (!organizationId) {
+      console.error('User has no org id');
+      throw new Error(`User has no org id. Installation: ${installationId}`);
+    }
     const response = await fetch(
       `${GITHUB_CALLBACK_URL}?${searchParams.toString()}`,
       {
@@ -48,34 +53,4 @@ export async function GET(request: NextRequest) {
     console.error('Error handling GitHub App installation callback:', error);
     return NextResponse.redirect(toSiteURL('/github_app/error'));
   }
-}
-
-async function getOrganizationId(): Promise<string> {
-  const supabase = createSupabaseUserRouteHandlerClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error || !user?.id) {
-    console.error('Failed to get current user', error);
-    throw error;
-  }
-
-  const session = await getSession();
-  const userId = session.data.session?.user.id;
-  if (userId === undefined) {
-    console.log();
-    throw Error('could not verify session');
-  }
-  const { data: orgs, error: errOrg } = await supabase
-    .from('organization_members')
-    .select('*')
-    .eq('member_id', userId);
-
-  if (errOrg || !orgs[0]) {
-    console.error('Failed to get org');
-    throw error;
-  }
-
-  return orgs[0].organization_id;
 }
