@@ -25,7 +25,7 @@ const MotionCard = motion(Card);
 
 const createProjectFormSchema = z.object({
     name: z.string().min(1, "Project name is required"),
-    repository: z.number().int().positive("Please select a repository"),
+    repository: z.bigint().positive("Please select a repository"),
     terraformDir: z.string().min(1, "Terraform working directory is required"),
     iac_type: z.enum(["terraform", "terragrunt", "opentofu"]).default("terraform"),
     workspace: z.string().default("default").optional(),
@@ -43,7 +43,7 @@ const createProjectFormSchema = z.object({
 type CreateProjectFormData = z.infer<typeof createProjectFormSchema>;
 
 type Repository = {
-    id: number;
+    id: bigint;
     repo_full_name: string | null;
 };
 
@@ -68,7 +68,7 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
         resolver: zodResolver(createProjectFormSchema),
         defaultValues: {
             name: "",
-            repository: repositories[0]?.id || 0,
+            repository: repositories[0]?.id || BigInt(0),
             terraformDir: "",
             iac_type: "terraform",
             workflow_file: "digger_workflow.yml",
