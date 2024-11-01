@@ -1,27 +1,6 @@
-import { Database } from '@/lib/database.types';
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { supabaseAdminClient } from '../admin/supabaseAdminClient';
 
-type createServerActionClientParams = NonNullable<
-  Parameters<typeof createServerActionClient>[1]
->;
-type CookieOptions = createServerActionClientParams['cookieOptions'];
-
-const isDevelopment = process.env.NODE_ENV === 'development';
-
-const optionalCookieOptions: CookieOptions = {
-  domain: isDevelopment ? undefined : '.digger.dev',
-  secure: !isDevelopment,
-  path: '/',
-  sameSite: 'lax',
-};
-
-export const createSupabaseUserServerActionClient = () =>
-  createServerActionClient<Database>(
-    {
-      cookies,
-    },
-    {
-      cookieOptions: optionalCookieOptions,
-    },
-  );
+// this used to be a user-scoped client
+// switching to admin because we no longer use supabase auth
+// it's only used on the server so security ok
+export const createSupabaseUserServerActionClient = () => supabaseAdminClient;

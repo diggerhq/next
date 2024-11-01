@@ -1,5 +1,5 @@
-import { createSupabaseUserRouteHandlerClient } from '@/supabase-clients/user/createSupabaseUserRouteHandlerClient';
 import { toSiteURL } from '@/utils/helpers';
+import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
 import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -24,12 +24,10 @@ export async function GET(
   }
   const { invitationId } = paramsSchema.parse(params);
 
-  const supabaseClient = createSupabaseUserRouteHandlerClient();
-  const { data, error } = await supabaseClient.auth.getSession();
-  if (error) {
-    throw error;
-  }
-  const user = data?.session?.user;
+  const user = await serverGetLoggedInUser();
+
+  // the below still won't work but at least we got rid of supabase user client on the server
+  // login form no longer exists so need to redirect to actual login but later
 
   if (!user) {
     const url = new URL(toSiteURL('/login'));
