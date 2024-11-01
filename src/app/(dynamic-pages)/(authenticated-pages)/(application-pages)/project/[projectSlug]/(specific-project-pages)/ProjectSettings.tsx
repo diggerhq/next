@@ -9,14 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { updateProjectSettingsAction } from "@/data/user/projects";
 import { useSAToastMutation } from "@/hooks/useSAToastMutation";
-import { Tables } from "@/lib/database.types";
+import { projects } from "@prisma/client";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { DeleteProject } from "./DeleteProject";
 
 type ProjectSettingsProps = {
-    project: Tables<'projects'>;
+    project: projects;
     repositoryName: string | null;
 };
 

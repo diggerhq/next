@@ -8,13 +8,13 @@ import { T } from "@/components/ui/Typography";
 import { getLoggedInUserOrganizationRole, getOrganizationTitle } from "@/data/user/organizations";
 import { getAllProjectsInOrganization, getProjectsForUser } from "@/data/user/projects";
 import { getSlimTeamById, getTeams } from "@/data/user/teams";
-import { Tables } from "@/lib/database.types";
 import { Enum } from "@/types";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import {
   organizationParamSchema,
   projectsfilterSchema
 } from "@/utils/zod-schemas/params";
+import { projects as projectsDbType } from '@prisma/client';
 import { Layers, Plus, Settings } from "lucide-react";
 import type { Metadata } from 'next';
 import Link from "next/link";
@@ -36,7 +36,7 @@ async function Projects({
   userId: string;
   userRole: Enum<'organization_member_role'>;
 }) {
-  let projects: Tables<'projects'>[];
+  let projects: projectsDbType[];
 
   if (userRole === 'admin') {
     projects = await getAllProjectsInOrganization({
@@ -55,7 +55,7 @@ async function Projects({
   const projectWithTeamNames = await Promise.all(projects.map(async (project) => {
     if (project.team_id) {
       try {
-        const team = await getSlimTeamById(project.team_id);
+        const team = await getSlimTeamById(Number(project.team_id));
         return { ...project, teamName: team?.name || 'Unknown Team' };
       } catch (error) {
         console.error(`Error fetching team for project ${project.id}:`, error);
