@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Table } from "@/types";
+import { projects } from "@prisma/client";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { CalendarDays, Clock, Link as LinkIcon } from "lucide-react";
@@ -35,7 +35,7 @@ const itemVariants = {
 };
 
 type ProjectCardsProps = {
-  projects: (Table<"projects"> & { teamName?: string })[];
+  projects: (projects & { teamName?: string })[];
 }
 
 export const ProjectsCardList = ({

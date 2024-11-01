@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import type { Tables } from '@/lib/database.types';
+import { ProjectListType } from '@/data/user/projects';
 import {
   flexRender,
   getCoreRowModel,
@@ -24,9 +24,6 @@ import { GitBranch } from 'lucide-react';
 import moment from 'moment';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ProjectListType } from './ProjectsWithPagination';
-
-type ProjectWithRepo = Tables<'projects'> & { repoFullName: string | null };
 
 type Props = {
   projects: ProjectListType[];

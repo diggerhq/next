@@ -1,17 +1,9 @@
 "use server";
-import { ProjectListType } from "@/app/(dynamic-pages)/(authenticated-pages)/(application-pages)/org/[organizationId]/(specific-organization-pages)/projects/ProjectsWithPagination";
-import { CommentList } from "@/components/Projects/CommentList";
-import type { Tables } from "@/lib/database.types";
-import { supabaseAdminClient } from "@/supabase-clients/admin/supabaseAdminClient";
-import { createSupabaseUserServerActionClient } from "@/supabase-clients/user/createSupabaseUserServerActionClient";
-import { createSupabaseUserServerComponentClient } from "@/supabase-clients/user/createSupabaseUserServerComponentClient";
-import type { CommentWithUser, Enum, SAPayload } from "@/types";
-import { normalizeComment } from "@/utils/comments";
+import type { Enum, SAPayload } from "@/types";
 import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import { PrismaClient, projects } from '@prisma/client';
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
-import { Suspense } from "react";
 import { getRepoDetails } from "./repos";
 
 
@@ -44,43 +36,52 @@ export async function getSlimProjectById(projectId: string) {
   }
 }
 
-export const getSlimProjectBySlug = async (projectSlug: string) => {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from("projects")
-    .select("id, slug, name, organization_id, branch, deleted_at")
-    .eq("slug", projectSlug)
-    .single();
-  if (error) {
-    throw error;
+export async function getSlimProjectBySlug(projectSlug: string) {
+  const prisma = new PrismaClient();
+
+  try {
+    const project = await prisma.projects.findUnique({
+      where: {
+        slug: projectSlug,
+      },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        organization_id: true,
+        branch: true,
+        deleted_at: true,
+      },
+    });
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    return project;
+  } finally {
+    await prisma.$disconnect();
   }
-  return data;
 }
 
 export async function getProjectById(projectId: string) {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from("projects")
-    .select("*")
-    .eq("id", projectId)
-    .single();
-  if (error) {
-    throw error;
-  }
-  return data;
-}
+  const prisma = new PrismaClient();
 
-export async function getProjectTitleById(projectId: string) {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from("projects")
-    .select("name")
-    .eq("id", projectId)
-    .single();
-  if (error) {
-    throw error;
+  try {
+    const project = await prisma.projects.findUnique({
+      where: {
+        id: projectId,
+      }
+    });
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    return project;
+  } finally {
+    await prisma.$disconnect();
   }
-  return data.name;
 }
 
 export const createProjectAction = async ({
@@ -170,120 +171,134 @@ export const createProjectAction = async ({
   }
 };
 
-export const getProjectComments = async (
-  projectId: string,
-): Promise<Array<CommentWithUser>> => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from("project_comments")
-    .select("*, user_profiles(*)")
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: false });
-  if (error) {
-    throw error;
+export async function approveProjectAction(projectId: string): Promise<SAPayload<projects>> { // Replace 'Project' with your Prisma Project type
+  const prisma = new PrismaClient();
+
+  try {
+    const updatedProject = await prisma.projects.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        project_status: 'approved'
+      }
+    });
+
+    revalidatePath(`/project/${projectId}`, "layout");
+
+    return {
+      status: 'success',
+      data: updatedProject
+    };
+
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error instanceof Error ? error.message : 'Failed to approve project'
+    };
+  } finally {
+    await prisma.$disconnect();
   }
+}
 
-  return data.map(normalizeComment);
-};
+export async function rejectProjectAction(projectId: string): Promise<SAPayload<projects>> {
+  const prisma = new PrismaClient();
 
-export const createProjectCommentAction = async (
-  projectId: string,
-  text: string,
-): Promise<SAPayload<{ id: number, commentList: React.JSX.Element }>> => {
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const user = await serverGetLoggedInUser();
-  const { data, error } = await supabaseClient
-    .from("project_comments")
-    .insert({ project_id: projectId, text, user_id: user.id! }) //TODO remove assertion or resolve
-    .select("*, user_profiles(*)")
-    .single();
-  if (error) {
-    return { status: 'error', message: error.message };
+  try {
+    const updatedProject = await prisma.projects.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        project_status: 'draft'
+      }
+    });
+
+    revalidatePath(`/project/${projectId}`, "layout");
+
+    return {
+      status: 'success',
+      data: updatedProject
+    };
+
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error instanceof Error ? error.message : 'Failed to reject project'
+    };
+  } finally {
+    await prisma.$disconnect();
   }
-  revalidatePath(`/project/${projectId}`, "page");
+}
 
-  return {
-    status: 'success',
-    data: {
-      id: data.id,
-      commentList: (
-        <Suspense>
-          <CommentList comments={[normalizeComment(data)]} />
-        </Suspense>
-      ),
-    },
-  };
-};
+export async function submitProjectForApprovalAction(projectId: string): Promise<SAPayload<projects>> {
+  const prisma = new PrismaClient();
 
-export const approveProjectAction = async (projectId: string): Promise<SAPayload<Tables<"projects">>> => {
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const { data, error } = await supabaseClient
-    .from("projects")
-    .update({ project_status: "approved" })
-    .eq("id", projectId)
-    .select("*")
-    .single();
+  try {
+    const updatedProject = await prisma.projects.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        project_status: 'pending_approval'
+      }
+    });
 
-  if (error) {
-    return { status: 'error', message: error.message };
+    revalidatePath(`/project/${projectId}`, "layout");
+
+    return {
+      status: 'success',
+      data: updatedProject
+    };
+
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error instanceof Error ? error.message : 'Failed to submit project for approval'
+    };
+  } finally {
+    await prisma.$disconnect();
   }
+}
 
-  revalidatePath(`/project/${projectId}`, "layout");
-  return { status: 'success', data };
-};
+export async function markProjectAsCompletedAction(projectId: string): Promise<SAPayload<projects>> {
+  const prisma = new PrismaClient();
 
-export const rejectProjectAction = async (projectId: string): Promise<SAPayload<Tables<"projects">>> => {
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const { data, error } = await supabaseClient
-    .from("projects")
-    .update({ project_status: "draft" })
-    .eq("id", projectId)
-    .select("*")
-    .single();
+  try {
+    const updatedProject = await prisma.projects.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        project_status: 'completed'
+      }
+    });
 
-  if (error) {
-    return { status: 'error', message: error.message };
+    revalidatePath(`/project/${projectId}`, "layout");
+
+    return {
+      status: 'success',
+      data: updatedProject
+    };
+
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error instanceof Error ? error.message : 'Failed to mark project as completed'
+    };
+  } finally {
+    await prisma.$disconnect();
   }
+}
 
-  revalidatePath(`/project/${projectId}`, "layout");
-  return { status: 'success', data };
-};
-
-export const submitProjectForApprovalAction = async (
-  projectId: string,
-): Promise<SAPayload<Tables<"projects">>> => {
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const { data, error } = await supabaseClient
-    .from("projects")
-    .update({ project_status: "pending_approval" })
-    .eq("id", projectId)
-    .select("*")
-    .single();
-
-  if (error) {
-    return { status: "error", message: error.message };
-  }
-
-  revalidatePath(`/project/${projectId}`, "layout");
-  return { status: "success", data };
-};
-
-export const markProjectAsCompletedAction = async (projectId: string): Promise<SAPayload<Tables<"projects">>> => {
-  const supabaseClient = createSupabaseUserServerActionClient();
-  const { data, error } = await supabaseClient
-    .from("projects")
-    .update({ project_status: "completed" })
-    .eq("id", projectId)
-    .select("*")
-    .single();
-
-  if (error) {
-    return { status: 'error', message: error.message };
-  }
-
-  revalidatePath(`/project/${projectId}`, "layout");
-  return { status: 'success', data };
-};
+export type ProjectListType = {
+  id: string;
+  name: string;
+  latest_action_on: string | null;
+  created_at: string | Date;
+  repo_full_name: string | null;
+  slug: string;
+}
 
 export async function getProjectsForUser({
   userId,
@@ -297,38 +312,56 @@ export async function getProjectsForUser({
   organizationId: string;
   query?: string;
   teamIds?: number[];
-}): Promise<Tables<'projects'>[]> {
-  const supabase = createSupabaseUserServerComponentClient();
+}): Promise<projects[]> {
+  const prisma = new PrismaClient();
 
-  let supabaseQuery = supabase
-    .from('projects')
-    .select('*, teams(name)')
-    .eq('organization_id', organizationId)
-    .ilike('name', `%${query}%`)
-    .is('deleted_at', null);
+  try {
+    const whereCondition: any = {
+      organization_id: organizationId,
+      name: {
+        contains: query,
+        mode: 'insensitive', // This is equivalent to ilike
+      },
+      deleted_at: null,
+    };
 
-  if (userRole !== 'admin' || userId !== 'owner') {
-    // For non-admin users, get their team memberships
-    const { data: userTeams } = await supabase
-      .from('team_members')
-      .select('team_id')
-      .eq('user_id', userId);
+    if (userRole !== 'admin' && userId !== 'owner') {
+      const userTeams = await prisma.team_members.findMany({
+        where: {
+          user_id: userId
+        },
+        select: {
+          team_id: true
+        }
+      });
 
-    const userTeamIds = userTeams?.map(team => team.team_id) || [];
+      const userTeamIds = userTeams.map(team => team.team_id);
 
-    // Filter by user's teams and organization-level projects
-    supabaseQuery = supabaseQuery.or(`team_id.is.null,team_id.in.(${userTeamIds.join(',')})`);
+      whereCondition.OR = [
+        { team_id: null },
+        { team_id: { in: userTeamIds } }
+      ];
+    }
+
+    if (teamIds.length > 0) {
+      whereCondition.team_id = { in: teamIds };
+    }
+
+    const projects = await prisma.projects.findMany({
+      where: whereCondition,
+      include: {
+        teams: {
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+
+    return projects;
+  } finally {
+    await prisma.$disconnect();
   }
-
-  // Apply team filter if provided
-  if (teamIds.length > 0) {
-    supabaseQuery = supabaseQuery.in('team_id', teamIds);
-  }
-
-  const { data, error } = await supabaseQuery;
-
-  if (error) throw error;
-  return data || [];
 }
 
 export async function getProjectsListForUser({
@@ -346,61 +379,82 @@ export async function getProjectsListForUser({
   teamIds?: number[];
   driftedOnly?: boolean;
 }): Promise<ProjectListType[]> {
-  const supabase = createSupabaseUserServerComponentClient();
+  const prisma = new PrismaClient();
 
-  let supabaseQuery = supabase
-    .from('projects')
-    .select('id, name, slug, latest_action_on, created_at, repo_id, latest_drift_output')
-    .eq('organization_id', organizationId)
-    .ilike('name', `%${query}%`)
-    .is('deleted_at', null);
+  try {
+    const whereCondition: any = {
+      organization_id: organizationId,
+      name: {
+        contains: query,
+        mode: 'insensitive', // equivalent to ilike
+      },
+      deleted_at: null,
+    };
 
-  if (userRole !== 'admin' || userId !== 'owner') {
-    // For non-admin users, get their team memberships
-    const { data: userTeams } = await supabase
-      .from('team_members')
-      .select('team_id')
-      .eq('user_id', userId);
+    if (userRole !== 'admin' && userId !== 'owner') {
+      const userTeams = await prisma.team_members.findMany({
+        where: {
+          user_id: userId
+        },
+        select: {
+          team_id: true
+        }
+      });
 
-    const userTeamIds = userTeams?.map(team => team.team_id) || [];
+      const userTeamIds = userTeams.map(team => team.team_id);
 
-    // Filter by user's teams and organization-level projects
-    supabaseQuery = supabaseQuery.or(`team_id.is.null,team_id.in.(${userTeamIds.join(',')})`);
-  }
+      whereCondition.OR = [
+        { team_id: null },
+        { team_id: { in: userTeamIds } }
+      ];
+    }
 
-  // Apply team filter if provided
-  if (teamIds.length > 0) {
-    supabaseQuery = supabaseQuery.in('team_id', teamIds);
-  }
+    if (teamIds.length > 0) {
+      whereCondition.team_id = { in: teamIds };
+    }
 
-  const { data, error } = await supabaseQuery.order('latest_action_on', {
-    ascending: false,
-  });
+    const projects = await prisma.projects.findMany({
+      where: whereCondition,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        latest_action_on: true,
+        created_at: true,
+        repo_id: true,
+        latest_drift_output: true,
+      },
+      orderBy: {
+        latest_action_on: 'desc'
+      }
+    });
 
-  if (error) {
+    if (!projects) return [];
+
+    const driftFilteredProjects = driftedOnly
+      ? projects.filter(project => !!project.latest_drift_output)
+      : projects;
+
+    const projectsWithRepoDetails = await Promise.all(
+      driftFilteredProjects.map(async (project) => {
+        const repoDetails = await getRepoDetails(Number(project.repo_id));
+        const { repo_id, ...projectWithoutRepoId } = project;
+        return {
+          ...projectWithoutRepoId,
+          created_at: String(projectWithoutRepoId.created_at),
+          repo_full_name: repoDetails?.repo_full_name || null,
+        };
+      })
+    );
+
+    return projectsWithRepoDetails;
+
+  } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
+  } finally {
+    await prisma.$disconnect();
   }
-
-  if (!data) return [];
-
-  const driftFilteredProjects = driftedOnly
-    ? data.filter(project => !!project.latest_drift_output)
-    : data;
-
-  // Fetch repo details for each project
-  const projectsWithRepoDetails = await Promise.all(
-    driftFilteredProjects.map(async (project) => {
-      const repoDetails = await getRepoDetails(project.repo_id);
-      const { repo_id, ...projectWithoutRepoId } = project;
-      return {
-        ...projectWithoutRepoId,
-        repo_full_name: repoDetails?.repo_full_name || null,
-      };
-    })
-  );
-
-  return projectsWithRepoDetails;
 }
 
 export async function getSlimProjectsForUser({
@@ -414,57 +468,76 @@ export async function getSlimProjectsForUser({
   projectIds: string[];
   teamIds?: number[];
 }): Promise<ProjectListType[]> {
-  const supabase = createSupabaseUserServerComponentClient();
+  const prisma = new PrismaClient();
 
-  let supabaseQuery = supabase
-    .from('projects')
-    .select('id,name, slug, latest_action_on, created_at, repo_id')
-    .in('id', projectIds)
-    .is('deleted_at', null);
+  try {
+    const whereCondition: any = {
+      id: { in: projectIds },
+      deleted_at: null,
+    };
 
-  if (userRole !== 'admin' || userId !== 'owner') {
-    // For non-admin users, get their team memberships
-    const { data: userTeams } = await supabase
-      .from('team_members')
-      .select('team_id')
-      .eq('user_id', userId);
+    // Handle team filtering for non-admin users
+    if (userRole !== 'admin' && userId !== 'owner') {
+      const userTeams = await prisma.team_members.findMany({
+        where: {
+          user_id: userId
+        },
+        select: {
+          team_id: true
+        }
+      });
 
-    const userTeamIds = userTeams?.map(team => team.team_id) || [];
+      const userTeamIds = userTeams.map(team => team.team_id);
 
-    // Filter by user's teams and organization-level projects
-    supabaseQuery = supabaseQuery.or(`team_id.is.null,team_id.in.(${userTeamIds.join(',')})`);
-  }
+      whereCondition.OR = [
+        { team_id: null },
+        { team_id: { in: userTeamIds } }
+      ];
+    }
 
-  // Apply team filter if provided
-  if (teamIds.length > 0) {
-    supabaseQuery = supabaseQuery.in('team_id', teamIds);
-  }
+    if (teamIds.length > 0) {
+      whereCondition.team_id = { in: teamIds };
+    }
 
-  const { data, error } = await supabaseQuery.order('latest_action_on', {
-    ascending: false,
-  });
+    const projects = await prisma.projects.findMany({
+      where: whereCondition,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        latest_action_on: true,
+        created_at: true,
+        repo_id: true,
+      },
+      orderBy: {
+        latest_action_on: 'desc'
+      }
+    });
 
-  if (error) {
+    if (!projects) return [];
+
+    const projectsWithRepoDetails = await Promise.all(
+      projects.map(async (project) => {
+        const repoDetails = await getRepoDetails(Number(project.repo_id));
+        const { repo_id, ...projectWithoutRepoId } = project;
+        return {
+          ...projectWithoutRepoId,
+          created_at: String(projectWithoutRepoId.created_at),
+          repo_full_name: repoDetails?.repo_full_name || null,
+        };
+      })
+    );
+
+    return projectsWithRepoDetails;
+
+  } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
+  } finally {
+    await prisma.$disconnect();
   }
-
-  if (!data) return [];
-
-  // Fetch repo details for each project
-  const projectsWithRepoDetails = await Promise.all(
-    data.map(async (project) => {
-      const repoDetails = await getRepoDetails(project.repo_id);
-      const { repo_id, ...projectWithoutRepoId } = project;
-      return {
-        ...projectWithoutRepoId,
-        repo_full_name: repoDetails?.repo_full_name || null,
-      };
-    })
-  );
-
-  return projectsWithRepoDetails;
 }
+
 export async function getProjectsIdsListForUser({
   userId,
   userRole,
@@ -478,57 +551,77 @@ export async function getProjectsIdsListForUser({
   query?: string;
   teamIds?: number[];
 }): Promise<string[]> {
-  const supabase = createSupabaseUserServerComponentClient();
+  const prisma = new PrismaClient();
 
-  let supabaseQuery = supabase
-    .from('projects')
-    .select('id,name, slug, latest_action_on, created_at, repo_id')
-    .eq('organization_id', organizationId)
-    .ilike('name', `%${query}%`)
-    .is('deleted_at', null);
+  try {
+    const whereCondition: any = {
+      organization_id: organizationId,
+      name: {
+        contains: query,
+        mode: 'insensitive', // equivalent to ilike
+      },
+      deleted_at: null,
+    };
 
-  if (userRole !== 'admin' || userId !== 'owner') {
-    // For non-admin users, get their team memberships
-    const { data: userTeams } = await supabase
-      .from('team_members')
-      .select('team_id')
-      .eq('user_id', userId);
+    // Handle team filtering for non-admin users
+    if (userRole !== 'admin' && userId !== 'owner') {
+      const userTeams = await prisma.team_members.findMany({
+        where: {
+          user_id: userId
+        },
+        select: {
+          team_id: true
+        }
+      });
 
-    const userTeamIds = userTeams?.map(team => team.team_id) || [];
+      const userTeamIds = userTeams.map(team => team.team_id);
 
-    // Filter by user's teams and organization-level projects
-    supabaseQuery = supabaseQuery.or(`team_id.is.null,team_id.in.(${userTeamIds.join(',')})`);
-  }
+      whereCondition.OR = [
+        { team_id: null },
+        { team_id: { in: userTeamIds } }
+      ];
+    }
 
-  // Apply team filter if provided
-  if (teamIds.length > 0) {
-    supabaseQuery = supabaseQuery.in('team_id', teamIds);
-  }
+    if (teamIds.length > 0) {
+      whereCondition.team_id = { in: teamIds };
+    }
 
-  const { data, error } = await supabaseQuery.order('latest_action_on', {
-    ascending: false,
-  });
+    const projects = await prisma.projects.findMany({
+      where: whereCondition,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        latest_action_on: true,
+        created_at: true,
+        repo_id: true,
+      },
+      orderBy: {
+        latest_action_on: 'desc'
+      }
+    });
 
-  if (error) {
+    if (!projects) return [];
+
+    const projectsWithRepoDetails = await Promise.all(
+      projects.map(async (project) => {
+        const repoDetails = await getRepoDetails(Number(project.repo_id));
+        const { repo_id, ...projectWithoutRepoId } = project;
+        return {
+          ...projectWithoutRepoId,
+          repo_full_name: repoDetails?.repo_full_name || null,
+        };
+      })
+    );
+
+    return projectsWithRepoDetails.map(project => project.id);
+
+  } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
+  } finally {
+    await prisma.$disconnect();
   }
-
-  if (!data) return [];
-
-  // Fetch repo details for each project
-  const projectsWithRepoDetails = await Promise.all(
-    data.map(async (project) => {
-      const repoDetails = await getRepoDetails(project.repo_id);
-      const { repo_id, ...projectWithoutRepoId } = project;
-      return {
-        ...projectWithoutRepoId,
-        repo_full_name: repoDetails?.repo_full_name || null,
-      };
-    })
-  );
-
-  return projectsWithRepoDetails.map(project => project.id);
 }
 
 export async function getProjectsCountForUser({
@@ -542,327 +635,300 @@ export async function getProjectsCountForUser({
   query?: string;
   teamIds?: number[];
 }): Promise<number> {
-  const supabase = createSupabaseUserServerComponentClient();
+  const prisma = new PrismaClient();
 
-  // Get the user's role in the organization
-  const { data: userRole } = await supabase
-    .from('organization_members')
-    .select('member_role')
-    .eq('organization_id', organizationId)
-    .eq('member_id', userId)
-    .single();
+  try {
+    const userRole = await prisma.organization_members.findFirst({
+      where: {
+        AND: [
+          { organization_id: organizationId },
+          { member_id: userId },
+        ]
+      },
+      select: {
+        member_role: true
+      }
+    });
 
-  if (!userRole) {
-    throw new Error('User not found in organization');
+    if (!userRole) {
+      throw new Error('User not found in organization');
+    }
+
+    const whereCondition: any = {
+      organization_id: organizationId,
+      name: {
+        contains: query,
+        mode: 'insensitive', // equivalent to ilike
+      },
+      deleted_at: null,
+    };
+
+    // Handle team filtering for non-admin users
+    if (userRole.member_role !== 'admin') {
+      const userTeams = await prisma.team_members.findMany({
+        where: {
+          user_id: userId
+        },
+        select: {
+          team_id: true
+        }
+      });
+
+      const userTeamIds = userTeams.map(team => team.team_id);
+
+      whereCondition.OR = [
+        { team_id: null },
+        { team_id: { in: userTeamIds } }
+      ];
+    }
+
+    if (teamIds.length > 0) {
+      whereCondition.team_id = { in: teamIds };
+    }
+
+    const count = await prisma.projects.count({
+      where: whereCondition
+    });
+
+    return count;
+  } finally {
+    await prisma.$disconnect();
   }
-
-  let supabaseQuery = supabase
-    .from('projects')
-    .select('*', { count: 'exact', head: true })
-    .eq('organization_id', organizationId)
-    .ilike('name', `%${query}%`)
-    .is('deleted_at', null);
-
-  if (userRole.member_role !== 'admin') {
-    // For non-admin users, get their team memberships
-    const { data: userTeams } = await supabase
-      .from('team_members')
-      .select('team_id')
-      .eq('user_id', userId);
-
-    const userTeamIds = userTeams?.map(team => team.team_id) || [];
-
-    // Filter by user's teams and organization-level projects
-    supabaseQuery = supabaseQuery.or(`team_id.is.null,team_id.in.(${userTeamIds.join(',')})`);
-  }
-
-  // Apply team filter if provided
-  if (teamIds.length > 0) {
-    supabaseQuery = supabaseQuery.in('team_id', teamIds);
-  }
-
-  const { count, error } = await supabaseQuery;
-
-  if (error) throw error;
-  return count || 0;
 }
 
-
-
-
-
-export const getAllProjectsInOrganization = async ({
+export async function getAllProjectsInOrganization({
   organizationId,
   query = "",
   page = 1,
   limit = 20,
 }: {
+  organizationId: string;
   query?: string;
   page?: number;
-  organizationId: string;
   limit?: number;
-}) => {
-  const zeroIndexedPage = page - 1;
-  const supabase = createSupabaseUserServerComponentClient();
-  let supabaseQuery = supabase
-    .from("projects")
-    .select("*")
-    .eq("organization_id", organizationId)
-    .is('deleted_at', null)
-    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
+}) {
+  const prisma = new PrismaClient();
 
-  if (query) {
-    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
-  }
+  try {
+    const zeroIndexedPage = page - 1;
 
-  const { data, error } = await supabaseQuery.order("created_at", {
-    ascending: false,
-  });
+    const whereCondition: any = {
+      organization_id: organizationId,
+      deleted_at: null,
+    };
 
-  if (error) {
+    if (query) {
+      whereCondition.name = {
+        contains: query,
+        mode: 'insensitive', // equivalent to ilike
+      };
+    }
+
+    const projects = await prisma.projects.findMany({
+      where: whereCondition,
+      take: limit,
+      skip: zeroIndexedPage * limit,
+      orderBy: {
+        created_at: 'desc'
+      }
+    });
+
+    return projects;
+
+  } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
+  } finally {
+    await prisma.$disconnect();
   }
+}
 
-  return data || [];
-};
-
-export const getAllProjectIdsInOrganization = async (organizationId: string) => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const supabaseQuery = supabase
-    .from("projects")
-    .select("id")
-    .eq("organization_id", organizationId)
-    .is('deleted_at', null)
-    .order("created_at", { ascending: false });
-
-  const { data, error } = await supabaseQuery;
-
-  if (error) {
-    console.error("Error fetching project IDs:", error);
-    return [];
-  }
-
-  return data?.map(project => project.id) || [];
-};
-
-export const getProjectIdsInOrganization = async (organizationId: string, count: number) => {
-  const supabase = createSupabaseUserServerComponentClient();
-  const supabaseQuery = supabase
-    .from("projects")
-    .select("id")
-    .is('deleted_at', null)
-    .eq("organization_id", organizationId);
-
-  const { data, error } = await supabaseQuery;
-
-  if (error) {
-    console.error("Error fetching project IDs:", error);
-    return [];
-  }
-
-  const projectIds = data?.map(project => project.id) || [];
-
-  // Shuffle the array and slice to get random project IDs
-  return projectIds.sort(() => Math.random() - 0.5).slice(0, count);
-};
-
-
-export const getOrganizationLevelProjects = async ({
+export async function getAllProjectsListInOrganization({
   organizationId,
   query = "",
   page = 1,
-  limit = 5,
+  limit = 20,
 }: {
+  organizationId: string;
   query?: string;
   page?: number;
-  organizationId: string;
   limit?: number;
-}) => {
-  const zeroIndexedPage = page - 1;
-  const supabase = createSupabaseUserServerComponentClient();
-  let supabaseQuery = supabase
-    .from("projects")
-    .select("*")
-    .eq("organization_id", organizationId)
-    .is('team_id', null)
-    .is('deleted_at', null)
-    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
+}) {
+  const prisma = new PrismaClient();
 
-  if (query) {
-    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
-  }
+  try {
+    const zeroIndexedPage = page - 1;
 
-  const { data, error } = await supabaseQuery.order("created_at", {
-    ascending: false,
-  });
+    // Build the where condition
+    const whereCondition: any = {
+      organization_id: organizationId,
+      deleted_at: null,
+    };
 
-  if (error) {
+    // Add search condition if query exists
+    if (query) {
+      whereCondition.name = {
+        contains: query,
+        mode: 'insensitive', // equivalent to ilike
+      };
+    }
+
+    const projects = await prisma.projects.findMany({
+      where: whereCondition,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        latest_action_on: true,
+        created_at: true,
+        repo_id: true,
+      },
+      take: limit,
+      skip: zeroIndexedPage * limit,
+      orderBy: {
+        latest_action_on: 'desc'
+      }
+    });
+
+    if (!projects) return [];
+
+    // Fetch repo details for each project
+    const projectsWithRepoDetails = await Promise.all(
+      projects.map(async (project) => {
+        const repoDetails = await getRepoDetails(Number(project.repo_id));
+        const { repo_id, ...projectWithoutRepoId } = project;
+        return {
+          ...projectWithoutRepoId,
+          repo_full_name: repoDetails?.repo_full_name || null,
+        };
+      })
+    );
+
+    return projectsWithRepoDetails;
+
+  } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
+  } finally {
+    await prisma.$disconnect();
   }
+}
 
-  return data || [];
-};
-
-
-export const getProjects = async ({
+export async function getProjectsList({
   organizationId,
   teamId,
   query = "",
   page = 1,
   limit = 5,
 }: {
-  query?: string;
-  page?: number;
   organizationId: string;
   teamId: number | null;
-  limit?: number;
-}) => {
-  const zeroIndexedPage = page - 1;
-  const supabase = createSupabaseUserServerComponentClient();
-  let supabaseQuery = supabase
-    .from("projects")
-    .select("*")
-    .eq("organization_id", organizationId)
-    .is('deleted_at', null)
-    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
-
-  // Add team filter
-  if (teamId !== null) {
-    supabaseQuery = supabaseQuery.eq('team_id', teamId);
-  } else {
-    supabaseQuery = supabaseQuery.is('team_id', null);
-  }
-
-  if (query) {
-    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
-  }
-
-  const { data, error } = await supabaseQuery.order("created_at", {
-    ascending: false,
-  });
-
-  if (error) {
-    console.error("Error fetching projects:", error);
-    return [];
-  }
-
-  console.log('projects data', data);
-
-  return data || [];
-};
-
-export const getAllProjectsListInOrganization = async ({
-  organizationId,
-  query = "",
-  page = 1,
-  limit = 20,
-}: {
   query?: string;
   page?: number;
-  organizationId: string;
   limit?: number;
-}) => {
-  const zeroIndexedPage = page - 1;
-  const supabase = createSupabaseUserServerComponentClient();
-  let supabaseQuery = supabase
-    .from("projects")
-    .select("id,name, slug, latest_action_on, created_at, repo_id")
-    .eq("organization_id", organizationId)
-    .is('deleted_at', null)
-    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
+}): Promise<ProjectListType[]> {
+  const prisma = new PrismaClient();
 
-  if (query) {
-    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
-  }
+  try {
+    const zeroIndexedPage = page - 1;
 
-  const { data, error } = await supabaseQuery.order("latest_action_on", {
-    ascending: false,
-  });
+    const whereCondition: any = {
+      organization_id: organizationId,
+      deleted_at: null,
+    };
 
-  if (error) {
-    console.error("Error fetching projects:", error);
-    return [];
-  }
+    if (teamId !== null) {
+      whereCondition.team_id = teamId;
+    } else {
+      whereCondition.team_id = null;
+    }
 
-  if (!data) return [];
-
-  // Fetch repo details for each project
-  const projectsWithRepoDetails = await Promise.all(
-    data.map(async (project) => {
-      const repoDetails = await getRepoDetails(project.repo_id);
-      const { repo_id, ...projectWithoutRepoId } = project;
-      return {
-        ...projectWithoutRepoId,
-        repo_full_name: repoDetails?.repo_full_name || null,
+    if (query) {
+      whereCondition.name = {
+        contains: query,
+        mode: 'insensitive', // equivalent to ilike
       };
-    })
-  );
+    }
 
-  return projectsWithRepoDetails;
-};
+    const projects = await prisma.projects.findMany({
+      where: whereCondition,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        latest_action_on: true,
+        created_at: true,
+        repo_id: true,
+      },
+      take: limit,
+      skip: zeroIndexedPage * limit,
+      orderBy: {
+        latest_action_on: 'desc'
+      }
+    });
 
-export const getProjectsList = async ({
-  organizationId,
-  teamId,
-  query = "",
-  page = 1,
-  limit = 5,
-}: {
-  query?: string;
-  page?: number;
-  organizationId: string;
-  teamId: number | null;
-  limit?: number;
-}) => {
-  const zeroIndexedPage = page - 1;
-  const supabase = createSupabaseUserServerComponentClient();
-  let supabaseQuery = supabase
-    .from("projects")
-    .select("id,name, slug, latest_action_on, created_at, repo_id")
-    .eq("organization_id", organizationId)
-    .is('deleted_at', null)
-    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
+    if (!projects) return [];
 
-  // Add team filter
-  if (teamId !== null) {
-    supabaseQuery = supabaseQuery.eq('team_id', teamId);
-  } else {
-    supabaseQuery = supabaseQuery.is('team_id', null);
-  }
+    // Fetch repo details for each project
+    const projectsWithRepoDetails: ProjectListType[] = await Promise.all(
+      projects.map(async (project) => {
+        const repoDetails = await getRepoDetails(Number(project.repo_id));
+        const { repo_id, ...projectWithoutRepoId } = project;
+        return {
+          ...projectWithoutRepoId,
+          created_at: String(projectWithoutRepoId.created_at),
+          repo_full_name: repoDetails?.repo_full_name || null,
+        };
+      })
+    );
 
-  if (query) {
-    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
-  }
+    return projectsWithRepoDetails;
 
-  const { data, error } = await supabaseQuery.order("latest_action_on", {
-    ascending: false,
-  });
-
-  if (error) {
+  } catch (error) {
     console.error("Error fetching projects:", error);
     return [];
+  } finally {
+    await prisma.$disconnect();
   }
+}
 
-  if (!data) return [];
+export async function getProjectsTotalCount({
+  organizationId,
+  query = "",
+  page = 1,
+  limit = 5,
+}: {
+  organizationId: string;
+  query?: string;
+  page?: number;
+  limit?: number;
+}) {
+  const prisma = new PrismaClient();
 
-  // Fetch repo details for each project
-  const projectsWithRepoDetails: ProjectListType[] = await Promise.all(
-    data.map(async (project) => {
-      const repoDetails = await getRepoDetails(project.repo_id);
-      const { repo_id, ...projectWithoutRepoId } = project;
-      return {
-        ...projectWithoutRepoId,
-        repo_full_name: repoDetails?.repo_full_name || null,
+  try {
+    const whereCondition: any = {
+      organization_id: organizationId,
+    };
+
+    if (query) {
+      whereCondition.name = {
+        contains: query,
+        mode: 'insensitive', // equivalent to ilike
       };
-    })
-  );
+    }
 
-  return projectsWithRepoDetails;
-};
+    const totalCount = await prisma.projects.count({
+      where: whereCondition
+    });
 
-export const getProjectsTotalCount = async ({
+    return Math.ceil(totalCount / limit) || 0;
+
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function getProjectsForUserTotalCount({
   organizationId,
   query = "",
   page = 1,
@@ -872,80 +938,36 @@ export const getProjectsTotalCount = async ({
   query?: string;
   page?: number;
   limit?: number;
-}) => {
-  const zeroIndexedPage = page - 1;
-  let supabaseQuery = supabaseAdminClient
-    .from("projects")
-    .select("id", {
-      count: "exact",
-      head: true,
-    })
-    .eq("organization_id", organizationId)
-    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
+}) {
+  const prisma = new PrismaClient();
 
-  if (query) {
-    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
+  try {
+    // Build the where condition
+    const whereCondition: any = {
+      organization_id: organizationId,
+      deleted_at: null,
+    };
+
+    // Add search condition if query exists
+    if (query) {
+      whereCondition.name = {
+        contains: query,
+        mode: 'insensitive', // equivalent to ilike
+      };
+    }
+
+    // Get total count of matching records
+    const totalCount = await prisma.projects.count({
+      where: whereCondition
+    });
+
+    // Calculate total pages
+    return Math.ceil(totalCount / limit) || 0;
+
+  } finally {
+    await prisma.$disconnect();
   }
-
-  const { count, error } = await supabaseQuery.order("created_at", {
-    ascending: false,
-  });
-
-  if (error) {
-    throw error;
-  }
-
-  if (!count) {
-    return 0;
-  }
-
-  return Math.ceil(count / limit) ?? 0;
-};
-
-export const getProjectsForUserTotalCount = async ({
-  organizationId,
-  query = "",
-  page = 1,
-  limit = 5,
-}: {
-  organizationId: string;
-  query?: string;
-  page?: number;
-  limit?: number;
-}) => {
-  const zeroIndexedPage = page - 1;
-  let supabaseQuery = supabaseAdminClient
-    .from("projects")
-    .select("id", {
-      count: "exact",
-      head: true,
-    })
-    .eq("organization_id", organizationId)
-    .is('deleted_at', null)
-    .range(zeroIndexedPage * limit, (zeroIndexedPage + 1) * limit - 1);
-
-  if (query) {
-    supabaseQuery = supabaseQuery.ilike("name", `%${query}%`);
-  }
-
-  const { count, error } = await supabaseQuery.order("created_at", {
-    ascending: false,
-  });
-
-  if (error) {
-    throw error;
-  }
-
-  if (!count) {
-    return 0;
-  }
-
-  return Math.ceil(count / limit) ?? 0;
-};
-
-
-// data/user/projects.ts
-
+}
 
 export async function updateProjectSettingsAction({
   projectId,
@@ -962,22 +984,24 @@ export async function updateProjectSettingsAction({
 }: {
   projectId: string;
   terraformWorkingDir: string;
-  iac_type: 'terraform' | 'terragrunt' | 'opentofu',
-  workspace: string,
-  workflow_file: string,
-  include_patterns?: string,
-  exclude_patterns?: string,
+  iac_type: 'terraform' | 'terragrunt' | 'opentofu';
+  workspace: string;
+  workflow_file: string;
+  include_patterns?: string;
+  exclude_patterns?: string;
   labels: string[];
   managedState: boolean;
   is_drift_detection_enabled: boolean;
   drift_crontab: string;
-}): Promise<SAPayload<unknown>> {
-  const supabase = createSupabaseUserServerComponentClient();
+}): Promise<SAPayload<projects>> {
+  const prisma = new PrismaClient();
 
   try {
-    const { data, error } = await supabase
-      .from('projects')
-      .update({
+    const updatedProject = await prisma.projects.update({
+      where: {
+        id: projectId
+      },
+      data: {
         terraform_working_dir: terraformWorkingDir,
         iac_type,
         workspace,
@@ -986,37 +1010,53 @@ export async function updateProjectSettingsAction({
         exclude_patterns,
         labels,
         is_managing_state: managedState,
-        is_drift_detection_enabled: is_drift_detection_enabled,
-        drift_crontab: drift_crontab,
-      })
-      .eq('id', projectId)
-      .select()
-      .single();
+        is_drift_detection_enabled,
+        drift_crontab,
+      }
+    });
 
-    if (error) throw error;
+    return {
+      status: 'success',
+      data: updatedProject
+    };
 
-    return { status: 'success', data };
   } catch (error) {
     console.error("Error updating project settings:", error);
-    return { status: 'error', message: 'Failed to update project settings' };
+    return {
+      status: 'error',
+      message: 'Failed to update project settings'
+    };
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function deleteProject(projectId: string): Promise<SAPayload<unknown>> {
-  const supabase = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabase
-    .from('projects')
-    .update({
-      deleted_at: new Date().toISOString(),
-    })
-    .eq('id', projectId)
-    .single();
+  const prisma = new PrismaClient();
 
-  if (error) {
-    return { status: 'error', message: error.message };
+  try {
+    const updatedProject = await prisma.projects.update({
+      where: {
+        id: projectId
+      },
+      data: {
+        deleted_at: new Date()
+      }
+    });
+
+    return {
+      status: 'success',
+      data: updatedProject
+    };
+
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error instanceof Error ? error.message : 'Failed to delete project'
+    };
+  } finally {
+    await prisma.$disconnect();
   }
-
-  return { status: 'success', data };
 }
 
 export async function triggerApplyAction({ projectId }: { projectId: string }): Promise<SAPayload<unknown>> {

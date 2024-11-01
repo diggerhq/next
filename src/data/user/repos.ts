@@ -1,22 +1,30 @@
 'use server';
 
-import { createSupabaseUserServerComponentClient } from '@/supabase-clients/user/createSupabaseUserServerComponentClient';
 import { PrismaClient } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 export async function getRepoDetails(repoId: number) {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const { data, error } = await supabaseClient
-    .from('repos')
-    .select('id, repo_full_name')
-    .eq('id', repoId)
-    .single();
+  const prisma = new PrismaClient();
 
-  if (error) {
-    throw error;
+  try {
+    const repo = await prisma.repos.findUnique({
+      where: {
+        id: repoId,
+      },
+      select: {
+        id: true,
+        repo_full_name: true,
+      },
+    });
+
+    if (!repo) {
+      throw new Error('Repository not found');
+    }
+
+    return repo;
+  } finally {
+    await prisma.$disconnect();
   }
-
-  return data;
 }
 
 export async function getOrganizationRepos(organizationId: string) {

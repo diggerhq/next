@@ -5,15 +5,6 @@ import { serverGetLoggedInUser } from "@/utils/server/serverGetLoggedInUser";
 import { projectsfilterSchema } from "@/utils/zod-schemas/params";
 import { OrganizationProjectsTable } from "./OrganizationProjectsTable";
 
-export type ProjectListType = {
-    id: string;
-    name: string;
-    latest_action_on: string | null;
-    created_at: string;
-    repo_full_name: string | null;
-    slug: string;
-}
-
 export async function UserProjectsWithPagination({
     organizationId,
     searchParams,
