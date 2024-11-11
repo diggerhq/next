@@ -214,7 +214,7 @@ export default function CreateProjectForm({ organizationId, repositories, teams,
                                 control={control}
                                 render={({ field }) => (
                                     <div className="relative">
-                                        <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value.toString()}>
+                                        <Select onValueChange={(value) => field.onChange(BigInt(value))} value={field.value.toString()}>
                                             <SelectTrigger className={`w-full ${errors.repository ? 'border-destructive' : ''}`}>
                                                 <SelectValue placeholder="Select a repository" />
                                             </SelectTrigger>
