@@ -18,9 +18,12 @@ export async function validateM2MToken(token: string) {
       new URL(`${auth0Domain}/.well-known/jwks.json`),
     );
 
+    // TODO: figure out the correct typing here
+    // @ts-ignore
     const { payload } = await jwtVerify(token, jwks, {
-      audience,
+      audience: [audience],
       issuer: `${auth0Domain}/`,
+      algorithms: ['RS256'],
     });
 
     return {
