@@ -1,22 +1,13 @@
-import { PrismaClient } from '@prisma/client';
+import { getM2MApplication } from '@/data/user/m2m';
 import { createRemoteJWKSet, decodeJwt, jwtVerify } from 'jose';
 export async function validateM2MToken(token: string) {
   try {
     // Decode without verification to get clientId
     const decoded = decodeJwt(token);
-    const clientId = decoded.azp || decoded.client_id;
+    const clientId = String(decoded.azp) || String(decoded.client_id);
 
     // Only verify if this clientId is registered in our system
-    const prisma = new PrismaClient();
-    const m2mApp = await prisma.user_m2m_applications.findFirst({
-      where: { clientId: clientId || '' },
-    });
-
-    if (!m2mApp) {
-      console.log('No matching M2M application found for client ID:', clientId);
-      return null;
-    }
-
+    const m2mApp = await getM2MApplication(clientId);
     console.log('verifying app for:', m2mApp.email);
 
     // Verify the token
