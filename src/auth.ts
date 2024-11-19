@@ -4,7 +4,7 @@ import Auth0 from 'next-auth/providers/auth0';
 import Okta from 'next-auth/providers/okta';
 
 function getAuthProviders() : OAuthConfig<any>[] {
-  let providers : OAuthConfig<any>[] = []
+  const providers : OAuthConfig<any>[] = []
   if (process.env.AUTH_PROVIDER_AUTH0_ENABLED==="1") {
     providers.push(Auth0({
       authorization: { params: { prompt: 'login' } },
