@@ -3,12 +3,13 @@ import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { createOrganization } from "@/data/user/organizations";
+import { createOrganization, setUserMetaDataWithOrgCreated } from "@/data/user/organizations";
 import { generateOrganizationSlug } from "@/lib/utils";
 import { CreateOrganizationSchema, createOrganizationSchema } from "@/utils/zod-schemas/organization";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import Cookies from 'js-cookie';
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 type OrganizationCreationProps = {
@@ -20,6 +21,14 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
   const { register, handleSubmit, setValue, formState: { errors, isValid } } = useForm<CreateOrganizationSchema>({
     resolver: zodResolver(createOrganizationSchema),
   });
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_SKIP_ORG_CREATION === "true") {
+      setUserMetaDataWithOrgCreated()
+      onSuccess()
+      return
+    }
+  }, [onSuccess])
 
   const createOrgMutation = useMutation({
     mutationFn: async ({ organizationTitle, organizationSlug }: CreateOrganizationSchema) => {
