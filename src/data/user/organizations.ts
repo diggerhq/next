@@ -11,7 +11,6 @@ import type {
   UnwrapPromise,
 } from '@/types';
 import { serverGetLoggedInUser } from '@/utils/server/serverGetLoggedInUser';
-import type { AuthUserMetadata } from '@/utils/zod-schemas/authUserMetadata';
 import { revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
 import { refreshSessionAction } from './session';
@@ -56,15 +55,17 @@ export const createOrganization = async (
   slug: string,
   {
     isOnboardingFlow = false,
+    ignoreIfOrgExists = false,
   }: {
     isOnboardingFlow?: boolean;
+    ignoreIfOrgExists?: boolean;
   } = {},
 ): Promise<SAPayload<string>> => {
   try {
     const supabaseClient = createSupabaseUserServerActionClient();
     const user = await serverGetLoggedInUser();
 
-    const organizationId = uuidv4();
+    let organizationId = uuidv4();
 
     if (RESTRICTED_SLUG_NAMES.includes(slug)) {
       return { status: 'error', message: 'Slug is restricted' };
@@ -87,7 +88,17 @@ export const createOrganization = async (
 
     if (insertError) {
       console.error('Error inserting organization:', insertError);
-      return { status: 'error', message: insertError.message };
+      // if set we simply get the org if it already exists
+      if (ignoreIfOrgExists) {
+        try {
+          organizationId = await getOrganizationIdBySlug(slug)
+        } catch(fetchError) {
+          return { status: 'error', message: fetchError.message };
+        }
+        
+      } else {
+        return { status: 'error', message: insertError.message };
+      }
     }
 
     const { error: orgMemberErrors } = await supabaseAdminClient
@@ -144,26 +155,6 @@ export const createOrganization = async (
   }
 };
 
-export const setUserMetaDataWithOrgCreated = async () => {
-  const supabaseClient = createSupabaseUserServerComponentClient();
-  const user = await serverGetLoggedInUser();
-  const updateUserMetadataPayload: Partial<AuthUserMetadata> = {
-    onboardingHasCreatedOrganization: true,
-  };
-
-  const updateUserMetadataResponse = await supabaseClient.auth.updateUser({
-    data: updateUserMetadataPayload,
-  });
-
-  if (updateUserMetadataResponse.error) {
-    console.error(
-      'Error updating user metadata:',
-      updateUserMetadataResponse.error,
-    );
-
-    throw updateUserMetadataResponse.error;
-  }
-};
 
 export async function fetchSlimOrganizations() {
   const currentUser = await serverGetLoggedInUser();

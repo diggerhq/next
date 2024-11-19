@@ -3,7 +3,7 @@ import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { createOrganization, setUserMetaDataWithOrgCreated } from "@/data/user/organizations";
+import { createOrganization } from "@/data/user/organizations";
 import { generateOrganizationSlug } from "@/lib/utils";
 import { CreateOrganizationSchema, createOrganizationSchema } from "@/utils/zod-schemas/organization";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,15 +24,17 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_SKIP_ORG_CREATION === "true") {
-      setUserMetaDataWithOrgCreated()
-      onSuccess()
-      return
+      createOrgMutation.mutate({ "organizationTitle": "digger", organizationSlug: "digger" });
     }
   }, [onSuccess])
 
   const createOrgMutation = useMutation({
     mutationFn: async ({ organizationTitle, organizationSlug }: CreateOrganizationSchema) => {
-      return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true })
+      if (process.env.NEXT_PUBLIC_SKIP_ORG_CREATION === "true") {
+        return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true, ignoreIfOrgExists: true })
+      } else {
+        return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true })
+      }
     },
     onSuccess: (data) => {
       const { data: orgId } = data as { data: string }
