@@ -16,7 +16,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { refreshSessionAction } from './session';
 import { updateUserProfileMetadata } from './user';
 
-
 export const getOrganizationIdBySlug = async (slug: string) => {
   const supabaseClient = createSupabaseUserServerComponentClient();
 
@@ -91,11 +90,10 @@ export const createOrganization = async (
       // if set we simply get the org if it already exists
       if (ignoreIfOrgExists) {
         try {
-          organizationId = await getOrganizationIdBySlug(slug)
-        } catch(fetchError) {
+          organizationId = await getOrganizationIdBySlug(slug);
+        } catch (fetchError) {
           return { status: 'error', message: fetchError.message };
         }
-        
       } else {
         return { status: 'error', message: insertError.message };
       }
@@ -154,7 +152,6 @@ export const createOrganization = async (
     return { status: 'error', message: 'An unexpected error occurred' };
   }
 };
-
 
 export async function fetchSlimOrganizations() {
   const currentUser = await serverGetLoggedInUser();
@@ -282,6 +279,12 @@ export const getLoggedInUserOrganizationRole = async (
     .single();
 
   if (error) {
+    console.log(
+      'error in getloggedinUserOrganizationRole:',
+      userId,
+      organizationId,
+      error,
+    );
     throw error;
   } else if (!data) {
     throw new Error('User is not a member of this organization');

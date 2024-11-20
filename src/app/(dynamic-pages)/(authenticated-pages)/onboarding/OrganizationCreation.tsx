@@ -9,7 +9,6 @@ import { CreateOrganizationSchema, createOrganizationSchema } from "@/utils/zod-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import Cookies from 'js-cookie';
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 type OrganizationCreationProps = {
@@ -22,19 +21,11 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
     resolver: zodResolver(createOrganizationSchema),
   });
 
-  useEffect(() => {
-    if (process.env.NEXT_PUBLIC_SKIP_ORG_CREATION === "true") {
-      createOrgMutation.mutate({ "organizationTitle": "digger", organizationSlug: "digger" });
-    }
-  }, [onSuccess])
 
   const createOrgMutation = useMutation({
     mutationFn: async ({ organizationTitle, organizationSlug }: CreateOrganizationSchema) => {
-      if (process.env.NEXT_PUBLIC_SKIP_ORG_CREATION === "true") {
-        return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true, ignoreIfOrgExists: true })
-      } else {
-        return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true })
-      }
+      return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true })
+
     },
     onSuccess: (data) => {
       const { data: orgId } = data as { data: string }

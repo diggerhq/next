@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { T } from "@/components/ui/Typography";
 import { useToast } from "@/components/ui/use-toast";
+import { createOrganization } from "@/data/user/organizations";
 import { updateUserProfileNameAndAvatar, uploadPublicUserAvatar } from "@/data/user/user";
 import { generateSlug } from "@/lib/utils";
 import { getUserAvatarUrl } from "@/utils/helpers";
@@ -38,6 +39,13 @@ export function ProfileUpdate({
     mutationFn: () => updateUserProfileNameAndAvatar({ fullName, userName, avatarUrl }, { isOnboardingFlow: true }),
     onSuccess: () => {
       toast({ title: "Profile updated!", description: "Your profile has been successfully updated." });
+
+      // TODO: move this to server side component /src/app/(dynamic-pages)/(authenticated-pages)/onboarding/page.tsx
+      if (process.env.NEXT_PUBLIC_SKIP_ORG_CREATION === "true") {
+        console.log("creating default organisation for user")
+        createOrganization("digger", "digger", { isOnboardingFlow: true, ignoreIfOrgExists: true })
+      }
+
       onSuccess();
     },
     onError: () => {
