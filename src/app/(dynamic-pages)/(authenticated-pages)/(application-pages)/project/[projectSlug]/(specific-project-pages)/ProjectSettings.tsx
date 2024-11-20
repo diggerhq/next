@@ -31,6 +31,7 @@ type ProjectSettingsFormData = {
     managedState: boolean;
     is_drift_detection_enabled: boolean;
     drift_crontab: string;
+    auto_approve: boolean;
 };
 
 export default function ProjectSettings({ project, repositoryName }: ProjectSettingsProps) {
@@ -46,6 +47,7 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
             managedState: project.is_managing_state || false,
             is_drift_detection_enabled: project.is_drift_detection_enabled || false,
             drift_crontab: project.drift_crontab || '',
+            auto_approve: project.auto_approve || false,
         },
     });
 
@@ -63,6 +65,7 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                 managedState: data.managedState,
                 is_drift_detection_enabled: data.is_drift_detection_enabled,
                 drift_crontab: data.drift_crontab,
+                auto_approve: data.auto_approve,
             });
             return result;
         },
@@ -272,6 +275,20 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                                 control={control}
                                 render={({ field }) => (
                                     <Input id="drift_crontab" {...field} />
+                                )}
+                            />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <Label htmlFor="auto_approve">Auto-approve</Label>
+                            <Controller
+                                name="auto_approve"
+                                control={control}
+                                render={({ field }) => (
+                                    <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
                                 )}
                             />
                         </div>

@@ -522,6 +522,7 @@ model projects {
   workflow_file              String?
   include_patterns           String?
   exclude_patterns           String?
+  auto_approve               Boolean        @default(false)
   chats                      chats[]
   digger_runs                digger_runs[]
   env_vars                   env_vars[]
@@ -655,19 +656,19 @@ model user_profiles {
   user_roles                                                                                 user_roles[]
 }
 
-
 model user_m2m_applications {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   email       String
-  clientId    String   @unique
-  audience    String?
-  issuer      String?
+  clientId    String    @unique
+  audience    String
+  issuer      String
   name        String?
   description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
-}
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
+  @@index([email], map: "m2m_application_user_id_idx")
+}
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
