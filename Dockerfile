@@ -36,8 +36,8 @@ COPY package*.json  ./
 COPY prisma ./prisma
 
 # Install dependencies
-RUN pnpm run prisma:generate
 RUN pnpm install
+RUN pnpm run prisma:generate
 
 # Copy the rest of the application code
 COPY . .

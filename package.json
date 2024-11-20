@@ -192,7 +192,6 @@
     "start": "next start",
     "generate:types": "supabase gen types --lang=typescript --linked --schema public > src/lib/database.types.ts",
     "generate:types:local": "supabase gen types --lang=typescript --local > src/lib/database.types.ts",
-    "preinstall": "prisma generate --schema prisma/schema.prisma",
     "prisma:generate": "prisma generate",
     "prisma:generate-sql": "prisma generate --sql",
     "build": "next build",
