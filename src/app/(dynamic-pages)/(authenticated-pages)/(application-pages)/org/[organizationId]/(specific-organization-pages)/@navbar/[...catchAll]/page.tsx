@@ -44,8 +44,6 @@ export default async function OrganizationProjectsNavbar({
 }: {
   params: unknown;
 }) {
-
-  console.log("in catchall", params)
   const { organizationId } = organizationParamSchema.parse(params);
 
   return (
