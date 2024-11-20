@@ -192,7 +192,7 @@
     "start": "next start",
     "generate:types": "supabase gen types --lang=typescript --linked --schema public > src/lib/database.types.ts",
     "generate:types:local": "supabase gen types --lang=typescript --local > src/lib/database.types.ts",
-    "postinstall": "prisma generate --sql",
+    "prisma:generate": "prisma generate --sql",
     "build": "next build",
     "test:e2e": "cross-env NODE_ENV=test playwright test",
     "test:e2e:ui": "cross-env NODE_ENV=test playwright test --ui",

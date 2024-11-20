@@ -35,7 +35,7 @@ WORKDIR /app
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
-COPY prisma/ ./prisma
+
 # Install dependencies
 RUN pnpm install
 
@@ -49,4 +49,4 @@ RUN CI=true pnpm run build
 EXPOSE 3000
 
 # Start the application
-CMD ["pnpm", "start"]
+ENTRYPOINT "pnpm run prisma:generate && pnpm start"
