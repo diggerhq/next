@@ -54,15 +54,17 @@ export const createOrganization = async (
   slug: string,
   {
     isOnboardingFlow = false,
+    ignoreIfOrgExists = false,
   }: {
     isOnboardingFlow?: boolean;
+    ignoreIfOrgExists?: boolean;
   } = {},
 ): Promise<SAPayload<string>> => {
   try {
     const supabaseClient = createSupabaseUserServerActionClient();
     const user = await serverGetLoggedInUser();
 
-    const organizationId = uuidv4();
+    let organizationId = uuidv4();
 
     if (RESTRICTED_SLUG_NAMES.includes(slug)) {
       return { status: 'error', message: 'Slug is restricted' };
@@ -85,7 +87,16 @@ export const createOrganization = async (
 
     if (insertError) {
       console.error('Error inserting organization:', insertError);
-      return { status: 'error', message: insertError.message };
+      // if set we simply get the org if it already exists
+      if (ignoreIfOrgExists) {
+        try {
+          organizationId = await getOrganizationIdBySlug(slug);
+        } catch (fetchError) {
+          return { status: 'error', message: fetchError.message };
+        }
+      } else {
+        return { status: 'error', message: insertError.message };
+      }
     }
 
     const { error: orgMemberErrors } = await supabaseAdminClient
@@ -268,6 +279,12 @@ export const getLoggedInUserOrganizationRole = async (
     .single();
 
   if (error) {
+    console.log(
+      'error in getloggedinUserOrganizationRole:',
+      userId,
+      organizationId,
+      error,
+    );
     throw error;
   } else if (!data) {
     throw new Error('User is not a member of this organization');

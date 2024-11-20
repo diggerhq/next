@@ -21,9 +21,11 @@ export function OrganizationCreation({ onSuccess }: OrganizationCreationProps) {
     resolver: zodResolver(createOrganizationSchema),
   });
 
+
   const createOrgMutation = useMutation({
     mutationFn: async ({ organizationTitle, organizationSlug }: CreateOrganizationSchema) => {
       return createOrganization(organizationTitle, organizationSlug, { isOnboardingFlow: true })
+
     },
     onSuccess: (data) => {
       const { data: orgId } = data as { data: string }

@@ -113,7 +113,10 @@ function getAllFlowStates(onboardingStatus: AuthUserMetadata): FLOW_STATE[] {
     if (isUserCreatedThroughOrgInvitation) {
       flowStates.push("JOIN_INVITED_ORG");
     } else {
-      flowStates.push("ORGANIZATION");
+      if (process.env.NEXT_PUBLIC_SKIP_ORG_CREATION !== "true") {
+        flowStates.push("ORGANIZATION");
+      }
+
     }
   }
 
