@@ -1,7 +1,7 @@
 # Use an official Node runtime as the base image
 FROM node:18-alpine
 
-
+ARG DATABASE_URL
 ARG NEXT_PUBLIC_SSO_DOMAIN
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -24,6 +24,7 @@ ENV SUPABASE_PROJECT_REF=${SUPABASE_PROJECT_REF}
 ENV GITHUB_PROXY_CALLBACK_URL=${GITHUB_PROXY_CALLBACK_URL}
 ENV DIGGER_WEBHOOK_SECRET=${DIGGER_WEBHOOK_SECRET}
 ENV DIGGER_TRIGGER_APPLY_URL=${DIGGER_TRIGGER_APPLY_URL}
+ENV DATABASE_URL=${DATABASE_URL}
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -37,7 +38,6 @@ COPY prisma ./prisma
 
 # Install dependencies
 RUN pnpm install
-RUN pnpm run prisma:generate
 
 # Copy the rest of the application code
 COPY . .
