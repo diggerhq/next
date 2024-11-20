@@ -32,7 +32,8 @@ RUN npm install -g pnpm
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY package*.json ./COPY package*.json ./
+COPY prisma ./prisma
 
 # Install dependencies
 RUN pnpm install
