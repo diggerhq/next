@@ -36,6 +36,7 @@ COPY package*.json  ./
 COPY prisma ./prisma
 
 # Install dependencies
+RUN pnpm run prisma:generate
 RUN pnpm install
 
 # Copy the rest of the application code
@@ -48,4 +49,4 @@ RUN CI=true pnpm run build
 EXPOSE 3000
 
 # Start the application
-ENTRYPOINT "pnpm run prisma:generate && pnpm start"
+ENTRYPOINT "pnpm start"
