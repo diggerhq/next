@@ -49,4 +49,4 @@ RUN CI=true pnpm run build
 EXPOSE 3000
 
 # Start the application
-ENTRYPOINT "pnpm start"
+ENTRYPOINT ["pnpm", "start"]
