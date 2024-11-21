@@ -26,6 +26,10 @@ async function OrganizationSubscriptionSidebarCard({
 
   const isOrganizationAdmin = userRole === 'admin' || userRole === 'owner'
 
+  if (process.env.NEXT_PUBLIC_HIDE_FREE_TRIAL_DIALOG === "true") {
+    return null
+  }
+
   switch (normalizedSubscription.type) {
     case 'bypassed_enterprise_organization':
       return null;
