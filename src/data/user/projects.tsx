@@ -982,6 +982,7 @@ export async function updateProjectSettingsAction({
   is_drift_detection_enabled,
   drift_crontab,
   auto_approve,
+  workflow,
 }: {
   projectId: string;
   terraformWorkingDir: string;
@@ -995,6 +996,7 @@ export async function updateProjectSettingsAction({
   is_drift_detection_enabled: boolean;
   drift_crontab: string;
   auto_approve: boolean;
+  workflow: string;
 }): Promise<SAPayload<projects>> {
   const prisma = new PrismaClient();
 
@@ -1015,6 +1017,7 @@ export async function updateProjectSettingsAction({
         is_drift_detection_enabled,
         drift_crontab,
         auto_approve,
+        workflow,
       }
     });
 
