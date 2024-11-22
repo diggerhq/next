@@ -529,6 +529,7 @@ model projects {
   organizations              organizations  @relation(fields: [organization_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_projects_organization")
   repos                      repos          @relation(fields: [repo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_projects_repo")
   teams                      teams?         @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  workflow                   String 
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

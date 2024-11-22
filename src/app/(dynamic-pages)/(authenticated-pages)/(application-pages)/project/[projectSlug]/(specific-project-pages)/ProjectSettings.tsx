@@ -32,6 +32,7 @@ type ProjectSettingsFormData = {
     is_drift_detection_enabled: boolean;
     drift_crontab: string;
     auto_approve: boolean;
+    workflow: string; // digger.yml workflow
 };
 
 export default function ProjectSettings({ project, repositoryName }: ProjectSettingsProps) {
@@ -48,6 +49,7 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
             is_drift_detection_enabled: project.is_drift_detection_enabled || false,
             drift_crontab: project.drift_crontab || '',
             auto_approve: project.auto_approve || false,
+            workflow: project.workflow || "default",
         },
     });
 
@@ -66,6 +68,7 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                 is_drift_detection_enabled: data.is_drift_detection_enabled,
                 drift_crontab: data.drift_crontab,
                 auto_approve: data.auto_approve,
+                workflow: data.workflow
             });
             return result;
         },
@@ -136,6 +139,22 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                             />
                         </motion.div>
 
+
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.15, delay: 0.4 }}
+                        >
+                            <Label htmlFor="workflow">workflow (digger.yml)</Label>
+                            <Controller
+                                name="workflow"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input id="workflow" {...field} />
+                                )}
+                            />
+                        </motion.div>
+
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -186,7 +205,7 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.15, delay: 0.4 }}
                         >
-                            <Label htmlFor="workflow_file">Workflow file</Label>
+                            <Label htmlFor="workflow_file">Workflow file (github action workflow)</Label>
                             <Controller
                                 name="workflow_file"
                                 control={control}

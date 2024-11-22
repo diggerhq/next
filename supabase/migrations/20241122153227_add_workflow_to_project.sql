@@ -1,0 +1,1 @@
+ALTER table projects add column workflow TEXT default 'default';
