@@ -145,6 +145,8 @@ export const createProjectAction = async ({
         labels,
         is_drift_detection_enabled,
         drift_crontab,
+        workflow: "default",
+
       }
     });
     // why are we revalidating paths in a getter query?
