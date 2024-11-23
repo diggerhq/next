@@ -145,7 +145,7 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.15, delay: 0.4 }}
                         >
-                            <Label htmlFor="workflow">workflow (digger.yml)</Label>
+                            <Label htmlFor="workflow">digger.yml workflow</Label>
                             <Controller
                                 name="workflow"
                                 control={control}
@@ -205,7 +205,7 @@ export default function ProjectSettings({ project, repositoryName }: ProjectSett
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.15, delay: 0.4 }}
                         >
-                            <Label htmlFor="workflow_file">Workflow file (github action workflow)</Label>
+                            <Label htmlFor="workflow_file">Github action workflow Workflow file</Label>
                             <Controller
                                 name="workflow_file"
                                 control={control}
