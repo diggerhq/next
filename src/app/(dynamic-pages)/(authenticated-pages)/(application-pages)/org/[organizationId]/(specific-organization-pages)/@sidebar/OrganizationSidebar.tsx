@@ -11,7 +11,7 @@ import { SwitcherAndToggle } from '@/components/SidebarComponents/SidebarLogo';
 import { FreeTrialComponent } from '@/components/SubscriptionCards';
 import { Skeleton } from '@/components/ui/skeleton';
 import { differenceInDays } from 'date-fns';
-import { Activity, FileText, FlagIcon, Home, Layers, MessageCircle, Users } from 'lucide-react';
+import { FileText, FlagIcon, Home, Layers, MessageCircle, Users } from 'lucide-react';
 
 async function OrganizationSubscriptionSidebarCard({
   organizationId,
@@ -98,11 +98,11 @@ async function OrganizationSidebarInternal({
             href={`/org/${organizationId}/teams`}
             icon={<Users className="size-4 text-foreground" />}
           />
-          <SidebarLink
+          {/* <SidebarLink
             label="Activity"
             href={`/org/${organizationId}/activity`}
             icon={<Activity className="size-4 text-foreground" />}
-          />
+          /> */}
           <SidebarLink
             label="Docs"
             href={`https://docs.digger.dev/team/getting-started/gha-aws`}
