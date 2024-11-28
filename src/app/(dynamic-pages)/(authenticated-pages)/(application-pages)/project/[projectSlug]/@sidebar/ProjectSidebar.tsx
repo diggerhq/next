@@ -5,7 +5,7 @@ import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { getSlimProjectById, getSlimProjectBySlug } from '@/data/user/projects';
 import { cn } from '@/utils/cn';
 import { projectSlugParamSchema } from '@/utils/zod-schemas/params';
-import { Activity, ArrowLeft, FileText, FlagIcon, Layers, MessageCircle, Users } from 'lucide-react';
+import { ArrowLeft, FileText, FlagIcon, Layers, MessageCircle, Users } from 'lucide-react';
 import { Suspense } from 'react';
 
 async function ProjectSidebarInternal({ projectId, projectSlug }: { projectId: string; projectSlug: string }) {
@@ -47,11 +47,11 @@ async function ProjectSidebarInternal({ projectId, projectSlug }: { projectId: s
           href={`/org/${organizationId}/teams`}
           icon={<Users className="size-4 text-foreground" />}
         />
-        <SidebarLink
+        {/* <SidebarLink
           label="Activity"
           href={`/org/${organizationId}/activity`}
           icon={<Activity className="size-4 text-foreground" />}
-        />
+        /> */}
         <SidebarLink
           label="Docs"
           href={`https://docs.digger.dev/team/getting-started/gha-aws`}

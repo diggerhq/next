@@ -4,7 +4,7 @@ import { SidebarLink } from '@/components/SidebarLink';
 import { fetchSlimOrganizations } from '@/data/user/organizations';
 import { getOrganizationOfTeam } from '@/data/user/teams';
 import { cn } from '@/utils/cn';
-import { Activity, FileText, FlagIcon, Home, Layers, MessageCircle, Users } from 'lucide-react';
+import { FileText, FlagIcon, Home, Layers, MessageCircle, Users } from 'lucide-react';
 import { Suspense } from 'react';
 
 async function TeamSidebarInternal({ organizationId }: { organizationId: string }) {
@@ -43,11 +43,11 @@ async function TeamSidebarInternal({ organizationId }: { organizationId: string 
                     href={`/org/${organizationId}/teams`}
                     icon={<Users className="size-4 text-foreground" />}
                 />
-                <SidebarLink
+                {/* <SidebarLink
                     label="Activity"
                     href={`/org/${organizationId}/activity`}
                     icon={<Activity className="size-4 text-foreground" />}
-                />
+                /> */}
                 <SidebarLink
                     label="Docs"
                     href={`https://docs.digger.dev/team/getting-started/gha-aws`}
